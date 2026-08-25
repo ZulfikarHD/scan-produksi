@@ -1,6 +1,6 @@
 # Phase 04 - Production Report Management, Verification & Print/Export (Lihat Laporan)
 
-**Sprint Goal**: Mengembangkan modul "Lihat Laporan" untuk mengelola seluruh arsip Laporan Produksi Harian, pencarian berdasarkan ID Laporan unik, verifikasi & koreksi data oleh Supervisor, serta fitur cetak dokumen fisik standar PT Percetakan Dokumen Sekuriti dan ekspor ke format PDF/Excel.
+**Sprint Goal**: Mengembangkan modul "Lihat Laporan" berbasis Livewire 4 & Flux UI untuk mengelola seluruh arsip Laporan Produksi Harian, pencarian berdasarkan ID Laporan unik, verifikasi & koreksi data oleh Supervisor, serta fitur cetak dokumen fisik standar PT Percetakan Dokumen Sekuriti dan ekspor ke format PDF/Excel.
 
 **Estimated Duration**: 4-5 days
 
@@ -17,7 +17,8 @@
 **So that** I can easily find past packaging records by ID Laporan, date, or shift without opening physical filing cabinets
 
 **Acceptance Criteria:**
-- [ ] List all reports with columns:
+- [ ] Livewire Component `App\Livewire\Reports\ReportIndex` listing all reports.
+- [ ] Columns:
   - No
   - ID Laporan (`report_number`, e.g. `LAP-20260825-0001`)
   - Tanggal Laporan
@@ -29,24 +30,23 @@
   - Status (`Draft`, `Terkirim`, `Terverifikasi`)
   - Aksi (`Lihat Detail`, `Cetak`, `Edit`, `Hapus`)
 - [ ] Filter controls:
-  - Quick Date Presets: `Hari Ini`, `Kemarin`, `7 Hari Terakhir`, `Bulan Ini`, `Kustom Rentang Tanggal`.
+  - Date Presets: `Hari Ini`, `Kemarin`, `7 Hari Terakhir`, `Bulan Ini`, `Kustom Rentang Tanggal`.
   - Shift Filter (`Semua`, `Shift 1`, `Shift 2`, `Shift 3`).
   - Petugas Filter (Dropdown list of operators).
   - Status Filter (`Semua`, `Terkirim`, `Terverifikasi`).
-- [ ] Global search across ID Laporan, PO numbers, and product names.
-- [ ] Pagination with customizable items per page (10, 25, 50).
+- [ ] Real-time search across ID Laporan, PO numbers, and product names with `wire:model.live.debounce.300ms`.
+- [ ] Pagination using Livewire `WithPagination` (10, 25, 50).
 
 **UI Specs:**
-- Modern data table with status badges (Blue: Terkirim, Green: Terverifikasi, Amber: Draft).
-- Filter toolbar with date picker range selector.
+- Flux data table (`<flux:table>`) with status badges (`<flux:badge color="blue">Terkirim</flux:badge>`, `<flux:badge color="green">Terverifikasi</flux:badge>`).
+- Filter toolbar with Flux select and date picker components.
 - Summary counter header: "Menampilkan X laporan (Total Kemas: Y lembar)".
 
 **Tasks:**
-1. Implement `index` method in `app/Http/Controllers/DailyReportController.php`.
-2. Create query filter scope in `DailyReport` model.
-3. Create Inertia Page `resources/js/pages/ProductionReports/Index.vue`.
-4. Create filter bar component `resources/js/components/Reports/ReportFilterBar.vue`.
-5. Write Pest feature tests for report listing, filtering, and pagination in `tests/Feature/Reports/DailyReportIndexTest.php`.
+1. Create Livewire Component `app/Livewire/Reports/ReportIndex.php` and Blade view `resources/views/livewire/reports/index.blade.php`.
+2. Add query filter scopes in `DailyReport` model.
+3. Optimize table rendering with Blaze (`@blaze`).
+4. Write Pest feature tests for report listing, filtering, and pagination in `tests/Feature/Reports/DailyReportIndexTest.php`.
 
 ---
 
@@ -57,7 +57,7 @@
 **So that** I can inspect every scanned PO item, customer specifications, and packaging notes
 
 **Acceptance Criteria:**
-- [ ] Dedicated Report Detail page (`/reports/{report:report_number}`).
+- [ ] Livewire Component `App\Livewire\Reports\ReportDetail` (`/reports/{report:report_number}`).
 - [ ] Header summary: ID Laporan, Tanggal, Shift, Operator, Verifikator, Waktu Dibuat, Waktu Diperbarui, Catatan.
 - [ ] Scanned Items table detailing:
   - No PO & Kode Produk
@@ -66,18 +66,16 @@
   - Target Order vs Jumlah Kemas Baik
   - Jumlah Reject & Persentase Reject
   - Keterangan per Item
-- [ ] Action buttons: `Cetak Laporan`, `Download PDF`, `Edit Laporan` (if authorized), `Verifikasi Laporan` (Supervisor only).
+- [ ] Action buttons: `<flux:button icon="printer" wire:click="printReport">Cetak Laporan</flux:button>`, `<flux:button icon="arrow-down-tray" wire:click="exportPdf">Download PDF</flux:button>`, `Edit Laporan`, `Verifikasi Laporan` (Supervisor only).
 
 **UI Specs:**
-- Clean card layout with clear visual hierarchy.
-- Printable preview toggle.
+- Clean Flux card layout (`<flux:card>`) with clear visual hierarchy.
 - Verification banner with timestamp and supervisor signature indicator.
 
 **Tasks:**
-1. Implement `show` method in `DailyReportController.php`.
-2. Create Inertia Page `resources/js/pages/ProductionReports/Show.vue`.
-3. Create printable preview component `resources/js/components/Reports/ReportPrintPreview.vue`.
-4. Write Pest feature tests for viewing report details and access authorization in `tests/Feature/Reports/DailyReportShowTest.php`.
+1. Create Livewire Component `app/Livewire/Reports/ReportDetail.php` and Blade view `resources/views/livewire/reports/show.blade.php`.
+2. Implement route binding with `report_number`.
+3. Write Pest feature tests for viewing report details and access authorization in `tests/Feature/Reports/DailyReportShowTest.php`.
 
 ---
 
@@ -88,7 +86,8 @@
 **So that** clerical errors or miscounted items can be corrected without corrupting historical records
 
 **Acceptance Criteria:**
-- [ ] Edit page populated with existing report header and items.
+- [ ] Livewire Component `App\Livewire\Reports\EditReport` (`/reports/{report:report_number}/edit`).
+- [ ] Form populated with existing report header and items.
 - [ ] Capability to:
   - Adjust `good_quantity` and `reject_quantity`.
   - Add newly scanned items or remove mis-scanned items.
@@ -98,14 +97,11 @@
 - [ ] Authorization:
   - Petugas can only edit their own reports within 24 hours.
   - Supervisor can edit any report at any time.
-- [ ] Updates audit timestamp and logs editor user ID.
 
 **Tasks:**
-1. Create Form Request `app/Http/Requests/Reports/UpdateDailyReportRequest.php`.
+1. Create Livewire Component `app/Livewire/Reports/EditReport.php` and Blade view `resources/views/livewire/reports/edit.blade.php`.
 2. Create Policy `app/Policies/DailyReportPolicy.php` defining update/delete permissions.
-3. Implement `edit` and `update` methods in `DailyReportController.php`.
-4. Create Inertia Page `resources/js/pages/ProductionReports/Edit.vue`.
-5. Write Pest feature tests for report editing, validation, and policy authorization in `tests/Feature/Reports/UpdateDailyReportTest.php`.
+3. Write Pest feature tests for report editing, validation, and policy authorization in `tests/Feature/Reports/UpdateDailyReportTest.php`.
 
 ---
 
@@ -116,20 +112,18 @@
 **So that** only validated production reports are marked as final and unwanted entries can be removed safely
 
 **Acceptance Criteria:**
-- [ ] "Verifikasi Laporan" button for supervisor: updates status to `verified` and stamps `supervisor_id` + `verified_at`.
+- [ ] "Verifikasi Laporan" action button for supervisor: updates status to `verified` and stamps `supervisor_id` + `verified_at`.
 - [ ] Verified reports become read-only for operators.
 - [ ] Delete report action:
-  - Only accessible by Supervisor.
-  - Requires confirmation modal with warning.
+  - Only accessible by Supervisor via confirmation modal (`<flux:modal name="delete-report-confirm">`).
   - Cascades deletion of `daily_report_items`.
   - Reverts associated `production_orders` status.
-- [ ] Flash message confirmation upon verification or deletion.
+- [ ] Toast confirmation on verification or deletion (`Flux::toast(...)`).
 
 **Tasks:**
-1. Add `verify` and `destroy` endpoints in `DailyReportController.php`.
+1. Implement `verify` and `delete` methods in `ReportDetail.php` and `ReportIndex.php`.
 2. Implement authorization checks via `DailyReportPolicy`.
-3. Add verification & delete confirmation modals in Vue frontend.
-4. Write Pest feature tests for verification and deletion in `tests/Feature/Reports/DailyReportVerificationTest.php`.
+3. Write Pest feature tests for verification and deletion in `tests/Feature/Reports/DailyReportVerificationTest.php`.
 
 ---
 
@@ -140,110 +134,142 @@
 **So that** a physical hardcopy can be signed and handed over to the Packaging Supervisor and Management as required by company SOP
 
 **Acceptance Criteria:**
-- [ ] Dedicated Print CSS layout (`@media print`):
+- [ ] Dedicated Blade Print Layout (`resources/views/reports/print.blade.php`) with CSS `@media print`:
   - Formatted for standard A4 paper with proper margins.
   - Company Header: "PT PERCETAKAN DOKUMEN SEKURITI - UNIT PENGEMASAN".
-  - Subtitle: "LAPORAN HASIL PRODUKSI DAN PENGEMASAN HARIAN".
-  - Metadata Table: ID Laporan, Tanggal, Shift, Nama Petugas.
+  - Subtitle: "LAPORAN DOKUMENTASI HASIL PRODUKSI HARIAN".
+  - Metadata Grid: ID Laporan, Tanggal, Shift, Nama Petugas.
   - Items Table: No, No PO, Nama Produk, Spesifikasi, No Mesin, Qty Baik, Qty Reject, Satuan.
   - Signature Section: Tanda Tangan Petugas Kemas (Pembuat) & Kepala Unit/Supervisor (Mengetahui).
   - Hides web UI buttons, sidebar, and headers during printing.
-- [ ] Direct Print Trigger (`window.print()`) accessible with 1-click.
-- [ ] PDF Download endpoint (`GET /reports/{report}/pdf`) generating identical official PDF document.
+- [ ] Direct Print Trigger (`window.print()`) with clean print preview.
+- [ ] PDF Download endpoint (`GET /reports/{report:report_number}/pdf`) generating official PDF document.
 - [ ] Excel Export endpoint (`GET /reports/export?from=...&to=...`) for monthly rekapitulasi data.
 
 **UI Specs:**
-- Print View modal / full-page print preview.
-- 3-column signature block at the bottom of the printed page (Petugas Kemas, QC Inspector, Supervisor).
+- Print View modal / standalone printable route.
+- 2-column signature block at the bottom of the printed page (Petugas Kemas & Supervisor).
 
 **Tasks:**
-1. Build print-optimized Blade/Vue template with CSS print media queries.
-2. Setup PDF generator service using `barryvdh/laravel-dompdf` or pure CSS print view.
-3. Setup Excel export service using `maatwebsite/excel` for bulk report exports.
-4. Implement PDF & Excel download endpoints in `DailyReportController.php`.
+1. Build print-optimized Blade template `resources/views/reports/print.blade.php`.
+2. Setup PDF generator service using `barryvdh/laravel-dompdf` (or pure HTML print).
+3. Setup Excel export service for bulk report exports.
+4. Implement PDF & Excel download controller endpoints in `app/Http/Controllers/ReportExportController.php`.
 5. Write Pest feature tests for print and export endpoints in `tests/Feature/Reports/ReportExportTest.php`.
 
 ---
 
 ## Technical Notes
 
-### Print-Optimized Layout Structure
+### Print-Optimized Blade Layout (`resources/views/reports/print.blade.php`)
 
-```html
-<!-- Print Layout Template Example -->
-<div class="print-container hidden print:block p-8 bg-white text-black">
-    <!-- Header -->
-    <div class="border-b-2 border-black pb-4 mb-4 text-center">
-        <h1 class="text-xl font-bold uppercase tracking-wide">PT PERCETAKAN DOKUMEN SEKURITI</h1>
-        <h2 class="text-sm font-semibold uppercase">Unit Pengemasan - Gedung Produksi Ciampel Karawang</h2>
-        <h3 class="text-base font-bold mt-2 underline">LAPORAN DOKUMENTASI HASIL PRODUKSI HARIAN</h3>
+```blade
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Produksi - {{ $report->report_number }}</title>
+    <style>
+        @media print {
+            @page { size: A4 portrait; margin: 15mm; }
+            body { font-family: sans-serif; font-size: 11pt; color: #000; background: #fff; }
+            .no-print { display: none !important; }
+        }
+        body { font-family: sans-serif; margin: 0; padding: 20px; color: #111; }
+        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .header h1 { font-size: 16pt; margin: 0; text-transform: uppercase; font-weight: bold; }
+        .header h2 { font-size: 11pt; margin: 4px 0; font-weight: normal; }
+        .header h3 { font-size: 13pt; margin: 8px 0 0; font-weight: bold; text-decoration: underline; }
+        .meta-table { width: 100%; margin-bottom: 15px; font-size: 10pt; }
+        .meta-table td { padding: 3px 0; vertical-align: top; }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10pt; }
+        .data-table th, .data-table td { border: 1px solid #000; padding: 6px; }
+        .data-table th { background-color: #f2f2f2; text-align: center; font-weight: bold; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+        .signatures { width: 100%; margin-top: 30px; font-size: 10pt; }
+        .signatures td { width: 50%; text-align: center; vertical-align: top; }
+        .sign-space { height: 60px; }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px;">
+        <button onclick="window.print()" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Cetak Dokumen (Print)</button>
+        <button onclick="window.close()" style="padding: 8px 16px; background: #6b7280; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-left: 8px;">Tutup</button>
     </div>
 
-    <!-- Metadata Grid -->
-    <div class="grid grid-cols-2 gap-4 text-xs mb-4">
-        <div>
-            <p><strong>ID Laporan:</strong> {{ report.report_number }}</p>
-            <p><strong>Tanggal:</strong> {{ formatDate(report.report_date) }}</p>
-            <p><strong>Shift:</strong> {{ report.shift_label }}</p>
-        </div>
-        <div class="text-right">
-            <p><strong>Petugas Kemas:</strong> {{ report.user.name }} ({{ report.user.nip }})</p>
-            <p><strong>Waktu Cetak:</strong> {{ currentTimestampWIB }}</p>
-            <p><strong>Status:</strong> {{ report.status_label }}</p>
-        </div>
+    <div class="header">
+        <h1>PT PERCETAKAN DOKUMEN SEKURITI</h1>
+        <h2>Unit Pengemasan - Gedung Produksi Ciampel Karawang</h2>
+        <h3>LAPORAN DOKUMENTASI HASIL PRODUKSI HARIAN</h3>
     </div>
 
-    <!-- Scanned Items Table -->
-    <table class="w-full border-collapse border border-black text-xs mb-6">
+    <table class="meta-table">
+        <tr>
+            <td style="width: 15%;"><strong>ID Laporan</strong></td>
+            <td style="width: 35%;">: {{ $report->report_number }}</td>
+            <td style="width: 15%;"><strong>Petugas Kemas</strong></td>
+            <td style="width: 35%;">: {{ $report->user->name }} ({{ $report->user->nip }})</td>
+        </tr>
+        <tr>
+            <td><strong>Tanggal</strong></td>
+            <td>: {{ \Carbon\Carbon::parse($report->report_date)->translatedFormat('d F Y') }}</td>
+            <td><strong>Shift Kerja</strong></td>
+            <td>: {{ ucfirst(str_replace('_', ' ', $report->shift->value)) }}</td>
+        </tr>
+    </table>
+
+    <table class="data-table">
         <thead>
-            <tr class="bg-gray-100">
-                <th class="border border-black p-1">No</th>
-                <th class="border border-black p-1">No PO</th>
-                <th class="border border-black p-1">Nama Produk / Spesifikasi</th>
-                <th class="border border-black p-1">Mesin</th>
-                <th class="border border-black p-1 text-right">Qty Baik</th>
-                <th class="border border-black p-1 text-right">Qty Reject</th>
-                <th class="border border-black p-1">Satuan</th>
+            <tr>
+                <th style="width: 5%;">No</th>
+                <th style="width: 20%;">No PO / Barcode</th>
+                <th style="width: 35%;">Nama Produk & Spesifikasi</th>
+                <th style="width: 10%;">Mesin</th>
+                <th style="width: 15%;">Qty Baik</th>
+                <th style="width: 15%;">Qty Reject</th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(item, idx) in report.items" :key="item.id">
-                <td class="border border-black p-1 text-center">{{ idx + 1 }}</td>
-                <td class="border border-black p-1 font-mono font-bold">{{ item.po_number }}</td>
-                <td class="border border-black p-1">{{ item.product_name }} - {{ item.specification }}</td>
-                <td class="border border-black p-1 text-center">{{ item.machine_number || '-' }}</td>
-                <td class="border border-black p-1 text-right font-bold">{{ item.good_quantity.toLocaleString('id-ID') }}</td>
-                <td class="border border-black p-1 text-right">{{ item.reject_quantity.toLocaleString('id-ID') }}</td>
-                <td class="border border-black p-1 text-center">{{ item.unit }}</td>
+            @foreach($report->items as $idx => $item)
+            <tr>
+                <td class="text-center">{{ $idx + 1 }}</td>
+                <td style="font-family: monospace; font-weight: bold;">{{ $item->po_number }}</td>
+                <td>{{ $item->product_name }} - {{ $item->specification }}</td>
+                <td class="text-center">{{ $item->machine_number ?? '-' }}</td>
+                <td class="text-right font-bold">{{ number_format($item->good_quantity, 0, ',', '.') }} {{ $item->unit }}</td>
+                <td class="text-right">{{ number_format($item->reject_quantity, 0, ',', '.') }} {{ $item->unit }}</td>
             </tr>
+            @endforeach
         </tbody>
         <tfoot>
-            <tr class="font-bold bg-gray-100">
-                <td colspan="4" class="border border-black p-1 text-right">TOTAL</td>
-                <td class="border border-black p-1 text-right">{{ report.total_good_quantity.toLocaleString('id-ID') }}</td>
-                <td class="border border-black p-1 text-right">{{ report.total_reject_quantity.toLocaleString('id-ID') }}</td>
-                <td class="border border-black p-1"></td>
+            <tr class="font-bold" style="background-color: #f2f2f2;">
+                <td colspan="4" class="text-right">TOTAL</td>
+                <td class="text-right">{{ number_format($report->total_good_quantity, 0, ',', '.') }}</td>
+                <td class="text-right">{{ number_format($report->total_reject_quantity, 0, ',', '.') }}</td>
             </tr>
         </tfoot>
     </table>
 
-    <!-- Signature Footer -->
-    <div class="grid grid-cols-2 text-center text-xs mt-12 pt-4">
-        <div>
-            <p>Petugas Kemas,</p>
-            <div class="h-16"></div>
-            <p class="font-bold underline">{{ report.user.name }}</p>
-            <p>NIP: {{ report.user.nip }}</p>
-        </div>
-        <div>
-            <p>Mengetahui,</p>
-            <p>Kepala Unit / Supervisor</p>
-            <div class="h-12"></div>
-            <p class="font-bold underline">{{ report.supervisor?.name || '( ................................... )' }}</p>
-            <p>NIP: {{ report.supervisor?.nip || '...................................' }}</p>
-        </div>
-    </div>
-</div>
+    <table class="signatures">
+        <tr>
+            <td>
+                <p>Petugas Kemas,</p>
+                <div class="sign-space"></div>
+                <p class="font-bold" style="text-decoration: underline;">{{ $report->user->name }}</p>
+                <p>NIP: {{ $report->user->nip }}</p>
+            </td>
+            <td>
+                <p>Mengetahui,<br>Kepala Unit / Supervisor</p>
+                <div class="sign-space"></div>
+                <p class="font-bold" style="text-decoration: underline;">{{ $report->supervisor?->name ?? '( .......................................... )' }}</p>
+                <p>NIP: {{ $report->supervisor?->nip ?? '..........................................' }}</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
 ```
 
 ---
@@ -268,7 +294,7 @@
 |---|---|
 | DailyReport & DailyReportItem models | Phase 03 |
 | User role authorization & policies | Phase 01 |
-| Excel & PDF export libraries | Composer packages |
+| Livewire 4 & Flux UI tables | Project stack |
 
 ---
 
@@ -276,5 +302,5 @@
 
 | Risk | Mitigation |
 |---|---|
-| Inconsistent print pagination across different printer drivers | Use standardized `@page { size: A4 portrait; margin: 15mm; }` and `page-break-inside: avoid` CSS rules |
+| Inconsistent print pagination across different printer drivers | Use standardized `@page { size: A4 portrait; margin: 15mm; }` CSS rules |
 | Unintended edits to already verified historical reports | Lock report modifications once status is set to `verified` unless unlocked by Supervisor |

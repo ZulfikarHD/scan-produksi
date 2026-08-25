@@ -30,6 +30,7 @@ mendukung tujuan penelitian dan mampu menghasilkan solusi terhadap permasalahan
 yang diangkat.
 5. (Opsional) Ilustrasi metode. Sertakan diagram alur atau gambar model
 pengembangan perangkat lunak untuk memperjelas tahapan metode yang digunakan.
+----------------
 Contoh: Metode Waterfall
 3.1 Metode Pengembangan Perangkat Lunak
 Metode pengembangan perangkat lunak yang digunakan dalam penelitian ini adalah

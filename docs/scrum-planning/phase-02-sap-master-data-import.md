@@ -1,6 +1,6 @@
 # Phase 02 - SAP Master Data Import & Management (Update Database)
 
-**Sprint Goal**: Membangun modul Update Database untuk mengimpor dan mengelola Master Data Order Produksi dari SAP (file Excel/CSV), menyediakan parsing otomatis, validasi skema data, riwayat impor, serta pencarian master data produk untuk persiapan proses scan barcode.
+**Sprint Goal**: Membangun modul Update Database berbasis Livewire 4 & Flux UI untuk mengimpor dan mengelola Master Data Order Produksi dari SAP (file Excel/CSV), menyediakan parsing otomatis, validasi skema data, riwayat impor, serta pencarian master data produk untuk persiapan proses scan barcode.
 
 **Estimated Duration**: 4-5 days
 
@@ -44,14 +44,14 @@
 
 ---
 
-### US-2.2: SAP File Import & Parser Service (Update Database)
+### US-2.2: SAP File Import & Parser Service via Livewire (Update Database)
 
 **As a** supervisor or operator  
-**I want** to upload SAP data export files (.xlsx, .xls, .csv) into the system  
+**I want** to upload SAP data export files (.xlsx, .xls, .csv) into the system via Livewire file upload  
 **So that** new daily production orders and barcode identifiers are automatically updated in bulk without manual typing
 
 **Acceptance Criteria:**
-- [ ] Dedicated "Update Database" menu page with drag-and-drop file uploader.
+- [ ] Dedicated "Update Database" Livewire Component (`App\Livewire\MasterData\UpdateDatabase`).
 - [ ] File validation: required, mimes: `xlsx,xls,csv`, max file size: 10MB.
 - [ ] Flexible column header mapping for SAP export formats:
   - `No PO` / `Order Number`
@@ -67,46 +67,45 @@
 - [ ] Transaction-safe: rollbacks on fatal database errors with detailed error feedback.
 
 **UI Specs:**
-- Clean dropzone card with supported format badges (.xlsx, .xls, .csv).
+- Flux card container with file input (`<flux:input type="file" wire:model="file" />`).
 - Download sample template button (Excel template matching SAP export format).
-- Progress bar and spinner during file parsing & import processing.
+- Livewire loading state with spinner and progress indicator (`wire:loading wire:target="import"`).
 
 **Tasks:**
-1. Install and configure spreadsheet reader (e.g. `maatwebsite/excel` or `openspout/openspout`).
-2. Create Service `app/Services/SapImportService.php` with chunked streaming.
-3. Create Form Request `app/Http/Requests/MasterData/ImportSapDataRequest.php`.
-4. Create Controller `app/Http/Controllers/MasterData/UpdateDatabaseController.php`.
-5. Create Inertia Page `resources/js/pages/MasterData/UpdateDatabase.vue`.
-6. Write Pest feature tests for valid spreadsheet import, invalid format, and duplicate upsert handling in `tests/Feature/MasterData/SapImportTest.php`.
+1. Install and configure spreadsheet reader (e.g. `openspout/openspout` or `maatwebsite/excel`).
+2. Create Service `app/Services/SapImportService.php` with chunked stream reading.
+3. Create Livewire Component `app/Livewire/MasterData/UpdateDatabase.php` using `WithFileUploads`.
+4. Create Blade view `resources/views/livewire/master-data/update-database.blade.php`.
+5. Write Pest feature tests for valid spreadsheet import, invalid format, and duplicate upsert handling in `tests/Feature/MasterData/SapImportTest.php`.
 
 ---
 
-### US-2.3: Import Preview & Validation Error Handling
+### US-2.3: Import Preview & Validation Error Handling (Flux Modal)
 
 **As a** supervisor  
-**I want** to preview the parsed SAP records and receive clear error alerts for invalid rows  
-**So that** I can verify the data accuracy before committing it to the production database
+**I want** to preview the parsed SAP records and receive clear error alerts for invalid rows in a Flux modal  
+**So that** I can verify data accuracy before committing records to the production database
 
 **Acceptance Criteria:**
-- [ ] Optional Preview Step: displays summary (Total Rows Detected, Valid Rows, Incomplete/Invalid Rows).
+- [ ] Interactive Preview Modal (`<flux:modal name="import-preview">`): displays summary (Total Rows Detected, Valid Rows, Incomplete/Invalid Rows).
 - [ ] Highlight invalid rows with specific error reasons (e.g. "Row 14: Target Qty must be numeric", "Row 22: Missing PO Number").
 - [ ] Option to skip invalid rows and import only valid ones, or cancel import.
-- [ ] Success toast detailing total imported and updated order records.
+- [ ] Success toast via Flux UI detailing total imported and updated order records.
 
 **UI Specs:**
-- Modal or expandable table previewing first 10-20 rows.
-- Badges: Green (Valid), Red (Error with tooltip explanation).
-- Action buttons: "Konfirmasi & Simpan ke Database" and "Batalkan".
+- Modal dialog previewing the first 10-20 parsed rows with `<flux:table>`.
+- Badges: `<flux:badge color="green">Valid</flux:badge>` vs `<flux:badge color="red">Error</flux:badge>`.
+- Action buttons: `<flux:button variant="primary" wire:click="confirmImport">Simpan ke Database</flux:button>`.
 
 **Tasks:**
 1. Add validation rules mapper in `SapImportService`.
-2. Create preview endpoint `POST /update-database/preview`.
-3. Add preview modal component `resources/js/components/MasterData/ImportPreviewModal.vue`.
-4. Write feature tests for preview validation and partial import handling.
+2. Implement preview method in `UpdateDatabase` Livewire component.
+3. Add preview modal template with Flux table.
+4. Write Pest feature tests for preview validation and partial import handling.
 
 ---
 
-### US-2.4: Import History & Audit Log
+### US-2.4: Import History & Audit Log (Flux Table)
 
 **As a** supervisor  
 **I want** to view a history log of all SAP file imports performed on the system  
@@ -125,41 +124,41 @@
   - `status` (`success`, `partial`, `failed`)
   - `error_log` (json, nullable)
   - `timestamps`
-- [ ] Display import history table on the Update Database page.
+- [ ] Display import history table on the Update Database page below the upload area.
 - [ ] Download audit log / original file feature for supervisor.
 
 **Tasks:**
 1. Generate migration `database/migrations/xxxx_xx_xx_create_sap_import_logs_table.php`.
 2. Create Model `app/Models/SapImportLog.php`.
 3. Implement log creation in `SapImportService`.
-4. Add Import History tab in `resources/js/pages/MasterData/UpdateDatabase.vue`.
-5. Write feature tests for audit log logging in `tests/Feature/MasterData/ImportLogTest.php`.
+4. Add Import History tab in `resources/views/livewire/master-data/update-database.blade.php`.
+5. Write feature tests for audit log recording in `tests/Feature/MasterData/ImportLogTest.php`.
 
 ---
 
 ### US-2.5: Master Data Explorer & Manual Order Management
 
 **As a** supervisor  
-**I want** to search, view, and manually add/edit production orders  
+**I want** to search, view, and manually add/edit production orders via a Livewire table  
 **So that** packaging operations can proceed even if an urgent job is not yet exported from SAP
 
 **Acceptance Criteria:**
-- [ ] List all master production orders with filters: status, date range, customer name, and machine.
-- [ ] Search input by PO Number or Product Name.
+- [ ] Livewire Component `App\Livewire\MasterData\ProductionOrderIndex`.
+- [ ] Filters: status (`Semua`, `Siap Kemas`, `Sedang Diproses`, `Selesai`), date range, customer, and machine.
+- [ ] Real-time search by PO Number or Product Name (`wire:model.live.debounce.300ms`).
 - [ ] "Tambah Order Manual" modal form for emergency jobs (same fields as SAP master).
 - [ ] Edit order modal for correcting specifications or target quantities.
-- [ ] Detail view showing order specs, target qty, and current packaging fulfillment status.
+- [ ] Detail view showing order specs, target qty, and current packaging fulfillment progress.
 
 **UI Specs:**
-- Tabbed interface or sub-page in Master Data.
-- Quick filter chips: `Semua`, `Siap Kemas`, `Sedang Diproses`, `Selesai`.
+- Tabbed interface or separate route with Flux UI table.
 - Detail drawer / modal showing full print specification.
 
 **Tasks:**
-1. Create `app/Http/Controllers/MasterData/ProductionOrderController.php`.
-2. Create Form Requests `StoreProductionOrderRequest.php` and `UpdateProductionOrderRequest.php`.
-3. Create Inertia Page `resources/js/pages/MasterData/Orders/Index.vue`.
-4. Write Pest feature tests for order CRUD and manual order creation.
+1. Create Livewire Component `app/Livewire/MasterData/ProductionOrderIndex.php`.
+2. Create Blade view `resources/views/livewire/master-data/production-order-index.blade.php`.
+3. Implement create/edit modals with validation rules.
+4. Write Pest feature tests for order CRUD and manual order creation in `tests/Feature/MasterData/ProductionOrderCrudTest.php`.
 
 ---
 
@@ -177,51 +176,63 @@ use App\Models\SapImportLog;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
+use OpenSpout\Reader\XLSX\Reader;
 
 class SapImportService
 {
     public function import(UploadedFile $file, User $user): array
     {
         $filePath = $file->store('sap-imports', 'private');
-        $rows = Excel::toArray([], $file)[0] ?? [];
-        
-        $totalRows = count($rows) - 1; // excluding header
+        $fullPath = storage_path('app/' . $filePath);
+
         $imported = 0;
         $updated = 0;
         $errors = [];
+        $totalRows = 0;
+
+        $reader = new Reader();
+        $reader->open($fullPath);
 
         DB::beginTransaction();
         try {
-            foreach (array_slice($rows, 1) as $index => $row) {
-                $poNumber = trim($row[0] ?? '');
-                $productName = trim($row[1] ?? '');
-                $customerName = trim($row[2] ?? '');
-                $targetQty = (int) ($row[3] ?? 0);
-                $spec = trim($row[4] ?? '');
-                $machine = trim($row[5] ?? '');
+            foreach ($reader->getSheetIterator() as $sheet) {
+                foreach ($sheet->getRowIterator() as $rowIndex => $row) {
+                    if ($rowIndex === 1) {
+                        continue; // Skip header
+                    }
 
-                if (empty($poNumber) || empty($productName)) {
-                    $errors[] = "Baris " . ($index + 2) . ": No PO atau Nama Produk tidak boleh kosong.";
-                    continue;
+                    $totalRows++;
+                    $cells = $row->toArray();
+                    $poNumber = trim($cells[0] ?? '');
+                    $productName = trim($cells[1] ?? '');
+                    $customerName = trim($cells[2] ?? '');
+                    $targetQty = (int) ($cells[3] ?? 0);
+                    $spec = trim($cells[4] ?? '');
+                    $machine = trim($cells[5] ?? '');
+
+                    if (empty($poNumber) || empty($productName)) {
+                        $errors[] = "Baris {$rowIndex}: No PO atau Nama Produk tidak boleh kosong.";
+                        continue;
+                    }
+
+                    $order = ProductionOrder::updateOrCreate(
+                        ['po_number' => $poNumber],
+                        [
+                            'product_name' => $productName,
+                            'customer_name' => $customerName,
+                            'specification' => $spec,
+                            'machine_number' => $machine,
+                            'target_quantity' => $targetQty,
+                            'status' => ProductionOrderStatus::READY,
+                            'created_by' => $user->id,
+                            'order_date' => now()->toDateString(),
+                        ]
+                    );
+
+                    $order->wasRecentlyCreated ? $imported++ : $updated++;
                 }
-
-                $order = ProductionOrder::updateOrCreate(
-                    ['po_number' => $poNumber],
-                    [
-                        'product_name' => $productName,
-                        'customer_name' => $customerName,
-                        'specification' => $spec,
-                        'machine_number' => $machine,
-                        'target_quantity' => $targetQty,
-                        'status' => ProductionOrderStatus::READY,
-                        'created_by' => $user->id,
-                        'order_date' => now()->toDateString(),
-                    ]
-                );
-
-                $order->wasRecentlyCreated ? $imported++ : $updated++;
             }
+            $reader->close();
 
             $log = SapImportLog::create([
                 'user_id' => $user->id,
@@ -246,6 +257,9 @@ class SapImportService
             ];
         } catch (\Throwable $e) {
             DB::rollBack();
+            if (isset($reader)) {
+                $reader->close();
+            }
             throw $e;
         }
     }
@@ -259,7 +273,7 @@ class SapImportService
 | # | Story | Story Points | Priority |
 |---|---|---|---|
 | 1 | US-2.1 Production Order Master Data Schema & Model | 5 | Must |
-| 2 | US-2.2 SAP File Import & Parser Service | 8 | Must |
+| 2 | US-2.2 SAP File Import & Parser Service via Livewire | 8 | Must |
 | 3 | US-2.3 Import Preview & Validation Error Handling | 5 | Should |
 | 4 | US-2.4 Import History & Audit Log | 5 | Must |
 | 5 | US-2.5 Master Data Explorer & Manual Order Management | 6 | Should |
@@ -273,7 +287,7 @@ class SapImportService
 | Dependency | From |
 |---|---|
 | User authentication & role middleware | Phase 01 |
-| Excel/Spreadsheet parser package | Composer setup |
+| Livewire 4 file upload & Flux UI components | Project stack |
 | Storage disk configuration (`private` / `local`) | Laravel setup |
 
 ---
@@ -283,4 +297,4 @@ class SapImportService
 | Risk | Mitigation |
 |---|---|
 | Inconsistent Excel column naming from different SAP exports | Support flexible column index and header name alias mapping |
-| Large SAP export files causing PHP execution timeout | Use chunked stream processing and database transaction bulk upserts |
+| Large SAP export files causing PHP execution timeout | Use streaming reader (`openspout`) and database bulk upserts |

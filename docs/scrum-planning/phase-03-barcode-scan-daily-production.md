@@ -1,6 +1,6 @@
 # Phase 03 - Barcode Scanning & Daily Production Reporting (Buat Laporan)
 
-**Sprint Goal**: Mengembangkan fitur utama "Buat Laporan" yang mengintegrasikan Barcode Scanner (tipe Code 128) untuk membaca No PO pada Kartu Mesin Produksi, auto-fill spesifikasi produk secara real-time dari master data SAP, pencatatan kuantitas hasil kemas (baik & reject), serta penyimpanan Laporan Produksi Harian multi-item.
+**Sprint Goal**: Mengembangkan fitur utama "Buat Laporan" berbasis Livewire 4 & Flux UI yang mengintegrasikan Barcode Scanner (tipe Code 128 via Alpine.js event listener) untuk membaca No PO pada Kartu Mesin Produksi, auto-fill spesifikasi produk secara real-time dari master data SAP, pencatatan kuantitas hasil kemas (baik & reject), serta penyimpanan Laporan Produksi Harian multi-item.
 
 **Estimated Duration**: 5-6 days
 
@@ -54,38 +54,38 @@
 
 ---
 
-### US-3.2: Barcode Scanner (Code 128) Input Listener & Fast Lookup API
+### US-3.2: Barcode Scanner (Code 128) Alpine.js Listener & Instant Lookup
 
 **As a** petugas kemas  
-**I want** the system to automatically capture barcode scans from the handheld scanner on the Kartu Mesin Produksi and immediately fetch product specifications  
+**I want** the system to automatically capture barcode scans from the handheld scanner on the Kartu Mesin Produksi and immediately fetch product specifications via Livewire  
 **So that** I don't have to manually type long PO numbers or search through catalogues
 
 **Acceptance Criteria:**
-- [ ] Dedicated Barcode Scanner input component that stays auto-focused and ready for scanner input.
-- [ ] Detects hardware scanner keystrokes (Code 128 scanner sends keystrokes terminating with `Enter`).
-- [ ] Fast JSON API endpoint `GET /api/production-orders/lookup?po_number=...` returning order specs (< 50ms).
+- [ ] Alpine.js barcode listener directive `x-barcode-scanner` that keeps the scan input active and captures hardware scanner events (Code 128 carriage return).
+- [ ] Livewire action `lookupBarcode($poNumber)` triggered automatically upon scan completion.
+- [ ] Instant spec lookup (< 50ms) matching `po_number` in `production_orders`.
 - [ ] Audio/Visual feedback upon scan:
-  - Success beep / green glow if PO is found in Master Data.
-  - Warning beep / error toast if PO is not found or already completed.
+  - Success tone & green flash if PO is found in Master Data.
+  - Warning tone & Flux toast error if PO is not found or already completed.
 - [ ] Fallback: Petugas can type PO number manually and press Enter or click "Cari".
-- [ ] Handles rapid multiple scans without input race conditions.
+- [ ] Handles rapid multiple scans cleanly without race conditions.
 
 **UI Specs:**
-- Prominent Scan Zone at the top of the form with animated scanner icon and focus indicator: "Arahkan Barcode Scanner ke Kartu Mesin...".
-- Floating Quick-Lookup status card displaying matched product name, customer, and machine.
+- Prominent Scan Card with animated barcode icon and scanner focus badge: "Arahkan Barcode Scanner ke Kartu Mesin...".
+- Preview Card showing matched product name, customer, and machine immediately after scan.
 
 **Tasks:**
-1. Create API Controller `app/Http/Controllers/Api/ProductionOrderLookupController.php`.
-2. Create reusable Vue component `resources/js/components/Scanner/BarcodeInput.vue` with keyboard listener and sound effects.
-3. Add client-side scan debouncing and audio helper (`audio/beep-success.mp3`, `audio/beep-error.mp3`).
-4. Write feature tests for lookup API in `tests/Feature/Api/ProductionOrderLookupTest.php`.
+1. Create Alpine.js scanner handler script / directive in `resources/js/scanner.js` (or inline Blade Alpine component).
+2. Implement Livewire method `lookupBarcode` in `app/Livewire/Reports/CreateReport.php`.
+3. Add sound effects (`beep-success`, `beep-error`) triggered via Livewire `$this->dispatch('play-sound', ...)` event.
+4. Write Pest feature tests for barcode lookup in `tests/Feature/Reports/BarcodeLookupTest.php`.
 
 ---
 
 ### US-3.3: Interactive Packaging Data Entry & Staging Table (Buat Laporan)
 
 **As a** petugas kemas  
-**I want** to specify the quantity packed (good & reject) for each scanned order and compile them in a dynamic staging table  
+**I want** to specify the quantity packed (good & reject) for each scanned order and compile them in a dynamic Livewire staging table  
 **So that** all packaged items for the current shift are reviewed together before saving the daily report
 
 **Acceptance Criteria:**
@@ -99,25 +99,24 @@
   - Input field for `Jumlah Kemas Baik` (required, integer > 0).
   - Input field for `Jumlah Rusak / Reject` (optional, integer >= 0).
   - Input field for `Keterangan Item` (optional).
-  - "Tambah ke Daftar" button appends row to staging table.
+  - "Tambah ke Daftar" button appends row to staging array in Livewire component.
 - [ ] Staging Table features:
   - List of scanned items with row index, No PO, Nama Produk, Spesifikasi, No Mesin, Qty Baik, Qty Reject, and Total.
-  - Inline edit for quantities in staging table.
-  - Delete row button with quick undo option.
+  - Inline edit for quantities directly in table rows.
+  - Delete row button (`wire:click="removeItem($index)"`).
   - Auto-calculated summary bar at the bottom (Total Item Barcode, Total Qty Baik, Total Reject).
-- [ ] Duplicate warning: if a PO is scanned twice in the same report session, ask whether to add to existing row or reject.
+- [ ] Duplicate check: if a PO is already in staging, offer to add quantity to existing row.
 
 **UI Specs:**
-- 2-Column or Top-Bottom responsive layout:
-  - Top: Header & Scan Input Box.
-  - Bottom: Scanned Items Data Table with real-time totals footer.
-- Action Buttons: "Simpan Laporan Harian", "Simpan & Cetak", "Kosongkan Form".
+- Flux grid layout (`<flux:card>`, `<flux:table>`, `<flux:input>`, `<flux:select>`).
+- Bottom summary row with bold totals.
+- Action Buttons: `<flux:button variant="primary" wire:click="saveReport">Simpan Laporan Harian</flux:button>` and `<flux:button wire:click="resetForm">Kosongkan Form</flux:button>`.
 
 **Tasks:**
-1. Create Inertia Page `resources/js/pages/ProductionReports/Create.vue`.
-2. Create Vue components `resources/js/components/Reports/ReportHeaderForm.vue` and `ReportItemTable.vue`.
-3. Implement client-side draft recovery using `localStorage` to prevent data loss on accidental browser close.
-4. Implement input validation rules and quantity limits against target quantity.
+1. Create Livewire Component `app/Livewire/Reports/CreateReport.php` and Blade view `resources/views/livewire/reports/create.blade.php`.
+2. Implement reactive item collection `$items = []` with add, update, and remove methods.
+3. Optimize table rendering with Blaze (`@blaze`).
+4. Write Pest feature tests for adding items, duplicate detection, and quantity calculations in `tests/Feature/Reports/CreateReportTest.php`.
 
 ---
 
@@ -128,8 +127,8 @@
 **So that** all report header details and item entries are saved together and updated in the system records
 
 **Acceptance Criteria:**
-- [ ] Form Request `StoreDailyReportRequest` validating:
-  - `report_date` (required, date format)
+- [ ] Validation in Livewire Component:
+  - `reportDate` (required, date format)
   - `shift` (required, valid enum)
   - `notes` (nullable, string, max 500)
   - `items` (required, array, min 1 item)
@@ -140,117 +139,135 @@
   - Generates sequential unique `report_number`.
   - Creates `daily_reports` master record.
   - Inserts all `daily_report_items`.
-  - Updates `production_orders` status (e.g. increments fulfilled qty and marks `completed` if target is reached).
-- [ ] Redirects to Report Detail or List view with success toast containing the generated `report_number`.
+  - Updates `production_orders` status (increments fulfilled qty and marks `in_progress` or `completed`).
+- [ ] Redirects to Report Detail / Index with Flux success toast containing the generated `report_number`.
 
 **Tasks:**
-1. Create Form Request `app/Http/Requests/Reports/StoreDailyReportRequest.php`.
-2. Create Service `app/Services/DailyReportService.php`.
-3. Create Controller `app/Http/Controllers/DailyReportController.php` with `create` and `store` methods.
+1. Create Service `app/Services/DailyReportService.php`.
+2. Implement save handler in `app/Livewire/Reports/CreateReport.php`.
+3. Register routes in `routes/web.php` (`Route::get('/reports/create', CreateReport::class)->name('reports.create');`).
 4. Write Pest feature tests for valid report submission, validation failures, and order status updates in `tests/Feature/Reports/StoreDailyReportTest.php`.
 
 ---
 
 ## Technical Notes
 
-### DailyReportService & Store Logic
+### Livewire CreateReport Component
 
 ```php
-// app/Services/DailyReportService.php
-namespace App\Services;
-
-use App\Enums\ProductionOrderStatus;
-use App\Enums\ReportStatus;
-use App\Models\DailyReport;
-use App\Models\ProductionOrder;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-
-class DailyReportService
-{
-    public function __construct(
-        protected ReportNumberGenerator $numberGenerator
-    ) {}
-
-    public function createReport(array $data, User $petugas): DailyReport
-    {
-        return DB::transaction(function () use ($data, $petugas) {
-            $reportNumber = $this->numberGenerator->generate($data['report_date']);
-
-            $totalGood = 0;
-            $totalReject = 0;
-
-            foreach ($data['items'] as $item) {
-                $totalGood += (int) $item['good_quantity'];
-                $totalReject += (int) ($item['reject_quantity'] ?? 0);
-            }
-
-            $report = DailyReport::create([
-                'report_number' => $reportNumber,
-                'report_date' => $data['report_date'],
-                'shift' => $data['shift'],
-                'user_id' => $petugas->id,
-                'notes' => $data['notes'] ?? null,
-                'total_items_count' => count($data['items']),
-                'total_good_quantity' => $totalGood,
-                'total_reject_quantity' => $totalReject,
-                'status' => ReportStatus::SUBMITTED,
-            ]);
-
-            foreach ($data['items'] as $itemData) {
-                $order = ProductionOrder::findOrFail($itemData['production_order_id']);
-
-                $report->items()->create([
-                    'production_order_id' => $order->id,
-                    'po_number' => $order->po_number,
-                    'product_name' => $order->product_name,
-                    'specification' => $order->specification,
-                    'machine_number' => $order->machine_number,
-                    'good_quantity' => $itemData['good_quantity'],
-                    'reject_quantity' => $itemData['reject_quantity'] ?? 0,
-                    'unit' => $order->unit ?? 'lembar',
-                    'item_notes' => $itemData['item_notes'] ?? null,
-                ]);
-
-                // Update production order fulfillment status
-                $order->update(['status' => ProductionOrderStatus::IN_PROGRESS]);
-            }
-
-            return $report->load(['items', 'user']);
-        });
-    }
-}
-```
-
-### Store Daily Report Request
-
-```php
-// app/Http/Requests/Reports/StoreDailyReportRequest.php
-namespace App\Http\Requests\Reports;
+// app/Livewire/Reports/CreateReport.php
+namespace App\Livewire\Reports;
 
 use App\Enums\WorkShift;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
+use App\Models\ProductionOrder;
+use App\Services\DailyReportService;
+use Flux;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 
-class StoreDailyReportRequest extends FormRequest
+#[Layout('layouts.app')]
+class CreateReport extends Component
 {
-    public function authorize(): bool
+    public string $reportDate = '';
+    public string $shift = 'shift_1';
+    public string $notes = '';
+
+    // Scanner & Item Form
+    public string $scanInput = '';
+    public ?ProductionOrder $scannedOrder = null;
+    public int $goodQuantity = 0;
+    public int $rejectQuantity = 0;
+    public string $itemNotes = '';
+
+    // Staging Table
+    public array $items = [];
+
+    public function mount()
     {
-        return auth()->check();
+        $this->reportDate = now()->toDateString();
+        $this->shift = $this->determineCurrentShift();
     }
 
-    public function rules(): array
+    public function lookupBarcode()
     {
-        return [
-            'report_date' => ['required', 'date'],
-            'shift' => ['required', new Enum(WorkShift::class)],
-            'notes' => ['nullable', 'string', 'max:500'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.production_order_id' => ['required', 'exists:production_orders,id'],
-            'items.*.good_quantity' => ['required', 'integer', 'min:1'],
-            'items.*.reject_quantity' => ['nullable', 'integer', 'min:0'],
-            'items.*.item_notes' => ['nullable', 'string', 'max:255'],
+        $poNumber = trim($this->scanInput);
+        if (empty($poNumber)) return;
+
+        $order = ProductionOrder::where('po_number', $poNumber)->first();
+
+        if (!$order) {
+            Flux::toast("No PO {$poNumber} tidak ditemukan di master data SAP.", variant: 'danger');
+            $this->dispatch('play-sound', ['type' => 'error']);
+            $this->scanInput = '';
+            return;
+        }
+
+        $this->scannedOrder = $order;
+        $this->goodQuantity = $order->target_quantity;
+        $this->rejectQuantity = 0;
+        $this->itemNotes = '';
+        $this->dispatch('play-sound', ['type' => 'success']);
+    }
+
+    public function addItem()
+    {
+        if (!$this->scannedOrder || $this->goodQuantity <= 0) {
+            Flux::toast('Jumlah kemas baik harus lebih dari 0.', variant: 'warning');
+            return;
+        }
+
+        $this->items[] = [
+            'production_order_id' => $this->scannedOrder->id,
+            'po_number' => $this->scannedOrder->po_number,
+            'product_name' => $this->scannedOrder->product_name,
+            'specification' => $this->scannedOrder->specification,
+            'machine_number' => $this->scannedOrder->machine_number,
+            'good_quantity' => $this->goodQuantity,
+            'reject_quantity' => $this->rejectQuantity,
+            'unit' => $this->scannedOrder->unit ?? 'lembar',
+            'item_notes' => $this->itemNotes,
         ];
+
+        $this->reset(['scanInput', 'scannedOrder', 'goodQuantity', 'rejectQuantity', 'itemNotes']);
+        Flux::toast('Item berhasil ditambahkan ke daftar laporan.', variant: 'success');
+    }
+
+    public function removeItem(int $index)
+    {
+        unset($this->items[$index]);
+        $this->items = array_values($this->items);
+    }
+
+    public function saveReport(DailyReportService $service)
+    {
+        $this->validate([
+            'reportDate' => ['required', 'date'],
+            'shift' => ['required'],
+            'items' => ['required', 'array', 'min:1'],
+        ]);
+
+        $report = $service->createReport([
+            'report_date' => $this->reportDate,
+            'shift' => $this->shift,
+            'notes' => $this->notes,
+            'items' => $this->items,
+        ], auth()->user());
+
+        Flux::toast("Laporan {$report->report_number} berhasil disimpan.", variant: 'success');
+        $this->redirectRoute('reports.show', $report->report_number, navigate: true);
+    }
+
+    protected function determineCurrentShift(): string
+    {
+        $hour = (int) now()->format('H');
+        if ($hour >= 7 && $hour < 15) return 'shift_1';
+        if ($hour >= 15 && $hour < 23) return 'shift_2';
+        return 'shift_3';
+    }
+
+    public function render()
+    {
+        return view('livewire.reports.create');
     }
 }
 ```
@@ -262,7 +279,7 @@ class StoreDailyReportRequest extends FormRequest
 | # | Story | Story Points | Priority |
 |---|---|---|---|
 | 1 | US-3.1 Production Report Data Schema & Unique ID Generator | 8 | Must |
-| 2 | US-3.2 Barcode Scanner (Code 128) Input Listener & Fast Lookup API | 8 | Must |
+| 2 | US-3.2 Barcode Scanner (Code 128) Alpine.js Listener & Instant Lookup | 8 | Must |
 | 3 | US-3.3 Interactive Packaging Data Entry & Staging Table | 10 | Must |
 | 4 | US-3.4 Save & Store Production Report Service | 8 | Must |
 
@@ -284,5 +301,5 @@ class StoreDailyReportRequest extends FormRequest
 
 | Risk | Mitigation |
 |---|---|
-| Accidental page refresh during long scanning session losing unsaved items | Implement `localStorage` auto-draft recovery in Vue client |
-| Scanner emitting non-standard prefix/suffix characters | Sanitize input string by stripping non-alphanumeric/hyphen symbols and normalizing barcode string |
+| Accidental page refresh during long scanning session | Store draft state in Livewire or Alpine `x-data` persistent store |
+| Scanner emitting non-standard prefix/suffix characters | Sanitize input string by stripping non-alphanumeric/hyphen symbols before lookup |
