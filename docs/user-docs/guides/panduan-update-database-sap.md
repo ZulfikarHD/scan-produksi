@@ -1,6 +1,6 @@
 # Panduan Pengguna — Update Database Master Data SAP
 
-Panduan ini ditujukan bagi **Kepala Unit / Supervisor** untuk melakukan sinkronisasi dan pembaruan data order produksi harian dari berkas ekspor SAP ke dalam sistem aplikasi Unit Pengemasan.
+Panduan ini ditujukan bagi **Kepala Unit / Supervisor** untuk melakukan sinkronisasi dan pembaruan data order produksi harian dari berkas ekspor SAP ke dalam sistem aplikasi Unit Pengemasan, mengunduh template, serta mengaudit riwayat impor.
 
 ---
 
@@ -12,6 +12,7 @@ Dengan fitur ini:
 - Supervisor tidak perlu mengetik ulang nomor PO, spesifikasi produk, target kemas, atau nomor mesin satu per satu.
 - Data yang sudah ada di database akan diperbarui secara otomatis (*upsert*) jika ada perubahan kuantitas atau spesifikasi dari SAP tanpa menduplikasi data.
 - Sistem menyediakan pratinjau (*preview*) dan pemeriksaan validasi sebelum data benar-benar disimpan ke database.
+- Riwayat seluruh berkas yang pernah diunggah tersimpan rapi dan dapat diunduh kembali sewaktu-waktu sebagai arsip audit.
 
 ---
 
@@ -54,13 +55,15 @@ Jika Anda membutuhkan format acuan kolom berkas Excel yang sesuai dengan standar
 
 ---
 
-## 4. Memeriksa Riwayat & Rincian Kesalahan Impor
+## 4. Memeriksa Riwayat, Mengunduh Berkas Asli & Laporan Error (Audit Trail)
 
-Tabel **Riwayat Pembaruan Database** di bagian bawah halaman mencatat seluruh aktivitas unggahan:
-- Waktu unggah dalam format Waktu Indonesia Barat (WIB).
-- Nama berkas asli dan identitas akun Supervisor yang mengunggah.
-- Jumlah baris data yang berhasil ditambahkan (+), diperbarui, atau gagal.
-- Jika terdapat status **"Sebagian Berhasil"**, Anda dapat mengklik tombol **"Lihat Error"** untuk melihat daftar nomor baris serta alasan kegagalan spesifiknya.
+Tabel **Riwayat Pembaruan Database** di bagian bawah tab impor mencatat seluruh aktivitas unggahan:
+- **Waktu Impor:** Tercatat dalam format Waktu Indonesia Barat (WIB).
+- **Nama Berkas & Pengunggah:** Menampilkan nama berkas asli dan nama akun Supervisor yang memproses.
+- **Statistik Baris:** Jumlah baris total, baris baru (+), baris yang diperbarui, dan baris bermasalah.
+- **Melihat Detail Error:** Klik tombol **"Lihat Error"** pada baris yang berstatus *Sebagian Berhasil* untuk meninjau rincian nomor baris yang bermasalah.
+- **Mengunduh Berkas Asli:** Klik menu aksi (ikon titik tiga) $\rightarrow$ pilih **"Unduh Berkas Asli"** untuk mengunduh salinan berkas spreadsheet yang diunggah pada shift tersebut.
+- **Mengunduh Laporan Error (.txt):** Klik menu aksi $\rightarrow$ pilih **"Unduh Laporan Error (TXT)"** untuk mengunduh berkas laporan teks rincian kesalahan baris untuk dikirimkan ke tim input SAP.
 
 ---
 

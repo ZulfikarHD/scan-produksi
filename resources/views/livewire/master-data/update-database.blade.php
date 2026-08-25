@@ -4,7 +4,7 @@
         <div>
             <flux:heading size="xl" level="1" class="font-bold tracking-tight">Update Database SAP</flux:heading>
             <flux:subheading size="sm" class="mt-1 text-zinc-500 dark:text-zinc-400">
-                Sinkronisasi master data order produksi dari berkas ekspor SAP (.xlsx, .xls, .csv), validasi skema data, dan riwayat pembaruan basis data.
+                Sinkronisasi master data order produksi dari berkas ekspor SAP (.xlsx, .xls, .csv), penjelajah data order, dan riwayat pembaruan basis data.
             </flux:subheading>
         </div>
         <div class="flex items-center gap-2">
@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Total Order Tersimpan</span>
-                    <p class="text-lg font-bold text-zinc-900 dark:text-zinc-100">{{ number_format($totalOrdersCount, 0, ',', '.') }} Order</p>
+                    <p class="text-lg font-bold text-zinc-900 dark:text-zinc-100" data-test="stat-total-orders">{{ number_format($totalOrdersCount, 0, ',', '.') }} Order</p>
                 </div>
             </div>
         </div>
@@ -182,7 +182,7 @@
 
                                 <flux:table.cell variant="strong">
                                     <div class="flex items-center gap-2">
-                                        <flux:icon.document-text class="size-4 text-zinc-400" />
+                                        <flux:icon.document-text class="size-4 text-zinc-400 shrink-0" />
                                         <span class="truncate max-w-xs font-medium text-zinc-900 dark:text-zinc-100" title="{{ $log->file_name }}">
                                             {{ $log->file_name }}
                                         </span>
@@ -228,20 +228,38 @@
                                 </flux:table.cell>
 
                                 <flux:table.cell align="end">
-                                    @if($log->failed_count > 0 && !empty($log->error_log))
-                                        <flux:button
-                                            variant="ghost"
-                                            size="xs"
-                                            icon="exclamation-triangle"
-                                            wire:click="showLogErrorDetail({{ $log->id }})"
-                                            class="text-amber-600 dark:text-amber-400"
-                                            data-test="btn-view-log-error-{{ $log->id }}"
-                                        >
-                                            Lihat Error
-                                        </flux:button>
-                                    @else
-                                        <span class="text-xs text-zinc-400">-</span>
-                                    @endif
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        @if($log->hasErrors())
+                                            <flux:button
+                                                variant="ghost"
+                                                size="xs"
+                                                icon="exclamation-triangle"
+                                                wire:click="showLogErrorDetail({{ $log->id }})"
+                                                class="text-amber-600 dark:text-amber-400"
+                                                title="Lihat Detail Error"
+                                                data-test="btn-view-log-error-{{ $log->id }}"
+                                            >
+                                                Lihat Error
+                                            </flux:button>
+                                        @endif
+
+                                        <flux:dropdown position="bottom" align="end">
+                                            <flux:button variant="ghost" size="xs" icon="ellipsis-horizontal" data-test="log-action-menu-{{ $log->id }}" />
+                                            <flux:menu>
+                                                @if($log->file_path)
+                                                    <flux:menu.item wire:click="downloadOriginalFile({{ $log->id }})" icon="arrow-down-tray" data-test="btn-download-original-{{ $log->id }}">
+                                                        Unduh Berkas Asli
+                                                    </flux:menu.item>
+                                                @endif
+
+                                                @if($log->hasErrors())
+                                                    <flux:menu.item wire:click="downloadAuditErrorLog({{ $log->id }})" icon="document-text" data-test="btn-download-error-log-{{ $log->id }}">
+                                                        Unduh Laporan Error (TXT)
+                                                    </flux:menu.item>
+                                                @endif
+                                            </flux:menu>
+                                        </flux:dropdown>
+                                    </div>
                                 </flux:table.cell>
                             </flux:table.row>
                         @empty
@@ -264,20 +282,49 @@
     <!-- TAB 2: Master Data Order Produksi -->
     @if($activeTab === 'orders')
         <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-700/80 dark:bg-zinc-900 space-y-6">
-            <!-- Filter Toolbar -->
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div class="w-full sm:max-w-sm">
-                    <flux:input
-                        wire:model.live.debounce.300ms="search"
-                        icon="magnifying-glass"
-                        placeholder="Cari No PO, OBC, atau nama produk..."
-                        clearable
-                        data-test="input-search-order"
-                    />
+            <!-- Header Toolbar & Action Buttons -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
+                <div>
+                    <flux:heading size="lg">Penjelajah Master Data Order</flux:heading>
+                    <flux:subheading size="sm">Cari, filter, unduh data order cetak, atau tambahkan order manual untuk kondisi darurat.</flux:subheading>
                 </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <flux:button
+                        variant="filled"
+                        icon="arrow-down-tray"
+                        wire:click="exportOrders"
+                        data-test="btn-export-orders"
+                    >
+                        Ekspor Data (.xlsx)
+                    </flux:button>
 
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <div class="w-40">
+                    <flux:button
+                        variant="primary"
+                        icon="plus"
+                        wire:click="openCreateOrderModal"
+                        data-test="btn-create-order-modal"
+                    >
+                        Tambah Order Manual
+                    </flux:button>
+                </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <div class="space-y-3">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    <!-- Search Input -->
+                    <div class="lg:col-span-2">
+                        <flux:input
+                            wire:model.live.debounce.300ms="search"
+                            icon="magnifying-glass"
+                            placeholder="Cari No PO, OBC, atau nama produk..."
+                            clearable
+                            data-test="input-search-order"
+                        />
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div>
                         <flux:select wire:model.live="statusFilter" placeholder="Semua Status" data-test="select-order-status">
                             <flux:select.option value="">Semua Status</flux:select.option>
                             <flux:select.option value="ready">Siap Kemas</flux:select.option>
@@ -286,6 +333,46 @@
                             <flux:select.option value="cancelled">Dibatalkan</flux:select.option>
                         </flux:select>
                     </div>
+
+                    <!-- Machine Filter -->
+                    <div>
+                        <flux:select wire:model.live="machineFilter" placeholder="Semua Mesin" data-test="select-order-machine">
+                            <flux:select.option value="">Semua Mesin</flux:select.option>
+                            @foreach($availableMachines as $m)
+                                <flux:select.option :value="$m">{{ $m }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                    </div>
+
+                    <!-- Customer Filter -->
+                    <div>
+                        <flux:input
+                            wire:model.live.debounce.300ms="customerFilter"
+                            placeholder="Filter Pelanggan..."
+                            clearable
+                            data-test="input-filter-customer"
+                        />
+                    </div>
+                </div>
+
+                <!-- Date Range Filters & Reset Button -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Rentang Tgl Order:</span>
+                        <div class="w-36">
+                            <flux:input type="date" wire:model.live="startDateFilter" size="sm" data-test="input-date-start" />
+                        </div>
+                        <span class="text-xs text-zinc-400">s/d</span>
+                        <div class="w-36">
+                            <flux:input type="date" wire:model.live="endDateFilter" size="sm" data-test="input-date-end" />
+                        </div>
+                    </div>
+
+                    @if($search !== '' || $statusFilter !== '' || $machineFilter !== '' || $customerFilter !== '' || $startDateFilter !== '' || $endDateFilter !== '')
+                        <flux:button variant="ghost" size="sm" icon="x-mark" wire:click="resetOrderFilters" data-test="btn-reset-order-filters">
+                            Bersihkan Filter
+                        </flux:button>
+                    @endif
                 </div>
             </div>
 
@@ -300,6 +387,7 @@
                     <flux:table.column align="end">Target Kemas</flux:table.column>
                     <flux:table.column>Tgl Order</flux:table.column>
                     <flux:table.column>Status</flux:table.column>
+                    <flux:table.column align="end">Aksi</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -316,11 +404,20 @@
                             </flux:table.cell>
 
                             <flux:table.cell>
-                                <span class="font-medium text-xs text-zinc-900 dark:text-zinc-100">{{ $order->product_name }}</span>
+                                <div class="flex flex-col">
+                                    <span class="font-medium text-xs text-zinc-900 dark:text-zinc-100 truncate max-w-xs" title="{{ $order->product_name }}">
+                                        {{ $order->product_name }}
+                                    </span>
+                                    @if($order->product_code && $order->product_code !== $order->product_name)
+                                        <span class="font-mono text-[10px] text-zinc-400">{{ $order->product_code }}</span>
+                                    @endif
+                                </div>
                             </flux:table.cell>
 
                             <flux:table.cell>
-                                <span class="text-xs text-zinc-600 dark:text-zinc-400">{{ $order->customer_name ?? '-' }}</span>
+                                <span class="text-xs text-zinc-600 dark:text-zinc-400 truncate max-w-32 block" title="{{ $order->customer_name }}">
+                                    {{ $order->customer_name ?? '-' }}
+                                </span>
                             </flux:table.cell>
 
                             <flux:table.cell>
@@ -344,13 +441,39 @@
                                     {{ $order->statusLabel() }}
                                 </flux:badge>
                             </flux:table.cell>
+
+                            <flux:table.cell align="end">
+                                <flux:dropdown position="bottom" align="end">
+                                    <flux:button variant="ghost" size="xs" icon="ellipsis-horizontal" data-test="order-action-menu-{{ $order->id }}" />
+                                    <flux:menu>
+                                        <flux:menu.item wire:click="showOrderDetail({{ $order->id }})" icon="eye" data-test="btn-detail-order-{{ $order->id }}">
+                                            Lihat Detail
+                                        </flux:menu.item>
+
+                                        <flux:menu.item wire:click="openEditOrderModal({{ $order->id }})" icon="pencil-square" data-test="btn-edit-order-{{ $order->id }}">
+                                            Ubah Data
+                                        </flux:menu.item>
+
+                                        <flux:menu.separator />
+
+                                        <flux:menu.item wire:click="confirmDeleteOrder({{ $order->id }})" icon="trash" class="text-red-600 dark:text-red-400" data-test="btn-delete-order-{{ $order->id }}">
+                                            Hapus Order
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            </flux:table.cell>
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="8" class="text-center py-10 text-zinc-500 dark:text-zinc-400">
+                            <flux:table.cell colspan="9" class="text-center py-10 text-zinc-500 dark:text-zinc-400">
                                 <div class="flex flex-col items-center justify-center gap-1.5">
                                     <flux:icon.cube class="size-7 text-zinc-400" />
-                                    <span class="text-sm font-medium">Tidak ada data order produksi yang sesuai.</span>
+                                    <span class="text-sm font-medium">Tidak ada data order produksi yang sesuai dengan filter.</span>
+                                    @if($search !== '' || $statusFilter !== '' || $machineFilter !== '' || $customerFilter !== '' || $startDateFilter !== '' || $endDateFilter !== '')
+                                        <flux:button variant="subtle" size="xs" wire:click="resetOrderFilters" class="mt-1">
+                                            Bersihkan Filter
+                                        </flux:button>
+                                    @endif
                                 </div>
                             </flux:table.cell>
                         </flux:table.row>
@@ -488,7 +611,7 @@
         </div>
     </flux:modal>
 
-    <!-- MODAL DETAIL ERROR LOG AUDIT (US-2.4 helper) -->
+    <!-- MODAL DETAIL ERROR LOG AUDIT (US-2.4) -->
     <flux:modal name="log-error-detail" class="max-w-xl space-y-4">
         <div>
             <flux:heading size="lg">Rincian Kesalahan Impor Berkas</flux:heading>
@@ -512,10 +635,395 @@
             @endif
         </div>
 
-        <div class="flex items-center justify-end pt-2">
+        <div class="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            @if($selectedLog && $selectedLog->hasErrors())
+                <flux:button
+                    variant="filled"
+                    size="sm"
+                    icon="arrow-down-tray"
+                    wire:click="downloadAuditErrorLog({{ $selectedLog->id }})"
+                    data-test="btn-modal-download-error-log"
+                >
+                    Unduh Laporan Error (.txt)
+                </flux:button>
+            @else
+                <div></div>
+            @endif
+
             <flux:modal.close>
-                <flux:button variant="filled">Tutup Modal</flux:button>
+                <flux:button variant="filled">Tutup</flux:button>
             </flux:modal.close>
+        </div>
+    </flux:modal>
+
+    <!-- MODAL TAMBAH / UBAH ORDER PRODUKSI MANUAL (US-2.5) -->
+    <flux:modal name="order-form" class="max-w-2xl space-y-6">
+        <div>
+            <flux:heading size="lg">{{ $isEditingOrder ? 'Ubah Data Order Produksi' : 'Tambah Order Produksi Manual' }}</flux:heading>
+            <flux:subheading class="mt-1">
+                {{ $isEditingOrder ? 'Perbarui spesifikasi, kuantitas target kemas, atau parameter mesin order produksi.' : 'Lengkapi formulir untuk mendaftarkan order produksi darurat / ad-hoc yang belum tercatat di SAP.' }}
+            </flux:subheading>
+        </div>
+
+        <form wire:submit.prevent="saveOrder" class="space-y-5">
+            <!-- Bagian 1: Identitas Pokok Order -->
+            <div class="space-y-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">1. Identitas Order & Barcode</span>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <flux:field>
+                        <flux:label>Nomor PO (Barcode Key) <span class="text-red-500">*</span></flux:label>
+                        <flux:input
+                            wire:model="order_po_number"
+                            placeholder="Contoh: 3000189510 atau PO-2026-001"
+                            required
+                            data-test="form-order-po"
+                        />
+                        <flux:error name="order_po_number" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Nomor OBC</flux:label>
+                        <flux:input
+                            wire:model="order_no_obc"
+                            placeholder="Contoh: ACE211474"
+                            data-test="form-order-obc"
+                        />
+                        <flux:error name="order_no_obc" />
+                    </flux:field>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <flux:field>
+                        <flux:label>Kode Barang (Material Code)</flux:label>
+                        <flux:input
+                            wire:model="order_product_code"
+                            placeholder="Contoh: 931110001-24"
+                            data-test="form-order-product-code"
+                        />
+                        <flux:error name="order_product_code" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Tipe Perso</flux:label>
+                        <flux:input
+                            wire:model="order_perso_type"
+                            placeholder="Contoh: P / NP"
+                            data-test="form-order-perso"
+                        />
+                        <flux:error name="order_perso_type" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Nomor Seri</flux:label>
+                        <flux:input
+                            wire:model="order_seri"
+                            placeholder="Contoh: 1 / 2"
+                            data-test="form-order-seri"
+                        />
+                        <flux:error name="order_seri" />
+                    </flux:field>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <flux:field>
+                        <flux:label>Nama Produk / Material <span class="text-red-500">*</span></flux:label>
+                        <flux:input
+                            wire:model="order_product_name"
+                            placeholder="Contoh: Sertifikat Sekuriti Hologram A4"
+                            required
+                            data-test="form-order-product-name"
+                        />
+                        <flux:error name="order_product_name" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Nama Pelanggan / Institusi</flux:label>
+                        <flux:input
+                            wire:model="order_customer_name"
+                            placeholder="Contoh: Bank Indonesia / Kemenkeu"
+                            data-test="form-order-customer"
+                        />
+                        <flux:error name="order_customer_name" />
+                    </flux:field>
+                </div>
+            </div>
+
+            <!-- Bagian 2: Lini Produksi & Jadwal -->
+            <div class="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">2. Lini & Jadwal Produksi</span>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <flux:field>
+                        <flux:label>Nomor Mesin (Work Center)</flux:label>
+                        <flux:input
+                            wire:model="order_machine_number"
+                            placeholder="Contoh: HDR-1001 atau MESIN-02"
+                            data-test="form-order-machine"
+                        />
+                        <flux:error name="order_machine_number" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Tanggal Order <span class="text-red-500">*</span></flux:label>
+                        <flux:input
+                            type="date"
+                            wire:model="order_date"
+                            required
+                            data-test="form-order-date"
+                        />
+                        <flux:error name="order_date" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Batas Waktu Kirim</flux:label>
+                        <flux:input
+                            type="date"
+                            wire:model="order_delivery_deadline"
+                            data-test="form-order-deadline"
+                        />
+                        <flux:error name="order_delivery_deadline" />
+                    </flux:field>
+                </div>
+            </div>
+
+            <!-- Bagian 3: Target Kuantitas & Spesifikasi -->
+            <div class="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">3. Target Kuantitas & Spesifikasi</span>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <flux:field>
+                        <flux:label>Target Kemas (Qty Pesan) <span class="text-red-500">*</span></flux:label>
+                        <flux:input
+                            type="number"
+                            wire:model="order_target_quantity"
+                            placeholder="Contoh: 5000"
+                            min="1"
+                            required
+                            data-test="form-order-target-qty"
+                        />
+                        <flux:error name="order_target_quantity" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Rencana Cetak (Rencet)</flux:label>
+                        <flux:input
+                            type="number"
+                            wire:model="order_rencet_quantity"
+                            placeholder="Contoh: 5150"
+                            min="0"
+                            data-test="form-order-rencet-qty"
+                        />
+                        <flux:error name="order_rencet_quantity" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Satuan Kemas <span class="text-red-500">*</span></flux:label>
+                        <flux:select wire:model="order_unit" data-test="form-order-unit">
+                            <flux:select.option value="lembar">lembar</flux:select.option>
+                            <flux:select.option value="rim">rim</flux:select.option>
+                            <flux:select.option value="buku">buku</flux:select.option>
+                            <flux:select.option value="set">set</flux:select.option>
+                            <flux:select.option value="box">box</flux:select.option>
+                        </flux:select>
+                        <flux:error name="order_unit" />
+                    </flux:field>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <flux:field>
+                        <flux:label>Jenis Kertas / Bahan Baku</flux:label>
+                        <flux:input
+                            wire:model="order_paper_type"
+                            placeholder="Contoh: Kertas Sekuriti Watermark 90 GSM"
+                            data-test="form-order-paper-type"
+                        />
+                        <flux:error name="order_paper_type" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Status Order Produksi <span class="text-red-500">*</span></flux:label>
+                        <flux:select wire:model="order_status" data-test="form-order-status">
+                            <flux:select.option value="ready">Siap Kemas (Ready)</flux:select.option>
+                            <flux:select.option value="in_progress">Sedang Diproses (In Progress)</flux:select.option>
+                            <flux:select.option value="completed">Selesai (Completed)</flux:select.option>
+                            <flux:select.option value="cancelled">Dibatalkan (Cancelled)</flux:select.option>
+                        </flux:select>
+                        <flux:error name="order_status" />
+                    </flux:field>
+                </div>
+
+                <flux:field>
+                    <flux:label>Spesifikasi Teknis & Fitur Sekuriti</flux:label>
+                    <flux:textarea
+                        wire:model="order_specification"
+                        placeholder="Contoh: Cetak 4/4 Warna, Fitur Guilloche, Foil Hologram Hot-stamping, Nomorator Seri 6 digit"
+                        rows="2"
+                        data-test="form-order-specification"
+                    />
+                    <flux:error name="order_specification" />
+                </flux:field>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                <flux:modal.close>
+                    <flux:button variant="filled">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button variant="primary" type="submit" data-test="btn-submit-order-form">
+                    {{ $isEditingOrder ? 'Simpan Perubahan Order' : 'Simpan Order Produksi' }}
+                </flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
+    <!-- MODAL DETAIL SPESIFIKASI ORDER PRODUKSI (US-2.5) -->
+    <flux:modal name="order-detail" class="max-w-3xl space-y-6">
+        @if($selectedOrder)
+            <div>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <flux:heading size="xl" class="font-mono font-bold">{{ $selectedOrder->po_number }}</flux:heading>
+                        <flux:badge size="sm" :color="$selectedOrder->statusBadgeColor()">
+                            {{ $selectedOrder->statusLabel() }}
+                        </flux:badge>
+                    </div>
+                    @if($selectedOrder->no_obc)
+                        <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400">OBC: {{ $selectedOrder->no_obc }}</span>
+                    @endif
+                </div>
+                <flux:subheading class="mt-1 font-medium text-zinc-900 dark:text-zinc-100">
+                    {{ $selectedOrder->product_name }}
+                </flux:subheading>
+            </div>
+
+            <!-- Grid Rincian Spesifikasi Teknis -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <!-- Card 1: Informasi Produk & Pelanggan -->
+                <div class="rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-700/80 dark:bg-zinc-800/40 space-y-2.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Identitas Produk</span>
+                    <dl class="text-xs space-y-1.5">
+                        <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Kode Material</dt>
+                            <dd class="font-mono font-medium text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->product_code ?? '-' }}</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Pelanggan</dt>
+                            <dd class="font-medium text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->customer_name ?? '-' }}</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Tipe Perso / Seri</dt>
+                            <dd class="font-medium text-zinc-800 dark:text-zinc-200">
+                                {{ $selectedOrder->perso_type ?? '-' }} / Seri: {{ $selectedOrder->seri ?? '-' }}
+                            </dd>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Bahan Kertas</dt>
+                            <dd class="font-medium text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->paper_type ?? '-' }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Card 2: Mesin & Parameter Produksi -->
+                <div class="rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-700/80 dark:bg-zinc-800/40 space-y-2.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Lini & Kuantitas</span>
+                    <dl class="text-xs space-y-1.5">
+                        <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Nomor Mesin (Work Center)</dt>
+                            <dd class="font-mono font-semibold text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->machine_number ?? '-' }}</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Target Siap Kemas</dt>
+                            <dd class="font-mono font-bold text-blue-600 dark:text-blue-400">
+                                {{ $selectedOrder->formattedTargetQuantity() }} {{ $selectedOrder->unit }}
+                            </dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Rencana Cetak (Rencet)</dt>
+                            <dd class="font-mono font-medium text-zinc-800 dark:text-zinc-200">
+                                {{ $selectedOrder->formattedRencetQuantity() }} {{ $selectedOrder->unit }}
+                            </dd>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <dt class="text-zinc-500 dark:text-zinc-400">Realisasi Kemas</dt>
+                            <dd class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                                {{ $selectedOrder->formattedKemasQuantity() }} {{ $selectedOrder->unit }} ({{ $selectedOrder->fulfillmentPercentage() }}%)
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Card 3: Spesifikasi Lengkap Kertas & Sekuriti -->
+            @if($selectedOrder->specification)
+                <div class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700/80 dark:bg-zinc-900 space-y-1.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Spesifikasi Teknis & Sekuriti</span>
+                    <p class="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
+                        {{ $selectedOrder->specification }}
+                    </p>
+                </div>
+            @endif
+
+            <!-- Card 4: Timeline Siklus Produksi SAP -->
+            <div class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700/80 dark:bg-zinc-900 space-y-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Timeline Siklus Produksi</span>
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 text-xs">
+                    <div class="p-2 rounded bg-zinc-50 dark:bg-zinc-800/50">
+                        <span class="text-[11px] text-zinc-500 block">Tgl Order</span>
+                        <span class="font-medium text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->order_date?->format('d/m/Y') ?? '-' }}</span>
+                    </div>
+                    <div class="p-2 rounded bg-zinc-50 dark:bg-zinc-800/50">
+                        <span class="text-[11px] text-zinc-500 block">Batas Kirim</span>
+                        <span class="font-medium text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->delivery_deadline?->format('d/m/Y') ?? '-' }}</span>
+                    </div>
+                    <div class="p-2 rounded bg-zinc-50 dark:bg-zinc-800/50">
+                        <span class="text-[11px] text-zinc-500 block">Tgl Pakai BB</span>
+                        <span class="font-medium text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->tgl_pakai_bb?->format('d/m/Y') ?? '-' }}</span>
+                    </div>
+                    <div class="p-2 rounded bg-zinc-50 dark:bg-zinc-800/50">
+                        <span class="text-[11px] text-zinc-500 block">Tgl Cetak</span>
+                        <span class="font-medium text-zinc-800 dark:text-zinc-200">{{ $selectedOrder->tgl_cetak?->format('d/m/Y') ?? '-' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Info & Actions -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                    Diinput oleh: <strong>{{ $selectedOrder->creator?->name ?? 'Sistem SAP' }}</strong> pada {{ $selectedOrder->created_at?->translatedFormat('d M Y, H:i') }}
+                </span>
+
+                <div class="flex items-center gap-2">
+                    <flux:button
+                        variant="filled"
+                        size="sm"
+                        icon="pencil-square"
+                        wire:click="openEditOrderModal({{ $selectedOrder->id }})"
+                        data-test="btn-detail-edit"
+                    >
+                        Ubah Data
+                    </flux:button>
+                    <flux:modal.close>
+                        <flux:button variant="primary" size="sm">Tutup</flux:button>
+                    </flux:modal.close>
+                </div>
+            </div>
+        @endif
+    </flux:modal>
+
+    <!-- MODAL KONFIRMASI HAPUS ORDER (US-2.5) -->
+    <flux:modal name="delete-order-confirm" class="max-w-md space-y-6">
+        <div>
+            <flux:heading size="lg">Konfirmasi Hapus Order Produksi</flux:heading>
+            <flux:subheading class="mt-2">
+                Apakah Anda yakin ingin menghapus data order produksi dengan nomor PO <strong class="font-mono text-zinc-900 dark:text-zinc-100">{{ $confirmingDeleteOrderPo }}</strong>? Tindakan ini akan menghapus data spesifikasi order secara permanen.
+            </flux:subheading>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <flux:modal.close>
+                <flux:button variant="filled">Batal</flux:button>
+            </flux:modal.close>
+            <flux:button variant="danger" wire:click="deleteOrder" data-test="confirm-delete-order-btn">
+                Ya, Hapus Order
+            </flux:button>
         </div>
     </flux:modal>
 </div>

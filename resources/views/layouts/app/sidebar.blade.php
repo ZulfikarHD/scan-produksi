@@ -15,72 +15,69 @@
                         <span class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Unit Pengemasan</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-1">
-                    <flux:badge size="xs" color="zinc" class="hidden font-mono sm:inline-flex">v1.0.0</flux:badge>
-                    <flux:sidebar.collapse class="lg:hidden" />
-                </div>
+                <flux:badge size="xs" color="zinc" class="hidden font-mono sm:inline-flex">v1.0.0</flux:badge>
             </flux:sidebar.header>
 
-            <flux:sidebar.nav>
-                <flux:sidebar.group heading="Menu Utama" class="grid gap-1">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+            <flux:navlist>
+                <flux:navlist.group heading="Menu Utama" class="grid gap-1">
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         Dashboard
-                    </flux:sidebar.item>
+                    </flux:navlist.item>
 
                     @if(auth()->user()?->isSupervisor())
-                        <flux:sidebar.item
+                        <flux:navlist.item
                             icon="arrow-path"
                             :href="Route::has('database.update') ? route('database.update') : '#'"
                             :current="request()->routeIs('database.*')"
                             wire:navigate
                         >
                             Update Database
-                        </flux:sidebar.item>
+                        </flux:navlist.item>
                     @endif
 
-                    <flux:sidebar.item
+                    <flux:navlist.item
                         icon="document-plus"
                         :href="Route::has('laporan.create') ? route('laporan.create') : '#'"
                         :current="request()->routeIs('laporan.create')"
                         wire:navigate
                     >
                         Buat Laporan
-                    </flux:sidebar.item>
+                    </flux:navlist.item>
 
-                    <flux:sidebar.item
+                    <flux:navlist.item
                         icon="document-text"
                         :href="Route::has('laporan.index') ? route('laporan.index') : '#'"
                         :current="request()->routeIs('laporan.index*')"
                         wire:navigate
                     >
                         Lihat Laporan
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
+                    </flux:navlist.item>
+                </flux:navlist.group>
 
                 @if(auth()->user()?->isSupervisor())
-                    <flux:sidebar.group heading="Administrasi" class="grid gap-1 mt-4">
-                        <flux:sidebar.item
+                    <flux:navlist.group heading="Administrasi" class="grid gap-1 mt-4">
+                        <flux:navlist.item
                             icon="users"
                             :href="Route::has('petugas.index') ? route('petugas.index') : url('/petugas')"
                             :current="request()->is('petugas*') || request()->routeIs('petugas.*')"
                             wire:navigate
                         >
                             Data Petugas
-                        </flux:sidebar.item>
-                    </flux:sidebar.group>
+                        </flux:navlist.item>
+                    </flux:navlist.group>
                 @endif
 
-                <flux:sidebar.group heading="Sistem" class="grid gap-1 mt-4">
-                    <flux:sidebar.item
+                <flux:navlist.group heading="Sistem" class="grid gap-1 mt-4">
+                    <flux:navlist.item
                         icon="cog-6-tooth"
                         :href="route('profile.edit')"
                         :current="request()->routeIs('profile.*') || request()->routeIs('settings.*')"
                         wire:navigate
                     >
                         Pengaturan
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-            </flux:sidebar.nav>
+                    </flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
 
             <flux:spacer />
 

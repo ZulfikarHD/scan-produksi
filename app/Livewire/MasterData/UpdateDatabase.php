@@ -2,6 +2,7 @@
 
 namespace App\Livewire\MasterData;
 
+use App\Enums\ProductionOrderStatus;
 use App\Models\ProductionOrder;
 use App\Models\SapImportLog;
 use App\Models\User;
@@ -31,20 +32,33 @@ class UpdateDatabase extends Component
     #[Url]
     public string $activeTab = 'import'; // 'import' vs 'orders'
 
+    // Master Data Explorer Filters (US-2.5)
     #[Url]
     public string $search = '';
 
     #[Url]
     public string $statusFilter = '';
 
-    // File Upload State
+    #[Url]
+    public string $machineFilter = '';
+
+    #[Url]
+    public string $customerFilter = '';
+
+    #[Url]
+    public string $startDateFilter = '';
+
+    #[Url]
+    public string $endDateFilter = '';
+
+    // File Upload State (US-2.2)
     public mixed $file = null;
 
     public ?string $storedTempPath = null;
 
     public ?string $originalFileName = null;
 
-    // US-2.3 Preview State
+    // Preview State (US-2.3)
     public bool $hasPreview = false;
 
     public int $totalRowsCount = 0;
@@ -61,10 +75,57 @@ class UpdateDatabase extends Component
 
     public bool $isProcessing = false;
 
-    // Error Log Inspection Modal State
+    // Error Log Inspection Modal State (US-2.4)
     public ?int $selectedLogId = null;
 
     public ?SapImportLog $selectedLog = null;
+
+    // Manual Order Form State (US-2.5)
+    public bool $isEditingOrder = false;
+
+    public ?int $editingOrderId = null;
+
+    public string $order_po_number = '';
+
+    public string $order_no_obc = '';
+
+    public string $order_perso_type = '';
+
+    public string $order_seri = '';
+
+    public string $order_product_code = '';
+
+    public string $order_product_name = '';
+
+    public string $order_customer_name = '';
+
+    public string $order_specification = '';
+
+    public string $order_paper_type = '';
+
+    public string $order_machine_number = '';
+
+    public int|string $order_target_quantity = 0;
+
+    public int|string $order_rencet_quantity = 0;
+
+    public string $order_unit = 'lembar';
+
+    public string $order_date = '';
+
+    public string $order_delivery_deadline = '';
+
+    public string $order_status = 'ready';
+
+    // Order Detail Specification Modal State (US-2.5)
+    public ?int $selectedOrderId = null;
+
+    public ?ProductionOrder $selectedOrder = null;
+
+    // Order Deletion Confirmation Modal State (US-2.5)
+    public ?int $confirmingDeleteOrderId = null;
+
+    public string $confirmingDeleteOrderPo = '';
 
     /**
      * Render view Update Database dengan tab Impor Berkas SAP dan Master Data Order Produksi.
@@ -85,6 +146,29 @@ class UpdateDatabase extends Component
             $ordersQuery->byStatus($this->statusFilter);
         }
 
+        if ($this->machineFilter !== '') {
+            $ordersQuery->byMachine($this->machineFilter);
+        }
+
+        if ($this->customerFilter !== '') {
+            $ordersQuery->byCustomer($this->customerFilter);
+        }
+
+        if ($this->startDateFilter !== '' || $this->endDateFilter !== '') {
+            $ordersQuery->byDateRange(
+                $this->startDateFilter !== '' ? $this->startDateFilter : null,
+                $this->endDateFilter !== '' ? $this->endDateFilter : null
+            );
+        }
+
+        $availableMachines = ProductionOrder::query()
+            ->whereNotNull('machine_number')
+            ->where('machine_number', '!=', '')
+            ->distinct()
+            ->orderBy('machine_number')
+            ->pluck('machine_number')
+            ->toArray();
+
         $orders = $ordersQuery->latest('id')->paginate(15, ['*'], 'ordersPage');
 
         $latestLog = SapImportLog::latest('id')->first();
@@ -93,6 +177,7 @@ class UpdateDatabase extends Component
         return view('livewire.master-data.update-database', [
             'importLogs' => $importLogs,
             'orders' => $orders,
+            'availableMachines' => $availableMachines,
             'latestLog' => $latestLog,
             'totalOrdersCount' => $totalOrdersCount,
         ]);
@@ -111,6 +196,47 @@ class UpdateDatabase extends Component
      */
     public function updatingStatusFilter(): void
     {
+        $this->resetPage('ordersPage');
+    }
+
+    /**
+     * Reset pagination when machine filter changes on orders tab.
+     */
+    public function updatingMachineFilter(): void
+    {
+        $this->resetPage('ordersPage');
+    }
+
+    /**
+     * Reset pagination when customer filter changes on orders tab.
+     */
+    public function updatingCustomerFilter(): void
+    {
+        $this->resetPage('ordersPage');
+    }
+
+    /**
+     * Reset pagination when start date filter changes on orders tab.
+     */
+    public function updatingStartDateFilter(): void
+    {
+        $this->resetPage('ordersPage');
+    }
+
+    /**
+     * Reset pagination when end date filter changes on orders tab.
+     */
+    public function updatingEndDateFilter(): void
+    {
+        $this->resetPage('ordersPage');
+    }
+
+    /**
+     * Reset all filters on master data orders tab to default state.
+     */
+    public function resetOrderFilters(): void
+    {
+        $this->reset(['search', 'statusFilter', 'machineFilter', 'customerFilter', 'startDateFilter', 'endDateFilter']);
         $this->resetPage('ordersPage');
     }
 
@@ -180,7 +306,7 @@ class UpdateDatabase extends Component
     }
 
     /**
-     * Commit the parsed records into production database (US-2.3).
+     * Commit the parsed records into production database (US-2.3 & US-2.4).
      */
     public function confirmImport(SapImportService $importService, bool $skipInvalid = true): void
     {
@@ -210,11 +336,16 @@ class UpdateDatabase extends Component
             /** @var User $currentUser */
             $currentUser = Auth::user();
 
+            // Store permanent audit copy in private storage
+            $permanentRelativePath = 'sap-imports/'.now()->format('Ymd_His').'_'.basename($this->storedTempPath);
+            Storage::disk('local')->copy($this->storedTempPath, $permanentRelativePath);
+
             $result = $importService->import(
                 $fullPath,
                 $this->originalFileName ?? 'sap-export.xlsx',
                 $currentUser,
-                $skipInvalid
+                $skipInvalid,
+                $permanentRelativePath
             );
 
             // Clean up temporary stored file
@@ -259,7 +390,7 @@ class UpdateDatabase extends Component
     }
 
     /**
-     * Open error log modal for historical import inspection (US-2.4 helper).
+     * Open error log modal for historical import inspection (US-2.4).
      */
     public function showLogErrorDetail(int $logId): void
     {
@@ -267,5 +398,315 @@ class UpdateDatabase extends Component
         $this->selectedLogId = $logId;
 
         Flux::modal('log-error-detail')->show();
+    }
+
+    /**
+     * Download original uploaded SAP file for supervisor audit (US-2.4).
+     */
+    public function downloadOriginalFile(int $logId): BinaryFileResponse|StreamedResponse
+    {
+        $log = SapImportLog::findOrFail($logId);
+
+        if ($log->file_path && Storage::disk('local')->exists($log->file_path)) {
+            return response()->download(Storage::disk('local')->path($log->file_path), $log->file_name);
+        }
+
+        // Fallback check for absolute path if recorded
+        if ($log->file_path && file_exists($log->file_path)) {
+            return response()->download($log->file_path, $log->file_name);
+        }
+
+        Flux::toast('Berkas asli tidak ditemukan pada penyimpanan server.', variant: 'danger');
+
+        return response()->download(tempnam(sys_get_temp_dir(), 'missing_'), $log->file_name);
+    }
+
+    /**
+     * Download audit error log as a readable text file (US-2.4).
+     */
+    public function downloadAuditErrorLog(int $logId): BinaryFileResponse|StreamedResponse
+    {
+        $log = SapImportLog::findOrFail($logId);
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'audit_error_').'.txt';
+        $content = "LAPORAN AUDIT KESALAHAN IMPOR BERKAS SAP\n";
+        $content .= "========================================\n";
+        $content .= "Nama Berkas   : {$log->file_name}\n";
+        $content .= 'Waktu Impor   : '.($log->created_at ? $log->created_at->setTimezone('Asia/Jakarta')->format('d/m/Y H:i:s').' WIB' : '-')."\n";
+        $content .= 'Pengunggah    : '.($log->user ? $log->user->name : 'Sistem')."\n";
+        $content .= "Total Baris   : {$log->total_rows}\n";
+        $content .= 'Baris Sukses  : '.($log->imported_count + $log->updated_count)."\n";
+        $content .= "Baris Gagal   : {$log->failed_count}\n";
+        $content .= "Status Impor  : {$log->statusLabel()}\n";
+        $content .= "========================================\n\n";
+        $content .= "RINCIAN KESALAHAN:\n";
+
+        if (! empty($log->error_log)) {
+            foreach ($log->error_log as $idx => $err) {
+                $num = $idx + 1;
+                $content .= "{$num}. {$err}\n";
+            }
+        } else {
+            $content .= "Tidak ada rincian kesalahan yang tercatat.\n";
+        }
+
+        file_put_contents($tempFile, $content);
+
+        $downloadName = 'audit_error_log_'.pathinfo($log->file_name, PATHINFO_FILENAME).'_'.now()->format('Ymd_His').'.txt';
+
+        return response()->download($tempFile, $downloadName)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Open modal dialog to create a manual emergency production order (US-2.5).
+     */
+    public function openCreateOrderModal(): void
+    {
+        $this->resetValidation();
+        $this->reset([
+            'isEditingOrder',
+            'editingOrderId',
+            'order_po_number',
+            'order_no_obc',
+            'order_perso_type',
+            'order_seri',
+            'order_product_code',
+            'order_product_name',
+            'order_customer_name',
+            'order_specification',
+            'order_paper_type',
+            'order_machine_number',
+            'order_target_quantity',
+            'order_rencet_quantity',
+            'order_delivery_deadline',
+        ]);
+
+        $this->order_unit = 'lembar';
+        $this->order_status = 'ready';
+        $this->order_date = now()->toDateString();
+        $this->isEditingOrder = false;
+
+        Flux::modal('order-form')->show();
+    }
+
+    /**
+     * Open modal dialog to edit an existing production order (US-2.5).
+     */
+    public function openEditOrderModal(int $orderId): void
+    {
+        $this->resetValidation();
+
+        $order = ProductionOrder::findOrFail($orderId);
+
+        $this->isEditingOrder = true;
+        $this->editingOrderId = $order->id;
+        $this->order_po_number = $order->po_number;
+        $this->order_no_obc = (string) ($order->no_obc ?? '');
+        $this->order_perso_type = (string) ($order->perso_type ?? '');
+        $this->order_seri = (string) ($order->seri ?? '');
+        $this->order_product_code = (string) ($order->product_code ?? '');
+        $this->order_product_name = $order->product_name;
+        $this->order_customer_name = (string) ($order->customer_name ?? '');
+        $this->order_specification = (string) ($order->specification ?? '');
+        $this->order_paper_type = (string) ($order->paper_type ?? '');
+        $this->order_machine_number = (string) ($order->machine_number ?? '');
+        $this->order_target_quantity = $order->target_quantity;
+        $this->order_rencet_quantity = $order->rencet_quantity;
+        $this->order_unit = $order->unit ?? 'lembar';
+        $this->order_date = $order->order_date->format('Y-m-d');
+        $this->order_delivery_deadline = $order->delivery_deadline ? $order->delivery_deadline->format('Y-m-d') : '';
+        $this->order_status = $order->status->value;
+
+        Flux::modal('order-form')->show();
+    }
+
+    /**
+     * Save newly created or modified production order (US-2.5).
+     */
+    public function saveOrder(): void
+    {
+        $this->validate([
+            'order_po_number' => [
+                'required',
+                'string',
+                'max:50',
+                'unique:production_orders,po_number,'.($this->editingOrderId ?? 'NULL'),
+            ],
+            'order_product_name' => ['required', 'string', 'max:255'],
+            'order_target_quantity' => ['required', 'integer', 'min:1'],
+            'order_date' => ['required', 'date'],
+            'order_delivery_deadline' => ['nullable', 'date'],
+            'order_status' => ['required', 'in:ready,in_progress,completed,cancelled'],
+            'order_no_obc' => ['nullable', 'string', 'max:50'],
+            'order_product_code' => ['nullable', 'string', 'max:100'],
+            'order_customer_name' => ['nullable', 'string', 'max:255'],
+            'order_machine_number' => ['nullable', 'string', 'max:50'],
+            'order_unit' => ['required', 'string', 'max:30'],
+            'order_specification' => ['nullable', 'string'],
+            'order_paper_type' => ['nullable', 'string', 'max:100'],
+            'order_rencet_quantity' => ['nullable', 'integer', 'min:0'],
+            'order_perso_type' => ['nullable', 'string', 'max:50'],
+            'order_seri' => ['nullable', 'string', 'max:50'],
+        ], [
+            'order_po_number.required' => 'Nomor PO (Barcode) wajib diisi.',
+            'order_po_number.unique' => 'Nomor PO sudah terdaftar dalam basis data produksi.',
+            'order_po_number.max' => 'Nomor PO maksimal 50 karakter.',
+            'order_product_name.required' => 'Nama Produk / Material wajib diisi.',
+            'order_product_name.max' => 'Nama Produk maksimal 255 karakter.',
+            'order_target_quantity.required' => 'Target Kuantitas Kemas wajib diisi.',
+            'order_target_quantity.min' => 'Target Kuantitas Kemas minimal 1 lembar/satuan.',
+            'order_target_quantity.integer' => 'Target Kuantitas Kemas harus berupa angka bulat.',
+            'order_date.required' => 'Tanggal Order wajib diisi.',
+            'order_date.date' => 'Format Tanggal Order tidak valid.',
+            'order_delivery_deadline.date' => 'Format Batas Waktu Kirim tidak valid.',
+            'order_status.required' => 'Status order produksi wajib dipilih.',
+            'order_status.in' => 'Status order produksi tidak valid.',
+            'order_unit.required' => 'Satuan kemas wajib dipilih.',
+        ]);
+
+        $payload = [
+            'po_number' => trim($this->order_po_number),
+            'no_obc' => filled($this->order_no_obc) ? trim($this->order_no_obc) : null,
+            'perso_type' => filled($this->order_perso_type) ? trim($this->order_perso_type) : null,
+            'seri' => filled($this->order_seri) ? trim($this->order_seri) : null,
+            'product_code' => filled($this->order_product_code) ? trim($this->order_product_code) : null,
+            'product_name' => trim($this->order_product_name),
+            'customer_name' => filled($this->order_customer_name) ? trim($this->order_customer_name) : null,
+            'specification' => filled($this->order_specification) ? trim($this->order_specification) : null,
+            'paper_type' => filled($this->order_paper_type) ? trim($this->order_paper_type) : null,
+            'machine_number' => filled($this->order_machine_number) ? trim($this->order_machine_number) : null,
+            'target_quantity' => (int) $this->order_target_quantity,
+            'rencet_quantity' => (int) ($this->order_rencet_quantity ?: 0),
+            'unit' => trim($this->order_unit) ?: 'lembar',
+            'order_date' => $this->order_date,
+            'delivery_deadline' => filled($this->order_delivery_deadline) ? $this->order_delivery_deadline : null,
+            'status' => ProductionOrderStatus::from($this->order_status),
+        ];
+
+        if ($this->editingOrderId) {
+            $order = ProductionOrder::findOrFail($this->editingOrderId);
+            $order->update($payload);
+
+            Flux::toast("Data order produksi {$order->po_number} berhasil diperbarui.", variant: 'success');
+        } else {
+            $payload['created_by'] = Auth::id();
+            $order = ProductionOrder::create($payload);
+
+            Flux::toast("Order manual {$order->po_number} berhasil ditambahkan.", variant: 'success');
+        }
+
+        Flux::modal('order-form')->close();
+        $this->reset([
+            'isEditingOrder',
+            'editingOrderId',
+            'order_po_number',
+            'order_no_obc',
+            'order_perso_type',
+            'order_seri',
+            'order_product_code',
+            'order_product_name',
+            'order_customer_name',
+            'order_specification',
+            'order_paper_type',
+            'order_machine_number',
+            'order_target_quantity',
+            'order_rencet_quantity',
+            'order_unit',
+            'order_date',
+            'order_delivery_deadline',
+            'order_status',
+        ]);
+    }
+
+    /**
+     * Show specification detail modal for a given production order (US-2.5).
+     */
+    public function showOrderDetail(int $orderId): void
+    {
+        $this->selectedOrder = ProductionOrder::with('creator')->findOrFail($orderId);
+        $this->selectedOrderId = $orderId;
+
+        Flux::modal('order-detail')->show();
+    }
+
+    /**
+     * Open confirmation modal for deleting a production order (US-2.5).
+     */
+    public function confirmDeleteOrder(int $orderId): void
+    {
+        $order = ProductionOrder::findOrFail($orderId);
+
+        $this->confirmingDeleteOrderId = $order->id;
+        $this->confirmingDeleteOrderPo = $order->po_number;
+
+        Flux::modal('delete-order-confirm')->show();
+    }
+
+    /**
+     * Delete production order with status safety guardrails (US-2.5).
+     */
+    public function deleteOrder(): void
+    {
+        if (! $this->confirmingDeleteOrderId) {
+            return;
+        }
+
+        $order = ProductionOrder::findOrFail($this->confirmingDeleteOrderId);
+
+        // Guardrail: Cannot delete order that is currently in progress
+        if ($order->status === ProductionOrderStatus::IN_PROGRESS) {
+            Flux::modal('delete-order-confirm')->close();
+            Flux::toast('Order yang sedang berjalan dalam status Sedang Diproses tidak dapat dihapus untuk mencegah inkonsistensi proses.', variant: 'danger');
+            $this->reset(['confirmingDeleteOrderId', 'confirmingDeleteOrderPo']);
+
+            return;
+        }
+
+        $poNumber = $order->po_number;
+        $order->delete();
+
+        Flux::modal('delete-order-confirm')->close();
+        Flux::toast("Order produksi {$poNumber} berhasil dihapus.", variant: 'success');
+        $this->reset(['confirmingDeleteOrderId', 'confirmingDeleteOrderPo']);
+    }
+
+    /**
+     * Export currently filtered production orders into an Excel spreadsheet (US-2.5).
+     */
+    public function exportOrders(SapImportService $importService): BinaryFileResponse|StreamedResponse
+    {
+        $ordersQuery = ProductionOrder::query()->with('creator');
+
+        if ($this->search !== '') {
+            $ordersQuery->search($this->search);
+        }
+
+        if ($this->statusFilter !== '') {
+            $ordersQuery->byStatus($this->statusFilter);
+        }
+
+        if ($this->machineFilter !== '') {
+            $ordersQuery->byMachine($this->machineFilter);
+        }
+
+        if ($this->customerFilter !== '') {
+            $ordersQuery->byCustomer($this->customerFilter);
+        }
+
+        if ($this->startDateFilter !== '' || $this->endDateFilter !== '') {
+            $ordersQuery->byDateRange(
+                $this->startDateFilter !== '' ? $this->startDateFilter : null,
+                $this->endDateFilter !== '' ? $this->endDateFilter : null
+            );
+        }
+
+        $orders = $ordersQuery->latest('id')->get();
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'sap_export_orders_').'.xlsx';
+        $importService->exportOrdersToXlsx($orders, $tempFile);
+
+        $fileName = 'master_data_order_produksi_'.now()->format('Ymd_His').'.xlsx';
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 }

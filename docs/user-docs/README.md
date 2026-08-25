@@ -1,14 +1,31 @@
 # Panduan Pengguna (User Documentation)
 
-Selamat datang di pusat panduan pengguna aplikasi **Sistem Monitoring & Pencatatan Produksi PT Percetakan Dokumen Sekuriti (Unit Pengemasan)**.
+Selamat datang di pusat dokumentasi dan panduan operasional **Sistem Monitoring & Pencatatan Produksi**.
 
 ---
 
 ## Daftar Panduan
 
-| Panduan | Target Pengguna | Ringkasan |
-|---------|-----------------|-----------|
-| [Panduan Login & Navigasi Aplikasi](guides/panduan-login-dan-navigasi.md) | Petugas Kemas & Supervisor | Cara masuk ke sistem menggunakan NP/Username, mengenali banner shift kerja, serta navigasi menu utama. |
-| [Panduan Manajemen Data Petugas](guides/panduan-manajemen-data-petugas.md) | Supervisor / Kepala Unit | Panduan lengkap pengelolaan akun staf operator, penambahan petugas baru, edit profil, aktivasi/deaktivasi, dan penghapusan akun. |
-| [Panduan Master Data Order Produksi](guides/panduan-master-data-order-produksi.md) | Petugas Kemas & Supervisor | Penjelasan struktur informasi order produksi, nomor PO untuk scanner barcode, dan pemahaman badge status operasional. |
-| [Panduan Update Database Master Data SAP](guides/panduan-update-database-sap.md) | Supervisor / Kepala Unit | Alur unggah berkas SAP (.xlsx / .csv), validasi baris pada modal pratinjau, unduh template, dan pemantauan riwayat log impor. |
+1. **[Panduan Login & Navigasi Aplikasi](guides/panduan-login-dan-navigasi.md)**
+   - Cara masuk ke dalam sistem menggunakan Nomor Pegawai (NP) / Username.
+   - Penjelasan antarmuka dan struktur navigasi (sidebar, banner shift, header).
+   - Panduan pergantian shift dan keluar dari sistem (*logout*).
+
+2. **[Panduan Manajemen Data Petugas](guides/panduan-manajemen-data-petugas.md)**
+   - Menambahkan akun petugas kemas atau supervisor baru.
+   - Mengubah informasi petugas dan mereset kata sandi.
+   - Mengatur status keaktifan akun petugas.
+
+3. **[Panduan Update Database Master Data SAP & Log Audit](guides/panduan-update-database-sap.md)**
+   - Mengunggah berkas ekspor data SAP (`.xlsx` atau `.csv`).
+   - Memeriksa modal pratinjau data dan validasi baris.
+   - Menyimpan atau melewati baris bermasalah.
+   - Mengunduh template acuan berkas SAP.
+   - Mengunduh berkas asli yang pernah diunggah serta berkas teks laporan rincian error.
+
+4. **[Panduan Master Data Order Produksi & Input Manual](guides/panduan-master-data-order-produksi.md)**
+   - Menjelajahi, memfilter, dan mencari master data order produksi harian.
+   - Menambahkan order produksi darurat (*manual order*) tanpa SAP.
+   - Mengubah rincian data order dan melihat spesifikasi teknis lengkap.
+   - Menghapus order (termasuk aturan proteksi order yang sedang berjalan).
+   - Mengekspor data order yang sedang difilter ke berkas Excel (`.xlsx`).

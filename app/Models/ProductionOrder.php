@@ -248,6 +248,21 @@ class ProductionOrder extends Model
     }
 
     /**
+     * Scope query by customer name.
+     *
+     * @param  Builder<ProductionOrder>  $query
+     * @return Builder<ProductionOrder>
+     */
+    public function scopeByCustomer(Builder $query, ?string $customerName): Builder
+    {
+        if (blank($customerName)) {
+            return $query;
+        }
+
+        return $query->where('customer_name', 'like', '%'.trim($customerName).'%');
+    }
+
+    /**
      * Scope query by date range (order_date).
      *
      * @param  Builder<ProductionOrder>  $query
@@ -344,11 +359,31 @@ class ProductionOrder extends Model
     }
 
     /**
+     * Format rencet quantity with thousand separator.
+     */
+    public function formattedRencetQuantity(): string
+    {
+        return number_format($this->rencet_quantity, 0, ',', '.');
+    }
+
+    /**
      * Format kemas quantity with thousand separator.
      */
     public function formattedKemasQuantity(): string
     {
         return number_format($this->kemas_quantity, 0, ',', '.');
+    }
+
+    /**
+     * Calculate packaging fulfillment percentage relative to target quantity.
+     */
+    public function fulfillmentPercentage(): float
+    {
+        if ($this->target_quantity <= 0) {
+            return 0.0;
+        }
+
+        return min(100.0, round(($this->kemas_quantity / $this->target_quantity) * 100, 1));
     }
 
     /**

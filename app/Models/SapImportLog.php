@@ -108,4 +108,12 @@ class SapImportLog extends Model
             default => 'zinc',
         };
     }
+
+    /**
+     * Check if this import log has any logged error items.
+     */
+    public function hasErrors(): bool
+    {
+        return $this->failed_count > 0 && ! empty($this->error_log);
+    }
 }

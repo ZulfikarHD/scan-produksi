@@ -215,7 +215,8 @@ class SapImportService
         string $filePath,
         string $originalFileName,
         User $user,
-        bool $skipInvalid = true
+        bool $skipInvalid = true,
+        ?string $storedRelativePath = null
     ): array {
         $reader = $this->createReaderForFile($filePath);
         $reader->open($filePath);
@@ -320,7 +321,7 @@ class SapImportService
             $log = SapImportLog::create([
                 'user_id' => $user->id,
                 'file_name' => $originalFileName,
-                'file_path' => $filePath,
+                'file_path' => $storedRelativePath ?? $filePath,
                 'total_rows' => $totalRows,
                 'imported_count' => $imported,
                 'updated_count' => $updated,
@@ -779,6 +780,88 @@ class SapImportService
 
         foreach ($sampleRows as $row) {
             $writer->addRow(Row::fromValues($row));
+        }
+
+        $writer->close();
+    }
+
+    /**
+     * Export a collection or query of Production Orders into an Excel spreadsheet.
+     *
+     * @param  iterable<ProductionOrder>  $orders
+     */
+    public function exportOrdersToXlsx(iterable $orders, string $destinationPath): void
+    {
+        $writer = new XlsxWriter;
+        $writer->openToFile($destinationPath);
+
+        // Standard 24 SAP ERP Columns + Status & Satuan
+        $headers = [
+            'NO PO',
+            'No OBC',
+            'Perso / non Perso',
+            'SERI',
+            'TGL OBC',
+            'TGL JTempo',
+            'TGL_PAKAI_BB',
+            'TGL_CETAK',
+            'TGL_VERIFIKASI',
+            'Tanggal Kemas',
+            'QTY PESAN',
+            'RENCET',
+            'JML_BB (LK)',
+            'JLM_CD (LK)',
+            'TOTAL_BB (LK)',
+            'JML_CETAK',
+            'BAIK_VERIFIKASI',
+            'RUSAK_VERIFIKASI',
+            'HASIL BAIK DIJADIKAN HCTS',
+            'TOTAL_HCTS',
+            'KEMAS',
+            'KIRIM',
+            'WORK CENTER',
+            'Material',
+            'Pelanggan',
+            'Spesifikasi',
+            'Jenis Kertas',
+            'Satuan',
+            'Status Order',
+        ];
+
+        $writer->addRow(Row::fromValues($headers));
+
+        foreach ($orders as $order) {
+            $writer->addRow(Row::fromValues([
+                $order->po_number,
+                $order->no_obc ?? '',
+                $order->perso_type ?? '',
+                $order->seri ?? '',
+                $order->order_date->format('Y-m-d'),
+                $order->delivery_deadline ? $order->delivery_deadline->format('Y-m-d') : '',
+                $order->tgl_pakai_bb ? $order->tgl_pakai_bb->format('Y-m-d') : '',
+                $order->tgl_cetak ? $order->tgl_cetak->format('Y-m-d') : '',
+                $order->tgl_verifikasi ? $order->tgl_verifikasi->format('Y-m-d') : '',
+                $order->packaging_date ? $order->packaging_date->format('Y-m-d') : '',
+                $order->target_quantity,
+                $order->rencet_quantity,
+                $order->jml_bb,
+                $order->jml_cd,
+                $order->total_bb,
+                $order->jml_cetak,
+                $order->baik_verifikasi,
+                $order->rusak_verifikasi,
+                $order->hcts_baik,
+                $order->total_hcts,
+                $order->kemas_quantity,
+                $order->kirim_quantity,
+                $order->machine_number ?? '',
+                $order->product_name,
+                $order->customer_name ?? '',
+                $order->specification ?? '',
+                $order->paper_type ?? '',
+                $order->unit,
+                $order->statusLabel(),
+            ]));
         }
 
         $writer->close();

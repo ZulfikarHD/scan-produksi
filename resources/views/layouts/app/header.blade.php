@@ -82,35 +82,34 @@
                     </div>
                     <span class="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100">PT PDS</span>
                 </div>
-                <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
-            <flux:sidebar.nav>
-                <flux:sidebar.group heading="Menu Utama">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+            <flux:navlist>
+                <flux:navlist.group heading="Menu Utama">
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         Dashboard
-                    </flux:sidebar.item>
+                    </flux:navlist.item>
                     @if($isSupervisor)
-                        <flux:sidebar.item icon="arrow-path" :href="Route::has('database.update') ? route('database.update') : '#'" wire:navigate>
+                        <flux:navlist.item icon="arrow-path" :href="Route::has('database.update') ? route('database.update') : '#'" wire:navigate>
                             Update Database
-                        </flux:sidebar.item>
+                        </flux:navlist.item>
                     @endif
-                    <flux:sidebar.item icon="document-plus" :href="Route::has('laporan.create') ? route('laporan.create') : '#'" wire:navigate>
+                    <flux:navlist.item icon="document-plus" :href="Route::has('laporan.create') ? route('laporan.create') : '#'" wire:navigate>
                         Buat Laporan
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="document-text" :href="Route::has('laporan.index') ? route('laporan.index') : '#'" wire:navigate>
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="Route::has('laporan.index') ? route('laporan.index') : '#'" wire:navigate>
                         Lihat Laporan
-                    </flux:sidebar.item>
+                    </flux:navlist.item>
                     @if($isSupervisor)
-                        <flux:sidebar.item icon="users" :href="Route::has('petugas.index') ? route('petugas.index') : url('/petugas')" wire:navigate>
+                        <flux:navlist.item icon="users" :href="Route::has('petugas.index') ? route('petugas.index') : url('/petugas')" wire:navigate>
                             Data Petugas
-                        </flux:sidebar.item>
+                        </flux:navlist.item>
                     @endif
-                    <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" wire:navigate>
+                    <flux:navlist.item icon="cog-6-tooth" :href="route('profile.edit')" wire:navigate>
                         Pengaturan
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-            </flux:sidebar.nav>
+                    </flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
         </flux:sidebar>
 
         {{ $slot }}

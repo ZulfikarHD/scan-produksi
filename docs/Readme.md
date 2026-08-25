@@ -15,11 +15,13 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [Petugas Management & RBAC](dev-docs/features/petugas-management-and-rbac.md)
   - [Production Order Master Data](dev-docs/features/production-order-master-data.md)
   - [SAP File Import & Modal Preview](dev-docs/features/sap-file-import-and-preview.md)
+  - [Master Data Explorer & Manual Order Management](dev-docs/features/master-data-explorer-and-manual-order.md)
 - **Architecture Decision Records (ADRs)**:
   - [ADR-001: Fortify Livewire & Multi-Identifier NP Authentication](dev-docs/decisions/001-fortify-livewire-and-np-authentication.md)
   - [ADR-002: Role-Based Access Control & Single-Surface Petugas Management](dev-docs/decisions/002-role-based-access-control-and-single-surface-user-management.md)
   - [ADR-003: Production Order Indexing and Schema Architecture](dev-docs/decisions/003-production-order-indexing-and-schema-architecture.md)
   - [ADR-004: Streaming SAP Import Parser and Modal Preview Architecture](dev-docs/decisions/004-streaming-sap-import-parser-and-modal-preview.md)
+  - [ADR-005: Master Data Explorer, Audit Logging, and Manual Order Management Architecture](dev-docs/decisions/005-master-data-explorer-audit-log-and-manual-order-management.md)
 
 ### 2. User Guides (`docs/user-docs/`)
 Step-by-step guides for unit supervisors and packaging operators.
@@ -28,8 +30,8 @@ Step-by-step guides for unit supervisors and packaging operators.
 - **Guides**:
   - [Panduan Login & Navigasi Aplikasi](user-docs/guides/panduan-login-dan-navigasi.md)
   - [Panduan Manajemen Data Petugas](user-docs/guides/panduan-manajemen-data-petugas.md)
-  - [Panduan Master Data Order Produksi](user-docs/guides/panduan-master-data-order-produksi.md)
-  - [Panduan Update Database Master Data SAP](user-docs/guides/panduan-update-database-sap.md)
+  - [Panduan Master Data Order Produksi & Input Manual](user-docs/guides/panduan-master-data-order-produksi.md)
+  - [Panduan Update Database Master Data SAP & Log Audit](user-docs/guides/panduan-update-database-sap.md)
 
 ### 3. Scrum Planning & Specifications
 - [Phase 01: Foundation, Auth & User Management](scrum-planning/phase-01-foundation-auth-user-management.md)

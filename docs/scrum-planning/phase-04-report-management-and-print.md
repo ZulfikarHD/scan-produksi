@@ -144,7 +144,7 @@
   - Signature Section: Tanda Tangan Petugas Kemas (Pembuat) & Kepala Unit/Supervisor (Mengetahui).
   - Hides web UI buttons, sidebar, and headers during printing.
 - [ ] Direct Print Trigger (`window.print()`) with clean print preview.
-- [ ] PDF Download endpoint (`GET /reports/{report:report_number}/pdf`) generating official PDF document.
+- [ ] PDF Download endpoint (`GET /reports/{report:report_code}/pdf`) generating official PDF document.
 - [ ] Excel Export endpoint (`GET /reports/export?from=...&to=...`) for monthly rekapitulasi data.
 
 **UI Specs:**
@@ -169,7 +169,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Produksi - {{ $report->report_number }}</title>
+    <title>Laporan Produksi - {{ $report->report_code }}</title>
     <style>
         @media print {
             @page { size: A4 portrait; margin: 15mm; }
@@ -208,8 +208,8 @@
 
     <table class="meta-table">
         <tr>
-            <td style="width: 15%;"><strong>ID Laporan</strong></td>
-            <td style="width: 35%;">: {{ $report->report_number }}</td>
+            <td style="width: 15%;"><strong>Kode Laporan</strong></td>
+            <td style="width: 35%;">: {{ $report->report_code }}</td>
             <td style="width: 15%;"><strong>Petugas Kemas</strong></td>
             <td style="width: 35%;">: {{ $report->user->name }} ({{ $report->user->nip }})</td>
         </tr>
