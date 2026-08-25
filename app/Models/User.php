@@ -82,6 +82,26 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the daily production reports created by this user.
+     *
+     * @return HasMany<DailyReport, $this>
+     */
+    public function dailyReports(): HasMany
+    {
+        return $this->hasMany(DailyReport::class, 'user_id');
+    }
+
+    /**
+     * Alias for dailyReports to support legacy or alternative naming checks.
+     *
+     * @return HasMany<DailyReport, $this>
+     */
+    public function productionReports(): HasMany
+    {
+        return $this->dailyReports();
+    }
+
+    /**
      * Check if user has supervisor role.
      */
     public function isSupervisor(): bool

@@ -29,3 +29,9 @@ Selamat datang di pusat dokumentasi dan panduan operasional **Sistem Monitoring 
    - Mengubah rincian data order dan melihat spesifikasi teknis lengkap.
    - Menghapus order (termasuk aturan proteksi order yang sedang berjalan).
    - Mengekspor data order yang sedang difilter ke berkas Excel (`.xlsx`).
+
+5. **[Panduan Inisiasi Sesi Laporan Produksi (Buat Laporan)](guides/panduan-inisiasi-sesi-laporan-produksi.md)**
+   - Memilih tanggal laporan kerja (WIB), kategori seri produk pita cukai (PCHT, MMEA, HPTL/REL), dan shift kerja.
+   - Memeriksa pratinjau kode laporan target (`PCHT-YYYY-MM-DD-S1`).
+   - Melanjutkan sesi laporan aktif yang sudah pernah dibuat tanpa duplikasi data.
+   - Membuka konsol pemindaian barcode berkecepatan tinggi.

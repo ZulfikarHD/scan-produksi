@@ -275,3 +275,56 @@ class ProductionOrder extends Model
 }
 ```
 
+---
+
+## 8. Enum Sederhana & Terstandarisasi (Lean Enums)
+
+- **Gunakan Backed Enum (String):** Semua enum status, kategori produk, peran akun, dan shift wajib berupa PHP Backed Enum dengan nilai `string` huruf kecil (`pcht`, `ready`, `shift_1`, `supervisor`, dll.).
+- **Method Representasi UI Standar:** Enum hanya boleh berisi properti cases dan method representasi tampilan langsung:
+  - `label(): string` — Teks deskriptif Bahasa Indonesia untuk tabel / badge / form.
+  - `badgeColor(): string` (atau alias `color()`) — Nama warna badge Flux UI (`emerald`, `amber`, `sky`, `purple`, `red`, `zinc`, `blue`).
+  - Method atribut konstan spesifik jika diperlukan (misal: `code()`, `shortLabel()`, `timeRange()`, `number()`).
+- **Dilarang Menaruh Static Lookup & Business Logic di Enum:**
+  - ❌ **Jangan membuat static lookup wrapper** seperti `Enum::fromNumber($n)`, `Enum::findByName($str)`, atau `Enum::allLabels()`. Gunakan fungsi bawaan PHP seperti `Enum::cases()`, `Enum::from($val)`, atau `Enum::tryFrom($val)`.
+  - ❌ **Jangan menaruh logika bisnis runtime atau query database di Enum** (misal: `WorkShift::current()` yang memanggil kalkulasi waktu). Letakkan logika operasional di Helper (`ShiftHelper`), Service, atau langsung di Controller / Component.
+
+```php
+// ❌ BAD: Enum dipenuhi static lookup wrapper dan logika runtime eksternal
+enum WorkShift: string {
+    case SHIFT_1 = 'shift_1';
+    case SHIFT_2 = 'shift_2';
+
+    public static function fromNumber(int $num): self {
+        return match($num) { 1 => self::SHIFT_1, 2 => self::SHIFT_2 };
+    }
+
+    public static function current(): self {
+        return ShiftHelper::detect(); // ❌ Logika runtime tidak boleh di Enum
+    }
+}
+
+// ✅ GOOD: Enum murni sebagai definisi tipe data dan representasi tampilan
+enum WorkShift: string {
+    case SHIFT_1 = 'shift_1';
+    case SHIFT_2 = 'shift_2';
+    case SHIFT_3 = 'shift_3';
+
+    public function label(): string {
+        return match ($this) {
+            self::SHIFT_1 => 'Shift 1 (Pagi)',
+            self::SHIFT_2 => 'Shift 2 (Siang)',
+            self::SHIFT_3 => 'Shift 3 (Malam)',
+        };
+    }
+
+    public function badgeColor(): string {
+        return match ($this) {
+            self::SHIFT_1 => 'sky',
+            self::SHIFT_2 => 'amber',
+            self::SHIFT_3 => 'purple',
+        };
+    }
+}
+```
+
+

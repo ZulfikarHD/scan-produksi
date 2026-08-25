@@ -37,8 +37,8 @@
 
                     <flux:navlist.item
                         icon="document-plus"
-                        :href="Route::has('laporan.create') ? route('laporan.create') : '#'"
-                        :current="request()->routeIs('laporan.create')"
+                        :href="route('reports.session')"
+                        :current="request()->routeIs('reports.*') || request()->routeIs('laporan.create')"
                         wire:navigate
                     >
                         Buat Laporan

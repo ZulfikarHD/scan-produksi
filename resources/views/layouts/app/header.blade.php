@@ -30,7 +30,7 @@
                         Update Database
                     </flux:navbar.item>
                 @endif
-                <flux:navbar.item icon="document-plus" :href="Route::has('laporan.create') ? route('laporan.create') : '#'" wire:navigate>
+                <flux:navbar.item icon="document-plus" :href="route('reports.session')" :current="request()->routeIs('reports.*') || request()->routeIs('laporan.create')" wire:navigate>
                     Buat Laporan
                 </flux:navbar.item>
                 <flux:navbar.item icon="document-text" :href="Route::has('laporan.index') ? route('laporan.index') : '#'" wire:navigate>
@@ -94,7 +94,7 @@
                             Update Database
                         </flux:navlist.item>
                     @endif
-                    <flux:navlist.item icon="document-plus" :href="Route::has('laporan.create') ? route('laporan.create') : '#'" wire:navigate>
+                    <flux:navlist.item icon="document-plus" :href="route('reports.session')" :current="request()->routeIs('reports.*') || request()->routeIs('laporan.create')" wire:navigate>
                         Buat Laporan
                     </flux:navlist.item>
                     <flux:navlist.item icon="document-text" :href="Route::has('laporan.index') ? route('laporan.index') : '#'" wire:navigate>

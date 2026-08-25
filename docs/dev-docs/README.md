@@ -23,6 +23,7 @@ Welcome to the technical developer documentation for the **Sistem Monitoring & P
 | [Production Order Master Data](features/production-order-master-data.md) | Robust master data schema, `ProductionOrderStatus` enum, composite indexes for <20ms barcode lookups, query scopes, and factory/seeder suite. | Implemented (Phase 02 / US-2.1) |
 | [SAP File Import & Modal Preview](features/sap-file-import-and-preview.md) | Streaming OpenSpout spreadsheet reader (`.xlsx`, `.csv`), fuzzy header mapping, interactive validation preview modal (`<flux:modal name="import-preview">`), transactional upsert, and audit history logs. | Implemented (Phase 02 / US-2.2 & US-2.3) |
 | [Master Data Explorer & Manual Order Management](features/master-data-explorer-and-manual-order.md) | Tabbed Master Data Explorer on `/update-database`, multi-attribute filtering, debounced search, manual emergency order creation/edit modals, technical specification detail drawer, order deletion guardrails, source file download, and Excel (.xlsx) export. | Implemented (Phase 02 / US-2.4 & US-2.5) |
+| [Daily Production Report Session & Code Generator](features/daily-production-report-session.md) | Standardized report schemas (`daily_reports`, `daily_report_items`), series grouping (`PCHT`, `MMEA`, `HPTL`), auto shift detection, collision-free code generator, smart session launcher (`/reports/session`), and high-speed entry route. | Implemented (Phase 03 / US-3.1 & US-3.2) |
 
 ---
 
@@ -35,3 +36,4 @@ Welcome to the technical developer documentation for the **Sistem Monitoring & P
 | [ADR-003](decisions/003-production-order-indexing-and-schema-architecture.md) | Production Order Indexing and Schema Architecture | 2026-08-26 | Accepted |
 | [ADR-004](decisions/004-streaming-sap-import-parser-and-modal-preview.md) | Streaming SAP Import Parser and Modal Preview Architecture | 2026-08-26 | Accepted |
 | [ADR-005](decisions/005-master-data-explorer-audit-log-and-manual-order-management.md) | Master Data Explorer, Audit Logging, and Manual Order Management Architecture | 2026-08-26 | Accepted |
+| [ADR-006](decisions/006-daily-production-report-schema-and-session-launcher.md) | Daily Production Report Schema, Series Categorization, and Session Launcher Architecture | 2026-08-26 | Accepted |

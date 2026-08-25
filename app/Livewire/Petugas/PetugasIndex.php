@@ -266,7 +266,7 @@ class PetugasIndex extends Component
         $user = User::findOrFail($this->confirmingUserId);
 
         // Proteksi jika user tercatat sebagai pembuat dokumen laporan produksi
-        if (method_exists($user, 'productionReports') && $user->productionReports()->exists()) {
+        if ($user->productionReports()->exists()) {
             Flux::toast('Akun petugas yang sudah tercatat pada Laporan Hasil Produksi tidak dapat dihapus permanen untuk menjaga keabsahan riwayat dokumen. Silakan gunakan opsi Nonaktifkan Akun.', variant: 'danger');
             Flux::modal('delete-confirm')->close();
             $this->reset(['confirmingUserId', 'confirmingUserName']);

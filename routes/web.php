@@ -2,6 +2,8 @@
 
 use App\Livewire\MasterData\UpdateDatabase;
 use App\Livewire\Petugas\PetugasIndex;
+use App\Livewire\Reports\ProductionEntry;
+use App\Livewire\Reports\ReportSessionLauncher;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -10,6 +12,12 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+
+    // Modul Laporan Produksi & Sesi Pemindaian Barcode (Phase 03)
+    Route::get('reports/session', ReportSessionLauncher::class)->name('reports.session');
+    Route::get('reports/create', ReportSessionLauncher::class)->name('reports.create');
+    Route::get('laporan/buat', ReportSessionLauncher::class)->name('laporan.create');
+    Route::get('reports/{report:report_code}/entry', ProductionEntry::class)->name('reports.entry');
 
     Route::middleware(['role:supervisor'])->group(function () {
         Route::get('petugas', PetugasIndex::class)->name('petugas.index');

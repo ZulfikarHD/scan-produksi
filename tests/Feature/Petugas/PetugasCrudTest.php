@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Petugas\PetugasIndex;
+use App\Models\DailyReport;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
@@ -155,6 +156,22 @@ test('supervisor cannot delete their own logged in account', function () {
         ->call('deleteUser');
 
     $this->assertDatabaseHas('users', ['id' => $supervisor->id]);
+});
+
+test('supervisor cannot delete petugas who has authored production reports', function () {
+    $supervisor = User::factory()->supervisor()->create();
+    $petugas = User::factory()->petugas()->create();
+
+    DailyReport::factory()->create([
+        'user_id' => $petugas->id,
+    ]);
+
+    Livewire::actingAs($supervisor)
+        ->test(PetugasIndex::class)
+        ->call('confirmDelete', $petugas->id)
+        ->call('deleteUser');
+
+    $this->assertDatabaseHas('users', ['id' => $petugas->id]);
 });
 
 test('opening create modal resets validation errors and form state', function () {
