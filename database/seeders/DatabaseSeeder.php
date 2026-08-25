@@ -42,5 +42,8 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        // Production Orders master data sample
+        $this->call(ProductionOrderSeeder::class);
     }
 }
