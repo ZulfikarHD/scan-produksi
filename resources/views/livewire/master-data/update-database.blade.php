@@ -56,8 +56,12 @@
                     <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Status Impor Terakhir</span>
                     <div class="mt-0.5">
                         @if($latestLog)
-                            <flux:badge size="sm" :color="$latestLog->statusBadgeColor()">
-                                {{ $latestLog->statusLabel() }} ({{ $latestLog->imported_count + $latestLog->updated_count }} baris)
+                            @php
+                                $latestStatusColor = match($latestLog->status) { 'success' => 'green', 'partial' => 'amber', 'failed' => 'red', default => 'zinc' };
+                                $latestStatusLabel = match($latestLog->status) { 'success' => 'Berhasil Penuh', 'partial' => 'Sebagian Berhasil', 'failed' => 'Gagal Diproses', default => ucfirst($latestLog->status) };
+                            @endphp
+                            <flux:badge size="sm" :color="$latestStatusColor">
+                                {{ $latestStatusLabel }} ({{ $latestLog->imported_count + $latestLog->updated_count }} baris)
                             </flux:badge>
                         @else
                             <span class="text-xs text-zinc-500">-</span>
@@ -216,8 +220,12 @@
                                 </flux:table.cell>
 
                                 <flux:table.cell>
-                                    <flux:badge size="sm" :color="$log->statusBadgeColor()">
-                                        {{ $log->statusLabel() }}
+                                    @php
+                                        $logBadgeColor = match($log->status) { 'success' => 'green', 'partial' => 'amber', 'failed' => 'red', default => 'zinc' };
+                                        $logStatusLabel = match($log->status) { 'success' => 'Berhasil Penuh', 'partial' => 'Sebagian Berhasil', 'failed' => 'Gagal Diproses', default => ucfirst($log->status) };
+                                    @endphp
+                                    <flux:badge size="sm" :color="$logBadgeColor">
+                                        {{ $logStatusLabel }}
                                     </flux:badge>
                                 </flux:table.cell>
 
@@ -229,7 +237,7 @@
 
                                 <flux:table.cell align="end">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        @if($log->hasErrors())
+                                        @if($log->failed_count > 0 && !empty($log->error_log))
                                             <flux:button
                                                 variant="ghost"
                                                 size="xs"
@@ -252,7 +260,7 @@
                                                     </flux:menu.item>
                                                 @endif
 
-                                                @if($log->hasErrors())
+                                                @if($log->failed_count > 0 && !empty($log->error_log))
                                                     <flux:menu.item wire:click="downloadAuditErrorLog({{ $log->id }})" icon="document-text" data-test="btn-download-error-log-{{ $log->id }}">
                                                         Unduh Laporan Error (TXT)
                                                     </flux:menu.item>
@@ -426,7 +434,7 @@
 
                             <flux:table.cell align="end">
                                 <span class="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                                    {{ $order->formattedTargetQuantity() }} {{ $order->unit }}
+                                    {{ number_format($order->target_quantity, 0, ',', '.') }} {{ $order->unit }}
                                 </span>
                             </flux:table.cell>
 
@@ -437,8 +445,8 @@
                             </flux:table.cell>
 
                             <flux:table.cell>
-                                <flux:badge size="sm" :color="$order->statusBadgeColor()">
-                                    {{ $order->statusLabel() }}
+                                <flux:badge size="sm" :color="$order->status->badgeColor()">
+                                    {{ $order->status->label() }}
                                 </flux:badge>
                             </flux:table.cell>
 
@@ -636,7 +644,7 @@
         </div>
 
         <div class="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
-            @if($selectedLog && $selectedLog->hasErrors())
+            @if($selectedLog && $selectedLog->failed_count > 0 && !empty($selectedLog->error_log))
                 <flux:button
                     variant="filled"
                     size="sm"
@@ -881,8 +889,8 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5">
                         <flux:heading size="xl" class="font-mono font-bold">{{ $selectedOrder->po_number }}</flux:heading>
-                        <flux:badge size="sm" :color="$selectedOrder->statusBadgeColor()">
-                            {{ $selectedOrder->statusLabel() }}
+                        <flux:badge size="sm" :color="$selectedOrder->status->badgeColor()">
+                            {{ $selectedOrder->status->label() }}
                         </flux:badge>
                     </div>
                     @if($selectedOrder->no_obc)
@@ -932,19 +940,22 @@
                         <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
                             <dt class="text-zinc-500 dark:text-zinc-400">Target Siap Kemas</dt>
                             <dd class="font-mono font-bold text-blue-600 dark:text-blue-400">
-                                {{ $selectedOrder->formattedTargetQuantity() }} {{ $selectedOrder->unit }}
+                                {{ number_format($selectedOrder->target_quantity, 0, ',', '.') }} {{ $selectedOrder->unit }}
                             </dd>
                         </div>
                         <div class="flex justify-between py-1 border-b border-zinc-200/60 dark:border-zinc-700/60">
                             <dt class="text-zinc-500 dark:text-zinc-400">Rencana Cetak (Rencet)</dt>
                             <dd class="font-mono font-medium text-zinc-800 dark:text-zinc-200">
-                                {{ $selectedOrder->formattedRencetQuantity() }} {{ $selectedOrder->unit }}
+                                {{ number_format($selectedOrder->rencet_quantity, 0, ',', '.') }} {{ $selectedOrder->unit }}
                             </dd>
                         </div>
                         <div class="flex justify-between py-1">
                             <dt class="text-zinc-500 dark:text-zinc-400">Realisasi Kemas</dt>
                             <dd class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                                {{ $selectedOrder->formattedKemasQuantity() }} {{ $selectedOrder->unit }} ({{ $selectedOrder->fulfillmentPercentage() }}%)
+                                @php
+                                    $detailFulfillment = $selectedOrder->target_quantity > 0 ? min(100.0, round(($selectedOrder->kemas_quantity / $selectedOrder->target_quantity) * 100, 1)) : 0;
+                                @endphp
+                                {{ number_format($selectedOrder->kemas_quantity, 0, ',', '.') }} {{ $selectedOrder->unit }} ({{ $detailFulfillment }}%)
                             </dd>
                         </div>
                     </dl>

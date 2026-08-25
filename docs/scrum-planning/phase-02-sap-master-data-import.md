@@ -51,9 +51,9 @@
 **So that** new daily production orders and barcode identifiers are automatically updated in bulk without manual typing
 
 **Acceptance Criteria:**
-- [ ] Dedicated "Update Database" Livewire Component (`App\Livewire\MasterData\UpdateDatabase`).
-- [ ] File validation: required, mimes: `xlsx,xls,csv`, max file size: 10MB.
-- [ ] Flexible column header mapping for SAP export formats:
+- [x] Dedicated "Update Database" Livewire Component (`App\Livewire\MasterData\UpdateDatabase`).
+- [x] File validation: required, mimes: `xlsx,xls,csv`, max file size: 10MB.
+- [x] Flexible column header mapping for SAP export formats:
   - `No PO` / `Order Number`
   - `Kode Barang` / `Material Code`
   - `Nama Produk` / `Deskripsi`
@@ -62,9 +62,9 @@
   - `No Mesin` / `Machine`
   - `Target Qty` / `Target Kemas`
   - `Tgl Order` / `Order Date`
-- [ ] Service `SapImportService` parses spreadsheet rows in chunks, handles date normalization, and trims whitespace.
-- [ ] Upsert logic: updates existing records by `po_number` or creates new records.
-- [ ] Transaction-safe: rollbacks on fatal database errors with detailed error feedback.
+- [x] Service `SapImportService` parses spreadsheet rows in chunks, handles date normalization, and trims whitespace.
+- [x] Upsert logic: updates existing records by `po_number` or creates new records.
+- [x] Transaction-safe: rollbacks on fatal database errors with detailed error feedback.
 
 **UI Specs:**
 - Flux card container with file input (`<flux:input type="file" wire:model="file" />`).
@@ -87,10 +87,10 @@
 **So that** I can verify data accuracy before committing records to the production database
 
 **Acceptance Criteria:**
-- [ ] Interactive Preview Modal (`<flux:modal name="import-preview">`): displays summary (Total Rows Detected, Valid Rows, Incomplete/Invalid Rows).
-- [ ] Highlight invalid rows with specific error reasons (e.g. "Row 14: Target Qty must be numeric", "Row 22: Missing PO Number").
-- [ ] Option to skip invalid rows and import only valid ones, or cancel import.
-- [ ] Success toast via Flux UI detailing total imported and updated order records.
+- [x] Interactive Preview Modal (`<flux:modal name="import-preview">`): displays summary (Total Rows Detected, Valid Rows, Incomplete/Invalid Rows).
+- [x] Highlight invalid rows with specific error reasons (e.g. "Row 14: Target Qty must be numeric", "Row 22: Missing PO Number").
+- [x] Option to skip invalid rows and import only valid ones, or cancel import.
+- [x] Success toast via Flux UI detailing total imported and updated order records.
 
 **UI Specs:**
 - Modal dialog previewing the first 10-20 parsed rows with `<flux:table>`.
@@ -112,7 +112,7 @@
 **So that** I can track who updated the database, when it was updated, and the source file used
 
 **Acceptance Criteria:**
-- [ ] Table `sap_import_logs` storing:
+- [x] Table `sap_import_logs` storing:
   - `id` (bigint)
   - `user_id` (foreign key to users)
   - `file_name` (original uploaded file name)
@@ -124,8 +124,8 @@
   - `status` (`success`, `partial`, `failed`)
   - `error_log` (json, nullable)
   - `timestamps`
-- [ ] Display import history table on the Update Database page below the upload area.
-- [ ] Download audit log / original file feature for supervisor.
+- [x] Display import history table on the Update Database page below the upload area.
+- [x] Download audit log / original file feature for supervisor.
 
 **Tasks:**
 1. Generate migration `database/migrations/xxxx_xx_xx_create_sap_import_logs_table.php`.
@@ -143,12 +143,12 @@
 **So that** packaging operations can proceed even if an urgent job is not yet exported from SAP
 
 **Acceptance Criteria:**
-- [ ] Livewire Component `App\Livewire\MasterData\ProductionOrderIndex`.
-- [ ] Filters: status (`Semua`, `Siap Kemas`, `Sedang Diproses`, `Selesai`), date range, customer, and machine.
-- [ ] Real-time search by PO Number or Product Name (`wire:model.live.debounce.300ms`).
-- [ ] "Tambah Order Manual" modal form for emergency jobs (same fields as SAP master).
-- [ ] Edit order modal for correcting specifications or target quantities.
-- [ ] Detail view showing order specs, target qty, and current packaging fulfillment progress.
+- [x] Livewire Component `App\Livewire\MasterData\ProductionOrderIndex`.
+- [x] Filters: status (`Semua`, `Siap Kemas`, `Sedang Diproses`, `Selesai`), date range, customer, and machine.
+- [x] Real-time search by PO Number or Product Name (`wire:model.live.debounce.300ms`).
+- [x] "Tambah Order Manual" modal form for emergency jobs (same fields as SAP master).
+- [x] Edit order modal for correcting specifications or target quantities.
+- [x] Detail view showing order specs, target qty, and current packaging fulfillment progress.
 
 **UI Specs:**
 - Tabbed interface or separate route with Flux UI table.

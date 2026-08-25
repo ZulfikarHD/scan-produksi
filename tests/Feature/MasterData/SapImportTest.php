@@ -219,13 +219,13 @@ test('livewire update database component confirms import and upserts records int
 
     expect(ProductionOrder::count())->toBe(2);
 
-    $createdOrder = ProductionOrder::findByPoNumber('PO-NEW-02');
+    $createdOrder = ProductionOrder::where('po_number', 'PO-NEW-02')->first();
     expect($createdOrder)->not->toBeNull();
     expect($createdOrder->product_name)->toBe('Produk Baru');
     expect($createdOrder->target_quantity)->toBe(5000);
     expect($createdOrder->status)->toBe(ProductionOrderStatus::READY);
 
-    $updatedOrder = ProductionOrder::findByPoNumber('PO-EXISTING-01');
+    $updatedOrder = ProductionOrder::where('po_number', 'PO-EXISTING-01')->first();
     expect($updatedOrder)->not->toBeNull();
     expect($updatedOrder->product_name)->toBe('Nama Diperbarui SAP');
     expect($updatedOrder->target_quantity)->toBe(2500);
@@ -266,8 +266,8 @@ test('livewire update database component handles partial import by skipping inva
         ->call('confirmImport', true);
 
     expect(ProductionOrder::count())->toBe(2);
-    expect(ProductionOrder::findByPoNumber('PO-PARTIAL-01'))->not->toBeNull();
-    expect(ProductionOrder::findByPoNumber('PO-PARTIAL-02'))->not->toBeNull();
+    expect(ProductionOrder::where('po_number', 'PO-PARTIAL-01')->first())->not->toBeNull();
+    expect(ProductionOrder::where('po_number', 'PO-PARTIAL-02')->first())->not->toBeNull();
 
     // Check Log Status
     $log = SapImportLog::first();

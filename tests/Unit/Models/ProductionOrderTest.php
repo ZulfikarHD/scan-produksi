@@ -84,7 +84,7 @@ test('production order belongs to a creator user and user has many production or
     expect($user->productionOrders->first()->id)->toBe($order->id);
 });
 
-test('search scope filters by po number, obc number, product code, product name, and customer name', function () {
+test('direct eloquent query filters by po number, obc number, product code, product name, and customer name', function () {
     ProductionOrder::factory()->create([
         'po_number' => 'PO-2026-1111',
         'no_obc' => 'OBC-2026-1111',
@@ -102,131 +102,38 @@ test('search scope filters by po number, obc number, product code, product name,
     ]);
 
     // Search by PO number
-    expect(ProductionOrder::search('PO-2026-1111')->count())->toBe(1);
-    expect(ProductionOrder::search('1111')->count())->toBe(1);
+    expect(ProductionOrder::where('po_number', 'like', '%PO-2026-1111%')->count())->toBe(1);
+    expect(ProductionOrder::where('po_number', 'like', '%1111%')->count())->toBe(1);
 
     // Search by OBC number
-    expect(ProductionOrder::search('OBC-2026-2222')->count())->toBe(1);
+    expect(ProductionOrder::where('no_obc', 'OBC-2026-2222')->count())->toBe(1);
 
     // Search by Product Code
-    expect(ProductionOrder::search('PRD-XYZ')->count())->toBe(1);
+    expect(ProductionOrder::where('product_code', 'PRD-XYZ')->count())->toBe(1);
 
     // Search by Product Name
-    expect(ProductionOrder::search('Ijazah')->count())->toBe(1);
+    expect(ProductionOrder::where('product_name', 'like', '%Ijazah%')->count())->toBe(1);
 
     // Search by Customer Name
-    expect(ProductionOrder::search('Bea Cukai')->count())->toBe(1);
-
-    // Empty search returns all
-    expect(ProductionOrder::search('')->count())->toBe(2);
-    expect(ProductionOrder::search(null)->count())->toBe(2);
+    expect(ProductionOrder::where('customer_name', 'like', '%Bea Cukai%')->count())->toBe(1);
 });
 
-test('byObc scope filters orders by OBC number accurately', function () {
-    ProductionOrder::factory()->create(['no_obc' => 'OBC-100']);
-    ProductionOrder::factory()->create(['no_obc' => 'OBC-200']);
+test('status enum returns accurate labels and badge colors', function () {
+    $readyStatus = ProductionOrderStatus::READY;
+    expect($readyStatus->label())->toBe('Siap Kemas');
+    expect($readyStatus->badgeColor())->toBe('blue');
 
-    expect(ProductionOrder::byObc('OBC-100')->count())->toBe(1);
-    expect(ProductionOrder::byObc('OBC-200')->count())->toBe(1);
-    expect(ProductionOrder::byObc(null)->count())->toBe(2);
-});
+    $inProgressStatus = ProductionOrderStatus::IN_PROGRESS;
+    expect($inProgressStatus->label())->toBe('Sedang Diproses');
+    expect($inProgressStatus->badgeColor())->toBe('amber');
 
-test('status scopes filter orders correctly', function () {
-    ProductionOrder::factory()->ready()->create();
-    ProductionOrder::factory()->inProgress()->create();
-    ProductionOrder::factory()->completed()->create();
-    ProductionOrder::factory()->cancelled()->create();
+    $completedStatus = ProductionOrderStatus::COMPLETED;
+    expect($completedStatus->label())->toBe('Selesai');
+    expect($completedStatus->badgeColor())->toBe('green');
 
-    expect(ProductionOrder::ready()->count())->toBe(1);
-    expect(ProductionOrder::inProgress()->count())->toBe(1);
-    expect(ProductionOrder::completed()->count())->toBe(1);
-    expect(ProductionOrder::cancelled()->count())->toBe(1);
-
-    // byStatus with enum
-    expect(ProductionOrder::byStatus(ProductionOrderStatus::READY)->count())->toBe(1);
-    // byStatus with string
-    expect(ProductionOrder::byStatus('in_progress')->count())->toBe(1);
-    // byStatus with null returns all
-    expect(ProductionOrder::byStatus(null)->count())->toBe(4);
-});
-
-test('machine and date range scopes filter orders accurately', function () {
-    ProductionOrder::factory()->create([
-        'machine_number' => 'MESIN-01',
-        'order_date' => '2026-08-01',
-    ]);
-
-    ProductionOrder::factory()->create([
-        'machine_number' => 'MESIN-02',
-        'order_date' => '2026-08-15',
-    ]);
-
-    ProductionOrder::factory()->create([
-        'machine_number' => 'MESIN-01',
-        'order_date' => '2026-08-25',
-    ]);
-
-    // byMachine
-    expect(ProductionOrder::byMachine('MESIN-01')->count())->toBe(2);
-    expect(ProductionOrder::byMachine('MESIN-02')->count())->toBe(1);
-    expect(ProductionOrder::byMachine(null)->count())->toBe(3);
-
-    // byDateRange
-    expect(ProductionOrder::byDateRange('2026-08-10', '2026-08-20')->count())->toBe(1);
-    expect(ProductionOrder::byDateRange('2026-08-10', null)->count())->toBe(2);
-    expect(ProductionOrder::byDateRange(null, '2026-08-10')->count())->toBe(1);
-    expect(ProductionOrder::byDateRange(null, null)->count())->toBe(3);
-});
-
-test('findByPoNumber and findByBarcode locate orders quickly and sanitize whitespace', function () {
-    $order = ProductionOrder::factory()->create([
-        'po_number' => 'PO-2026-7788',
-    ]);
-
-    $foundByPo = ProductionOrder::findByPoNumber('  PO-2026-7788  ');
-    expect($foundByPo)->not->toBeNull();
-    expect($foundByPo->id)->toBe($order->id);
-
-    $foundByBarcode = ProductionOrder::findByBarcode('PO-2026-7788');
-    expect($foundByBarcode)->not->toBeNull();
-    expect($foundByBarcode->id)->toBe($order->id);
-
-    expect(ProductionOrder::findByPoNumber('PO-NON-EXISTENT'))->toBeNull();
-});
-
-test('formattedTargetQuantity and formattedKemasQuantity format numbers with Indonesian thousand separator', function () {
-    $order = ProductionOrder::factory()->make([
-        'target_quantity' => 1250000,
-        'kemas_quantity' => 950000,
-    ]);
-
-    expect($order->formattedTargetQuantity())->toBe('1.250.000');
-    expect($order->formattedKemasQuantity())->toBe('950.000');
-});
-
-test('status boolean helper methods and label/badge methods return accurate values', function () {
-    $readyOrder = ProductionOrder::factory()->ready()->make();
-    expect($readyOrder->isReady())->toBeTrue();
-    expect($readyOrder->isInProgress())->toBeFalse();
-    expect($readyOrder->isCompleted())->toBeFalse();
-    expect($readyOrder->isCancelled())->toBeFalse();
-    expect($readyOrder->statusLabel())->toBe('Siap Kemas');
-    expect($readyOrder->statusBadgeColor())->toBe('blue');
-
-    $inProgressOrder = ProductionOrder::factory()->inProgress()->make();
-    expect($inProgressOrder->isInProgress())->toBeTrue();
-    expect($inProgressOrder->statusLabel())->toBe('Sedang Diproses');
-    expect($inProgressOrder->statusBadgeColor())->toBe('amber');
-
-    $completedOrder = ProductionOrder::factory()->completed()->make();
-    expect($completedOrder->isCompleted())->toBeTrue();
-    expect($completedOrder->statusLabel())->toBe('Selesai');
-    expect($completedOrder->statusBadgeColor())->toBe('green');
-
-    $cancelledOrder = ProductionOrder::factory()->cancelled()->make();
-    expect($cancelledOrder->isCancelled())->toBeTrue();
-    expect($cancelledOrder->statusLabel())->toBe('Dibatalkan');
-    expect($cancelledOrder->statusBadgeColor())->toBe('red');
+    $cancelledStatus = ProductionOrderStatus::CANCELLED;
+    expect($cancelledStatus->label())->toBe('Dibatalkan');
+    expect($cancelledStatus->badgeColor())->toBe('red');
 });
 
 test('po_number enforces unique constraint at database level', function () {
@@ -274,13 +181,6 @@ test('production order handles nullable attributes gracefully', function () {
     expect($order->packaging_date)->toBeNull();
     expect($order->created_by)->toBeNull();
     expect($order->creator)->toBeNull();
-});
-
-test('findByPoNumber and findByBarcode return null for empty or whitespace-only inputs', function () {
-    expect(ProductionOrder::findByPoNumber(''))->toBeNull();
-    expect(ProductionOrder::findByPoNumber('   '))->toBeNull();
-    expect(ProductionOrder::findByBarcode(''))->toBeNull();
-    expect(ProductionOrder::findByBarcode('   '))->toBeNull();
 });
 
 test('production order serializes status enum correctly to array and json', function () {

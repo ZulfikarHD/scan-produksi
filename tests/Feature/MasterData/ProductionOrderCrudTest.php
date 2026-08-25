@@ -157,7 +157,7 @@ test('supervisor can create a manual emergency production order with validation 
         ->assertHasNoErrors();
 
     expect(ProductionOrder::count())->toBe(1);
-    $created = ProductionOrder::findByPoNumber('PO-MANUAL-8888');
+    $created = ProductionOrder::where('po_number', 'PO-MANUAL-8888')->first();
     expect($created)->not->toBeNull();
     expect($created->product_name)->toBe('Ijazah Percetakan Negara');
     expect($created->customer_name)->toBe('Kemendikbudristek');

@@ -208,3 +208,70 @@ class ProductionBatchController extends Controller
     }
 }
 ```
+
+---
+
+## 7. Model Sederhana & Tanpa Abstraksi Berlebih (Lean Models)
+
+- **Hanya Simpan Struktur Data:** Model Eloquent hanya boleh berisi properti standar Laravel:
+  - `$fillable` (atau `$guarded`)
+  - `casts()`
+  - Definisi Relasi Eloquent (`belongsTo`, `hasMany`, dll.)
+- **Dilarang Membuat Micro-Scopes / Wrapper Trivial:** Jangan membuat query scope untuk query 1 baris sederhana (`scopeReady`, `scopeByStatus`, `scopeSearch`, dll.). Tulis query tersebut langsung di Controller/Livewire (`ProductionOrder::where('status', 'ready')` atau `$query->where('po_number', 'like', "%{$term}%")`).
+- **Dilarang Membuat Static Lookup Wrapper:** Jangan membuat helper seperti `Model::findByBarcode($code)` atau `Model::findByPoNumber($po)`. Gunakan langsung `Model::where('po_number', $code)->first()`.
+- **Formatting & Helper State di View/Component:** Lakukan pemformatan angka/tanggal (`number_format`, `format('d/m/Y')`) langsung di Blade atau Livewire Component, bukan membuat method accessor/helper kecil di Model (`formattedQty()`, `isReady()`, dll.).
+- **Tujuan:** Pemula dan developer lain dapat membaca query asli secara transparan tanpa harus mengecek definisi scope/method tersembunyi di dalam Model.
+
+```php
+// ❌ BAD: Model penuh micro-abstractions & helper 1 baris
+class ProductionOrder extends Model
+{
+    public function scopeReady($query)
+    {
+        return $query->where('status', 'ready');
+    }
+
+    public static function findByPoNumber($po)
+    {
+        return static::where('po_number', $po)->first();
+    }
+
+    public function isReady(): bool
+    {
+        return $this->status === 'ready';
+    }
+
+    public function formattedQty(): string
+    {
+        return number_format($this->target_quantity, 0, ',', '.');
+    }
+}
+
+// ✅ GOOD: Model bersih, sederhana, dan langsung ke intinya
+class ProductionOrder extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'po_number',
+        'target_quantity',
+        'status',
+        // ...
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'order_date' => 'date',
+            'target_quantity' => 'integer',
+            'status' => ProductionOrderStatus::class,
+        ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+}
+```
+

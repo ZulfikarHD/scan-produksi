@@ -117,11 +117,11 @@ test('production order model accurately stores and parses real sap output record
     expect($order->product_code)->toBe('931110001-24');
 
     // Barcode scanner lookup on real PO number
-    $lookup = ProductionOrder::findByPoNumber('3000189509');
+    $lookup = ProductionOrder::where('po_number', '3000189509')->first();
     expect($lookup)->not->toBeNull();
     expect($lookup->id)->toBe($order->id);
-    expect($lookup->formattedTargetQuantity())->toBe('2.000');
-    expect($lookup->formattedKemasQuantity())->toBe('2.000');
+    expect(number_format($lookup->target_quantity, 0, ',', '.'))->toBe('2.000');
+    expect(number_format($lookup->kemas_quantity, 0, ',', '.'))->toBe('2.000');
 });
 
 test('po_number index supports high performance barcode lookup under 20ms', function () {
@@ -140,7 +140,7 @@ test('po_number index supports high performance barcode lookup under 20ms', func
 
     // Measure lookup time for barcode scan
     $startTime = microtime(true);
-    $order = ProductionOrder::findByPoNumber($targetPo);
+    $order = ProductionOrder::where('po_number', $targetPo)->first();
     $elapsedMs = (microtime(true) - $startTime) * 1000;
 
     expect($order)->not->toBeNull();

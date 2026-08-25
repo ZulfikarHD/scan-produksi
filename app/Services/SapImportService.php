@@ -860,7 +860,7 @@ class SapImportService
                 $order->specification ?? '',
                 $order->paper_type ?? '',
                 $order->unit,
-                $order->statusLabel(),
+                $order->status->label(),
             ]));
         }
 

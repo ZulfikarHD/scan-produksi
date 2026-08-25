@@ -139,26 +139,34 @@ class UpdateDatabase extends Component
         $ordersQuery = ProductionOrder::query()->with('creator');
 
         if ($this->search !== '') {
-            $ordersQuery->search($this->search);
+            $term = trim($this->search);
+            $ordersQuery->where(function ($q) use ($term) {
+                $q->where('po_number', 'like', "%{$term}%")
+                    ->orWhere('no_obc', 'like', "%{$term}%")
+                    ->orWhere('product_code', 'like', "%{$term}%")
+                    ->orWhere('product_name', 'like', "%{$term}%")
+                    ->orWhere('customer_name', 'like', "%{$term}%");
+            });
         }
 
         if ($this->statusFilter !== '') {
-            $ordersQuery->byStatus($this->statusFilter);
+            $ordersQuery->where('status', $this->statusFilter);
         }
 
         if ($this->machineFilter !== '') {
-            $ordersQuery->byMachine($this->machineFilter);
+            $ordersQuery->where('machine_number', $this->machineFilter);
         }
 
         if ($this->customerFilter !== '') {
-            $ordersQuery->byCustomer($this->customerFilter);
+            $ordersQuery->where('customer_name', 'like', "%{$this->customerFilter}%");
         }
 
-        if ($this->startDateFilter !== '' || $this->endDateFilter !== '') {
-            $ordersQuery->byDateRange(
-                $this->startDateFilter !== '' ? $this->startDateFilter : null,
-                $this->endDateFilter !== '' ? $this->endDateFilter : null
-            );
+        if ($this->startDateFilter !== '' && $this->endDateFilter !== '') {
+            $ordersQuery->whereBetween('order_date', [$this->startDateFilter, $this->endDateFilter]);
+        } elseif ($this->startDateFilter !== '') {
+            $ordersQuery->where('order_date', '>=', $this->startDateFilter);
+        } elseif ($this->endDateFilter !== '') {
+            $ordersQuery->where('order_date', '<=', $this->endDateFilter);
         }
 
         $availableMachines = ProductionOrder::query()
@@ -437,7 +445,13 @@ class UpdateDatabase extends Component
         $content .= "Total Baris   : {$log->total_rows}\n";
         $content .= 'Baris Sukses  : '.($log->imported_count + $log->updated_count)."\n";
         $content .= "Baris Gagal   : {$log->failed_count}\n";
-        $content .= "Status Impor  : {$log->statusLabel()}\n";
+        $statusLabel = match ($log->status) {
+            'success' => 'Berhasil Penuh',
+            'partial' => 'Sebagian Berhasil',
+            'failed' => 'Gagal Diproses',
+            default => ucfirst($log->status),
+        };
+        $content .= "Status Impor  : {$statusLabel}\n";
         $content .= "========================================\n\n";
         $content .= "RINCIAN KESALAHAN:\n";
 
@@ -678,26 +692,34 @@ class UpdateDatabase extends Component
         $ordersQuery = ProductionOrder::query()->with('creator');
 
         if ($this->search !== '') {
-            $ordersQuery->search($this->search);
+            $term = trim($this->search);
+            $ordersQuery->where(function ($q) use ($term) {
+                $q->where('po_number', 'like', "%{$term}%")
+                    ->orWhere('no_obc', 'like', "%{$term}%")
+                    ->orWhere('product_code', 'like', "%{$term}%")
+                    ->orWhere('product_name', 'like', "%{$term}%")
+                    ->orWhere('customer_name', 'like', "%{$term}%");
+            });
         }
 
         if ($this->statusFilter !== '') {
-            $ordersQuery->byStatus($this->statusFilter);
+            $ordersQuery->where('status', $this->statusFilter);
         }
 
         if ($this->machineFilter !== '') {
-            $ordersQuery->byMachine($this->machineFilter);
+            $ordersQuery->where('machine_number', $this->machineFilter);
         }
 
         if ($this->customerFilter !== '') {
-            $ordersQuery->byCustomer($this->customerFilter);
+            $ordersQuery->where('customer_name', 'like', "%{$this->customerFilter}%");
         }
 
-        if ($this->startDateFilter !== '' || $this->endDateFilter !== '') {
-            $ordersQuery->byDateRange(
-                $this->startDateFilter !== '' ? $this->startDateFilter : null,
-                $this->endDateFilter !== '' ? $this->endDateFilter : null
-            );
+        if ($this->startDateFilter !== '' && $this->endDateFilter !== '') {
+            $ordersQuery->whereBetween('order_date', [$this->startDateFilter, $this->endDateFilter]);
+        } elseif ($this->startDateFilter !== '') {
+            $ordersQuery->where('order_date', '>=', $this->startDateFilter);
+        } elseif ($this->endDateFilter !== '') {
+            $ordersQuery->where('order_date', '<=', $this->endDateFilter);
         }
 
         $orders = $ordersQuery->latest('id')->get();
