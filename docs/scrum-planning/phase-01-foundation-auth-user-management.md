@@ -17,13 +17,13 @@
 **So that** I can easily access all production modules with clear operational status
 
 **Acceptance Criteria:**
-- [ ] Main application shell using Flux UI layout components (`<flux:sidebar>`, `<flux:header>`, `<flux:main>`).
-- [ ] Active navigation state highlight based on current route (`route('dashboard')`, etc.).
-- [ ] User profile dropdown (`<flux:profile>`) with logout action, display name, and active role badge (`Supervisor` / `Petugas`).
-- [ ] Global toast notification system powered by Flux UI (`<flux:toast />` / `Flux::toast()`).
-- [ ] Timezone localized to `Asia/Jakarta` (WIB) with current date and shift banner on top header.
-- [ ] Accessible dark/light mode support integrated with Flux UI and Tailwind CSS v4.
-- [ ] Optimized Blade component rendering using Blaze (`@blaze`).
+- [x] Main application shell using Flux UI layout components (`<flux:sidebar>`, `<flux:header>`, `<flux:main>`).
+- [x] Active navigation state highlight based on current route (`route('dashboard')`, etc.).
+- [x] User profile dropdown (`<flux:profile>`) with logout action, display name, and active role badge (`Supervisor` / `Petugas`).
+- [x] Global toast notification system powered by Flux UI (`<flux:toast />` / `Flux::toast()`).
+- [x] Timezone localized to `Asia/Jakarta` (WIB) with current date and shift banner on top header.
+- [x] Accessible dark/light mode support integrated with Flux UI and Tailwind CSS v4.
+- [x] Optimized Blade component rendering using Blaze (`@blaze`).
 
 **UI Specs:**
 - Sidebar with menu items: Dashboard, Update Database, Buat Laporan, Lihat Laporan, Data Petugas, Pengaturan.
@@ -46,14 +46,14 @@
 **So that** only authorized packaging personnel can access production documentation and modify records
 
 **Acceptance Criteria:**
-- [ ] Dedicated Login page utilizing Livewire 4 component (`App\Livewire\Auth\Login`).
-- [ ] Input fields: Username/Email and Password with Remember Me checkbox.
-- [ ] Validation: username/email required, password required with instant Livewire feedback.
-- [ ] Rate limiting on login attempts (throttle 5 attempts per minute with clear error message).
-- [ ] Secure password hashing via Laravel Fortify.
-- [ ] Redirect authenticated users to Dashboard upon successful login.
-- [ ] Logout action via `App\Livewire\Actions\Logout` that invalidates session and regenerates CSRF token.
-- [ ] Guest middleware preventing logged-in users from accessing the login page.
+- [x] Dedicated Login page utilizing Livewire 4 component (`App\Livewire\Auth\Login`).
+- [x] Input fields: Username/Email and Password with Remember Me checkbox.
+- [x] Validation: username/email required, password required with instant Livewire feedback.
+- [x] Rate limiting on login attempts (throttle 5 attempts per minute with clear error message).
+- [x] Secure password hashing via Laravel Fortify.
+- [x] Redirect authenticated users to Dashboard upon successful login.
+- [x] Logout action via `App\Livewire\Actions\Logout` that invalidates session and regenerates CSRF token.
+- [x] Guest middleware preventing logged-in users from accessing the login page.
 
 **UI Specs:**
 - Centered card layout with PT Percetakan Dokumen Sekuriti branding and logo.
@@ -75,11 +75,11 @@
 **So that** restricted actions (e.g. Master Data SAP import, user management, and critical report deletion) are protected
 
 **Acceptance Criteria:**
-- [ ] User migration and model extended with `role` enum (`supervisor`, `petugas`) and `is_active` boolean flag.
-- [ ] Middleware `EnsureUserRole` created to protect supervisor-only endpoints and Livewire components.
-- [ ] Inactive users cannot log in (shows account suspended notification).
-- [ ] Sidebar navigation items conditionally rendered using Blade `@if(auth()->user()->isSupervisor())`.
-- [ ] Authorization policies defined for Report and Master Data operations.
+- [x] User migration and model extended with `role` enum (`supervisor`, `petugas`) and `is_active` boolean flag.
+- [x] Middleware `EnsureUserRole` created to protect supervisor-only endpoints and Livewire components.
+- [x] Inactive users cannot log in (shows account suspended notification).
+- [x] Sidebar navigation items conditionally rendered using Blade `@if(auth()->user()->isSupervisor())`.
+- [x] Authorization policies defined for Report and Master Data operations.
 
 **Tasks:**
 1. Create migration `database/migrations/xxxx_xx_xx_add_role_and_status_to_users_table.php`.
@@ -96,12 +96,12 @@
 **So that** I can monitor active operators and maintain staff records accurately
 
 **Acceptance Criteria:**
-- [ ] Livewire Component `App\Livewire\Petugas\PetugasIndex` displaying all staff.
-- [ ] Table columns: Name, Username, NIP / Employee ID, Email, Role, Status (`Aktif` / `Nonaktif`), and Last Login.
-- [ ] Real-time search by name, username, or NIP using `wire:model.live.debounce.300ms`.
-- [ ] Filter by role (`All`, `Supervisor`, `Petugas`) and status (`All`, `Aktif`, `Nonaktif`).
-- [ ] Pagination using Livewire `WithPagination` (10/25/50 per page).
-- [ ] Active status badges using `<flux:badge color="green">` (Aktif) and `<flux:badge color="zinc">` (Nonaktif).
+- [x] Livewire Component `App\Livewire\Petugas\PetugasIndex` displaying all staff.
+- [x] Table columns: Name, Username, NIP / Employee ID, Email, Role, Status (`Aktif` / `Nonaktif`), and Last Login.
+- [x] Real-time search by name, username, or NIP using `wire:model.live.debounce.300ms`.
+- [x] Filter by role (`All`, `Supervisor`, `Petugas`) and status (`All`, `Aktif`, `Nonaktif`).
+- [x] Pagination using Livewire `WithPagination` (10/25/50 per page).
+- [x] Active status badges using `<flux:badge color="green">` (Aktif) and `<flux:badge color="zinc">` (Nonaktif).
 
 **UI Specs:**
 - Flux data table (`<flux:table>`) with column sort indicators.
@@ -123,16 +123,16 @@
 **So that** the system reflects current packaging unit staffing changes without page reloads
 
 **Acceptance Criteria:**
-- [ ] Create/Edit Petugas modal (`<flux:modal name="petugas-form">`) with fields:
+- [x] Create/Edit Petugas modal (`<flux:modal name="petugas-form">`) with fields:
   - Nama Lengkap (required, max 100)
   - NIP / ID Karyawan (required, unique, max 30)
   - Username (required, unique, alpha_dash, max 50)
   - Email (required, email, unique)
   - Role (required: `supervisor` / `petugas`)
   - Password (required on create, min 8 chars; optional on edit)
-- [ ] Instant toggle active/inactive status button with confirmation.
-- [ ] Protected deletion: cannot delete user who has authored existing production reports.
-- [ ] Toast notification on success (`Flux::toast('Data petugas berhasil disimpan.')`).
+- [x] Instant toggle active/inactive status button with confirmation.
+- [x] Protected deletion: cannot delete user who has authored existing production reports.
+- [x] Toast notification on success (`Flux::toast('Data petugas berhasil disimpan.')`).
 
 **UI Specs:**
 - Modal dialog with Flux form inputs (`<flux:field>`, `<flux:input>`, `<flux:select>`).

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\MasterData\UpdateDatabase;
 use App\Livewire\Petugas\PetugasIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware(['role:supervisor'])->group(function () {
         Route::get('petugas', PetugasIndex::class)->name('petugas.index');
+        Route::get('update-database', UpdateDatabase::class)->name('database.update');
     });
 });
 

@@ -17,7 +17,7 @@
 **So that** all product identity details (No PO, spesifikasi barang, nomor mesin, target cetak siap kirim) are accurately stored and indexed for fast barcode lookups
 
 **Acceptance Criteria:**
-- [ ] Table `production_orders` created with fields:
+- [x] Table `production_orders` created with fields:
   - `id` (bigint, primary key)
   - `po_number` (string, unique index, e.g. "PO-2026-8891")
   - `product_code` (string, index)
@@ -33,8 +33,8 @@
   - `status` (enum: `ready`, `in_progress`, `completed`, `cancelled`)
   - `created_by` (foreign key to `users`)
   - `timestamps`
-- [ ] Model `ProductionOrder` with full type casting, search scopes, and relationships.
-- [ ] Fast indexed lookup on `po_number` (< 20ms query time for barcode scanning).
+- [x] Model `ProductionOrder` with full type casting, search scopes, and relationships.
+- [x] Fast indexed lookup on `po_number` (< 20ms query time for barcode scanning).
 
 **Tasks:**
 1. Generate migration `database/migrations/xxxx_xx_xx_create_production_orders_table.php`.

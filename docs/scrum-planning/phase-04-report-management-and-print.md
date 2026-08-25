@@ -20,21 +20,22 @@
 - [ ] Livewire Component `App\Livewire\Reports\ReportIndex` listing all reports.
 - [ ] Columns:
   - No
-  - ID Laporan (`report_number`, e.g. `LAP-20260825-0001`)
+  - Kode Laporan (`report_code`, e.g. `PCHT-2026-08-26`, `MMEA-2026-08-26`)
+  - Kategori Seri Produk (`PCHT`, `MMEA`, `HPTL/REL`)
   - Tanggal Laporan
   - Shift (`Shift 1`, `Shift 2`, `Shift 3`)
   - Petugas Kemas (Nama & NIP)
-  - Total PO / Item
-  - Total Qty Kemas Baik
-  - Total Qty Reject
+  - Total PO Terscan
+  - Total Hasil Kemas (Lembar)
   - Status (`Draft`, `Terkirim`, `Terverifikasi`)
   - Aksi (`Lihat Detail`, `Cetak`, `Edit`, `Hapus`)
 - [ ] Filter controls:
+  - Seri Produk Filter (`Semua`, `PCHT`, `MMEA`, `HPTL/REL`).
   - Date Presets: `Hari Ini`, `Kemarin`, `7 Hari Terakhir`, `Bulan Ini`, `Kustom Rentang Tanggal`.
   - Shift Filter (`Semua`, `Shift 1`, `Shift 2`, `Shift 3`).
   - Petugas Filter (Dropdown list of operators).
-  - Status Filter (`Semua`, `Terkirim`, `Terverifikasi`).
-- [ ] Real-time search across ID Laporan, PO numbers, and product names with `wire:model.live.debounce.300ms`.
+  - Status Filter (`Semua`, `Draft`, `Terkirim`, `Terverifikasi`).
+- [ ] Real-time search across Kode Laporan, PO numbers, and product names with `wire:model.live.debounce.300ms`.
 - [ ] Pagination using Livewire `WithPagination` (10, 25, 50).
 
 **UI Specs:**
@@ -57,8 +58,8 @@
 **So that** I can inspect every scanned PO item, customer specifications, and packaging notes
 
 **Acceptance Criteria:**
-- [ ] Livewire Component `App\Livewire\Reports\ReportDetail` (`/reports/{report:report_number}`).
-- [ ] Header summary: ID Laporan, Tanggal, Shift, Operator, Verifikator, Waktu Dibuat, Waktu Diperbarui, Catatan.
+- [ ] Livewire Component `App\Livewire\Reports\ReportDetail` (`/reports/{report:report_code}`).
+- [ ] Header summary: Kode Laporan, Seri Produk, Tanggal, Shift, Operator, Verifikator, Waktu Dibuat, Waktu Diperbarui, Catatan.
 - [ ] Scanned Items table detailing:
   - No PO & Kode Produk
   - Nama Produk & Spesifikasi Kertas/Sekuriti
@@ -74,7 +75,7 @@
 
 **Tasks:**
 1. Create Livewire Component `app/Livewire/Reports/ReportDetail.php` and Blade view `resources/views/livewire/reports/show.blade.php`.
-2. Implement route binding with `report_number`.
+2. Implement route binding with `report_code`.
 3. Write Pest feature tests for viewing report details and access authorization in `tests/Feature/Reports/DailyReportShowTest.php`.
 
 ---
@@ -86,7 +87,7 @@
 **So that** clerical errors or miscounted items can be corrected without corrupting historical records
 
 **Acceptance Criteria:**
-- [ ] Livewire Component `App\Livewire\Reports\EditReport` (`/reports/{report:report_number}/edit`).
+- [ ] Livewire Component `App\Livewire\Reports\EditReport` (`/reports/{report:report_code}/edit`).
 - [ ] Form populated with existing report header and items.
 - [ ] Capability to:
   - Adjust `good_quantity` and `reject_quantity`.
