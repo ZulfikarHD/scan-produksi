@@ -6,8 +6,10 @@ use App\Enums\ReportStatus;
 use App\Models\DailyReport;
 use App\Models\DailyReportItem;
 use App\Models\ProductionOrder;
+use App\Models\User;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -54,6 +56,14 @@ class ProductionEntry extends Component
      */
     public function lookupPo(): void
     {
+        // Cek status laporan: jika bukan draft dan bukan supervisor, tolak pemindaian
+        if ($this->report->status !== ReportStatus::DRAFT && ! $this->isSupervisor()) {
+            Flux::toast('Laporan sudah diselesaikan dan terkunci dari penambahan item baru.', variant: 'warning');
+            $this->scanPo = '';
+
+            return;
+        }
+
         $po = trim($this->scanPo);
 
         if ($po === '') {
@@ -73,6 +83,15 @@ class ProductionEntry extends Component
             return;
         }
 
+        // Deteksi apakah No PO sudah pernah discan sebelumnya dalam sesi laporan ini
+        $alreadyScanned = DailyReportItem::where('daily_report_id', $this->report->id)
+            ->where('po_number', $po)
+            ->exists();
+
+        if ($alreadyScanned) {
+            Flux::toast("Peringatan: No PO '{$po}' sudah pernah dicatat dalam sesi laporan ini.", variant: 'warning');
+        }
+
         $this->scannedOrder = $order;
         $this->productionQty = $order->target_quantity > 0 ? $order->target_quantity : null;
 
@@ -86,6 +105,13 @@ class ProductionEntry extends Component
      */
     public function saveEntry(): void
     {
+        // Cek status laporan: jika bukan draft dan bukan supervisor, tolak penyimpanan
+        if ($this->report->status !== ReportStatus::DRAFT && ! $this->isSupervisor()) {
+            Flux::toast('Laporan sudah diselesaikan dan tidak dapat ditambahkan item baru.', variant: 'warning');
+
+            return;
+        }
+
         if (! $this->scannedOrder) {
             $this->lookupPo();
 
@@ -115,11 +141,13 @@ class ProductionEntry extends Component
             'scanned_at' => now(),
         ]);
 
+        $poNumber = $this->scannedOrder->po_number;
+
         $this->refreshTotals();
         $this->reset(['scanPo', 'scannedOrder', 'productionQty', 'itemNotes']);
 
         $this->dispatch('play-sound', ['type' => 'success']);
-        Flux::toast('Data item PO berhasil ditambahkan ke laporan.', variant: 'success');
+        Flux::toast("Data item PO '{$poNumber}' berhasil ditambahkan ke laporan.", variant: 'success');
 
         // Kembalikan fokus kursor ke input scan barcode untuk PO berikutnya
         $this->dispatch('focus-scan-input');
@@ -130,6 +158,13 @@ class ProductionEntry extends Component
      */
     public function updateItemQuantity(int $itemId, int|string $newQty): void
     {
+        // Cek status laporan: jika bukan draft dan bukan supervisor, tolak perubahan
+        if ($this->report->status !== ReportStatus::DRAFT && ! $this->isSupervisor()) {
+            Flux::toast('Laporan sudah diselesaikan dan terkunci dari pengeditan.', variant: 'warning');
+
+            return;
+        }
+
         $qty = (int) $newQty;
 
         if ($qty <= 0) {
@@ -150,6 +185,13 @@ class ProductionEntry extends Component
      */
     public function deleteItem(int $itemId): void
     {
+        // Cek status laporan: jika bukan draft dan bukan supervisor, tolak penghapusan
+        if ($this->report->status !== ReportStatus::DRAFT && ! $this->isSupervisor()) {
+            Flux::toast('Laporan sudah diselesaikan dan baris item tidak dapat dihapus.', variant: 'warning');
+
+            return;
+        }
+
         DailyReportItem::where('daily_report_id', $this->report->id)->where('id', $itemId)->delete();
         $this->refreshTotals();
         Flux::toast('Baris item PO berhasil dihapus dari laporan.', variant: 'info');
@@ -160,11 +202,40 @@ class ProductionEntry extends Component
      */
     public function finalizeReport(): void
     {
+        $itemCount = DailyReportItem::where('daily_report_id', $this->report->id)->count();
+
+        if ($itemCount === 0) {
+            Flux::toast('Laporan belum memiliki item PO yang dipindai. Silakan scan minimal 1 PO sebelum menyelesaikan laporan.', variant: 'warning');
+
+            return;
+        }
+
         $this->report->update([
             'status' => ReportStatus::SUBMITTED,
         ]);
+        $this->report->refresh();
 
-        Flux::toast("Laporan {$this->report->report_code} berhasil diselesaikan.", variant: 'success');
+        Flux::toast("Laporan {$this->report->report_code} berhasil diselesaikan dengan total {$this->report->total_good_quantity} lembar.", variant: 'success');
+    }
+
+    /**
+     * Buka kembali sesi laporan ke status Draft (Khusus Supervisor).
+     */
+    public function reopenReport(): void
+    {
+        if (! $this->isSupervisor()) {
+            Flux::toast('Hanya Supervisor yang berhak membuka kembali sesi laporan yang telah diselesaikan.', variant: 'danger');
+
+            return;
+        }
+
+        $this->report->update([
+            'status' => ReportStatus::DRAFT,
+        ]);
+        $this->report->refresh();
+
+        Flux::toast("Sesi laporan {$this->report->report_code} berhasil dibuka kembali (Draft).", variant: 'success');
+        $this->dispatch('focus-scan-input');
     }
 
     /**
@@ -180,5 +251,16 @@ class ProductionEntry extends Component
             'total_good_quantity' => $totalGood,
         ]);
         $this->report->refresh();
+    }
+
+    /**
+     * Periksa apakah pengguna yang sedang login memiliki peran Supervisor.
+     */
+    private function isSupervisor(): bool
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        return $user instanceof User && $user->isSupervisor();
     }
 }

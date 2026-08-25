@@ -24,16 +24,18 @@ Welcome to the technical developer documentation for the **Sistem Monitoring & P
 | [SAP File Import & Modal Preview](features/sap-file-import-and-preview.md) | Streaming OpenSpout spreadsheet reader (`.xlsx`, `.csv`), fuzzy header mapping, interactive validation preview modal (`<flux:modal name="import-preview">`), transactional upsert, and audit history logs. | Implemented (Phase 02 / US-2.2 & US-2.3) |
 | [Master Data Explorer & Manual Order Management](features/master-data-explorer-and-manual-order.md) | Tabbed Master Data Explorer on `/update-database`, multi-attribute filtering, debounced search, manual emergency order creation/edit modals, technical specification detail drawer, order deletion guardrails, source file download, and Excel (.xlsx) export. | Implemented (Phase 02 / US-2.4 & US-2.5) |
 | [Daily Production Report Session & Code Generator](features/daily-production-report-session.md) | Standardized report schemas (`daily_reports`, `daily_report_items`), series grouping (`PCHT`, `MMEA`, `HPTL`), auto shift detection, collision-free code generator, smart session launcher (`/reports/session`), and high-speed entry route. | Implemented (Phase 03 / US-3.1 & US-3.2) |
+| [High-Speed Continuous Barcode Scanning & Inline Production Entry](features/continuous-barcode-scan-and-inline-production-entry.md) | Continuous 100% keyboard scanning loop, instant SAP order lookup, Alpine.js cursor autofocus transfer, Web Audio API sound synthesis, 9-column inline editable table, shift finalization lock, and standard A4 physical print layout. | Implemented (Phase 03 / US-3.3, US-3.4, US-3.5) |
 
 ---
 
 ## Architectural Decision Records (ADRs)
 
 | ADR | Title | Date | Status |
-|-----|-------|------|--------|
+|---|---|---|---|
 | [ADR-001](decisions/001-fortify-livewire-and-np-authentication.md) | Fortify Livewire & Multi-Identifier NP Authentication | 2026-08-26 | Accepted |
 | [ADR-002](decisions/002-role-based-access-control-and-single-surface-user-management.md) | Role-Based Access Control & Single-Surface Petugas Management | 2026-08-26 | Accepted |
 | [ADR-003](decisions/003-production-order-indexing-and-schema-architecture.md) | Production Order Indexing and Schema Architecture | 2026-08-26 | Accepted |
 | [ADR-004](decisions/004-streaming-sap-import-parser-and-modal-preview.md) | Streaming SAP Import Parser and Modal Preview Architecture | 2026-08-26 | Accepted |
 | [ADR-005](decisions/005-master-data-explorer-audit-log-and-manual-order-management.md) | Master Data Explorer, Audit Logging, and Manual Order Management Architecture | 2026-08-26 | Accepted |
 | [ADR-006](decisions/006-daily-production-report-schema-and-session-launcher.md) | Daily Production Report Schema, Series Categorization, and Session Launcher Architecture | 2026-08-26 | Accepted |
+| [ADR-007](decisions/007-high-speed-continuous-barcode-scanning-and-inline-table-editing.md) | High-Speed Continuous Barcode Scanning, Focus Management, and Inline Table Editing Architecture | 2026-08-26 | Accepted |

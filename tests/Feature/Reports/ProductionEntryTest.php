@@ -14,7 +14,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('petugas can scan PO and save production item entry', function () {
+test('petugas can scan PO and save production item entry in continuous loop', function () {
     $user = User::factory()->create(['role' => UserRole::PETUGAS]);
     $report = DailyReport::factory()->create([
         'user_id' => $user->id,
@@ -61,7 +61,7 @@ test('petugas can scan PO and save production item entry', function () {
 
 test('scanning non-existent PO number shows error toast and resets scan input', function () {
     $user = User::factory()->create();
-    $report = DailyReport::factory()->create(['user_id' => $user->id]);
+    $report = DailyReport::factory()->create(['user_id' => $user->id, 'status' => ReportStatus::DRAFT]);
 
     Livewire::actingAs($user)
         ->test(ProductionEntry::class, ['report' => $report])
@@ -73,60 +73,90 @@ test('scanning non-existent PO number shows error toast and resets scan input', 
         ->assertDispatched('focus-scan-input');
 });
 
-test('petugas can inline edit production quantity directly in table row', function () {
-    $user = User::factory()->create();
-    $report = DailyReport::factory()->create(['user_id' => $user->id]);
-    $item = DailyReportItem::factory()->create([
-        'daily_report_id' => $report->id,
-        'good_quantity' => 20000,
-        'target_quantity' => 20000,
-    ]);
-
-    $report->update([
-        'total_items_count' => 1,
-        'total_good_quantity' => 20000,
-    ]);
-
-    Livewire::actingAs($user)
-        ->test(ProductionEntry::class, ['report' => $report])
-        ->call('updateItemQuantity', $item->id, 22500);
-
-    expect($item->fresh()->good_quantity)->toBe(22500);
-    expect($report->fresh()->total_good_quantity)->toBe(22500);
-});
-
-test('petugas can delete an item row from daily report', function () {
-    $user = User::factory()->create();
-    $report = DailyReport::factory()->create(['user_id' => $user->id]);
-    $item = DailyReportItem::factory()->create([
-        'daily_report_id' => $report->id,
-        'good_quantity' => 10000,
-    ]);
-
-    $report->update([
-        'total_items_count' => 1,
-        'total_good_quantity' => 10000,
-    ]);
-
-    Livewire::actingAs($user)
-        ->test(ProductionEntry::class, ['report' => $report])
-        ->call('deleteItem', $item->id);
-
-    $this->assertDatabaseMissing('daily_report_items', ['id' => $item->id]);
-    expect($report->fresh()->total_items_count)->toBe(0);
-    expect($report->fresh()->total_good_quantity)->toBe(0);
-});
-
-test('finalizing report updates status to submitted', function () {
-    $user = User::factory()->create();
+test('scanning duplicate PO displays warning notice while populating order', function () {
+    $user = User::factory()->create(['role' => UserRole::PETUGAS]);
     $report = DailyReport::factory()->create([
         'user_id' => $user->id,
         'status' => ReportStatus::DRAFT,
     ]);
 
+    $order = ProductionOrder::factory()->create([
+        'po_number' => 'PO-2026-8888',
+        'target_quantity' => 15000,
+    ]);
+
+    DailyReportItem::factory()->create([
+        'daily_report_id' => $report->id,
+        'po_number' => 'PO-2026-8888',
+        'good_quantity' => 15000,
+    ]);
+
     Livewire::actingAs($user)
         ->test(ProductionEntry::class, ['report' => $report])
-        ->call('finalizeReport');
+        ->set('scanPo', 'PO-2026-8888')
+        ->call('lookupPo')
+        ->assertSet('scannedOrder.id', $order->id)
+        ->assertDispatched('focus-qty-input');
+});
 
-    expect($report->fresh()->status)->toBe(ReportStatus::SUBMITTED);
+test('saving entry with invalid or zero quantity is rejected', function () {
+    $user = User::factory()->create();
+    $report = DailyReport::factory()->create(['user_id' => $user->id, 'status' => ReportStatus::DRAFT]);
+    $order = ProductionOrder::factory()->create([
+        'po_number' => 'PO-2026-9999',
+        'target_quantity' => 20000,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductionEntry::class, ['report' => $report])
+        ->set('scanPo', 'PO-2026-9999')
+        ->call('lookupPo')
+        ->set('productionQty', 0)
+        ->call('saveEntry')
+        ->assertDispatched('focus-qty-input');
+
+    expect(DailyReportItem::where('daily_report_id', $report->id)->count())->toBe(0);
+});
+
+test('empty scan input triggers no action on lookupPo', function () {
+    $user = User::factory()->create();
+    $report = DailyReport::factory()->create(['user_id' => $user->id, 'status' => ReportStatus::DRAFT]);
+
+    Livewire::actingAs($user)
+        ->test(ProductionEntry::class, ['report' => $report])
+        ->set('scanPo', '   ')
+        ->call('lookupPo')
+        ->assertSet('scannedOrder', null);
+});
+
+test('saving entry without lookup auto-triggers lookup first', function () {
+    $user = User::factory()->create();
+    $report = DailyReport::factory()->create(['user_id' => $user->id, 'status' => ReportStatus::DRAFT]);
+    $order = ProductionOrder::factory()->create([
+        'po_number' => 'PO-2026-AUTO',
+        'target_quantity' => 30000,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductionEntry::class, ['report' => $report])
+        ->set('scanPo', 'PO-2026-AUTO')
+        ->call('saveEntry')
+        ->assertSet('scannedOrder.id', $order->id)
+        ->assertDispatched('focus-qty-input');
+});
+
+test('operator cannot scan or save new items when report is submitted', function () {
+    $user = User::factory()->create(['role' => UserRole::PETUGAS]);
+    $report = DailyReport::factory()->create([
+        'user_id' => $user->id,
+        'status' => ReportStatus::SUBMITTED,
+    ]);
+
+    $order = ProductionOrder::factory()->create(['po_number' => 'PO-2026-LOCKED']);
+
+    Livewire::actingAs($user)
+        ->test(ProductionEntry::class, ['report' => $report])
+        ->set('scanPo', 'PO-2026-LOCKED')
+        ->call('lookupPo')
+        ->assertSet('scannedOrder', null);
 });

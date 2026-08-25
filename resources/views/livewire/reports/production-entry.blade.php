@@ -38,6 +38,12 @@
     @play-sound.window="playAudio($event.detail?.type || 'success')"
     class="space-y-6 max-w-7xl mx-auto"
 >
+    @php
+        $isDraft = $report->status === \App\Enums\ReportStatus::DRAFT;
+        $isSupervisor = auth()->user()?->isSupervisor() ?? false;
+        $canEdit = $isDraft || $isSupervisor;
+    @endphp
+
     <!-- Header Konsol Sesi Laporan -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="space-y-1">
@@ -51,7 +57,7 @@
                 <flux:badge :color="$report->shift->badgeColor()" size="sm">
                     {{ $report->shift->label() }}
                 </flux:badge>
-                <flux:badge :color="$report->status->badgeColor()" size="sm">
+                <flux:badge :color="$report->status->badgeColor()" size="sm" data-test="badge-report-status">
                     {{ $report->status->label() }}
                 </flux:badge>
             </div>
@@ -64,7 +70,7 @@
             </flux:subheading>
         </div>
 
-        <div class="flex items-center gap-2.5">
+        <div class="flex flex-wrap items-center gap-2.5">
             <flux:button
                 variant="ghost"
                 icon="arrow-left"
@@ -75,7 +81,19 @@
                 Ganti Sesi
             </flux:button>
 
-            @if($report->status === \App\Enums\ReportStatus::DRAFT)
+            @if($report->status !== \App\Enums\ReportStatus::DRAFT)
+                <flux:button
+                    variant="filled"
+                    icon="printer"
+                    :href="route('reports.print', ['report' => $report->report_code])"
+                    target="_blank"
+                    data-test="btn-print-report"
+                >
+                    Cetak Dokumen Fisik
+                </flux:button>
+            @endif
+
+            @if($isDraft)
                 <flux:button
                     variant="primary"
                     icon="check-circle"
@@ -85,103 +103,139 @@
                 >
                     Selesaikan Laporan
                 </flux:button>
+            @elseif($isSupervisor)
+                <flux:button
+                    variant="subtle"
+                    icon="arrow-path"
+                    wire:click="reopenReport"
+                    wire:confirm="Buka kembali sesi laporan ini ke status Draft agar petugas dapat menambah/mengubah data?"
+                    data-test="btn-reopen-report"
+                >
+                    Buka Kembali Sesi
+                </flux:button>
             @endif
         </div>
     </div>
 
-    <!-- Top Scan Console (Continuous Scan Loop) -->
-    <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-700/80 dark:bg-zinc-900 space-y-4">
-        <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
-            <div class="flex items-center gap-2">
-                <span class="flex size-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                    High-Speed Barcode Scanner Console
-                </span>
-            </div>
-            <span class="text-xs text-zinc-400 dark:text-zinc-500 hidden sm:inline">
-                Arahkan scanner ke Kartu Mesin & tekan Enter
-            </span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-            <!-- Input 1: Scan Barcode No PO -->
-            <div class="md:col-span-5">
-                <flux:field>
-                    <flux:label class="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                        <flux:icon.qr-code class="size-4 text-emerald-600" />
-                        1. Scan / Masukkan No PO Barcode
-                    </flux:label>
-                    <input
-                        type="text"
-                        x-ref="scanInput"
-                        wire:model="scanPo"
-                        wire:keydown.enter.prevent="lookupPo"
-                        placeholder="Contoh: PO-2026-0001 lalu tekan Enter..."
-                        class="w-full h-11 px-3.5 text-base font-mono rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                        data-test="input-scan-po"
-                        autocomplete="off"
-                    />
-                </flux:field>
-            </div>
-
-            <!-- Input 2: Jumlah Kemas / Produksi -->
-            <div class="md:col-span-4">
-                <flux:field>
-                    <flux:label class="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                        <flux:icon.calculator class="size-4 text-indigo-600" />
-                        2. Jumlah Kemas (Lembar)
-                    </flux:label>
-                    <input
-                        type="number"
-                        x-ref="qtyInput"
-                        wire:model="productionQty"
-                        wire:keydown.enter.prevent="saveEntry"
-                        placeholder="Kuantitas kemas..."
-                        class="w-full h-11 px-3.5 text-base font-bold text-right rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                        data-test="input-production-qty"
-                    />
-                </flux:field>
-            </div>
-
-            <!-- Tombol Simpan Baris -->
-            <div class="md:col-span-3">
-                <flux:button
-                    variant="primary"
-                    wire:click="saveEntry"
-                    icon="plus"
-                    class="w-full h-11 font-semibold text-base shadow-sm"
-                    data-test="btn-save-entry"
-                >
-                    Simpan Item (Enter)
-                </flux:button>
-            </div>
-        </div>
-
-        <!-- Matched SAP Specification Pill -->
-        @if($scannedOrder)
-            <div class="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm animate-fadeIn" data-test="matched-order-pill">
-                <div class="space-y-0.5">
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold font-mono text-emerald-900 dark:text-emerald-200">{{ $scannedOrder->po_number }}</span>
-                        <span class="text-zinc-400">•</span>
-                        <span class="font-semibold text-emerald-800 dark:text-emerald-300">{{ $scannedOrder->product_name }}</span>
-                    </div>
-                    <div class="text-xs text-zinc-600 dark:text-zinc-400">
-                        {{ $scannedOrder->specification ?? 'Spesifikasi pita cukai sekuriti' }}
-                        @if($scannedOrder->machine_number)
-                            • Mesin: <span class="font-mono font-medium">{{ $scannedOrder->machine_number }}</span>
-                        @endif
-                    </div>
+    <!-- Status Notice for Non-Draft Reports -->
+    @if(! $isDraft)
+        <div class="rounded-xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/50 dark:bg-amber-950/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm" data-test="locked-report-banner">
+            <div class="flex items-center gap-3">
+                <flux:icon.lock-closed class="size-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                <div>
+                    <span class="font-bold text-amber-900 dark:text-amber-200">Laporan Telah Diselesaikan (Status: {{ $report->status->label() }})</span>
+                    <p class="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
+                        Sesi pemindaian barcode telah ditutup dan data terkunci dari pengeditan operator. Dokumen siap dicetak untuk diserahkan ke Supervisor.
+                    </p>
                 </div>
-                <div class="text-right">
-                    <span class="text-xs text-zinc-500 dark:text-zinc-400">Target SAP:</span>
-                    <span class="font-mono font-bold text-emerald-800 dark:text-emerald-200 text-base ml-1">
-                        {{ number_format($scannedOrder->target_quantity, 0, ',', '.') }} {{ $scannedOrder->unit }}
+            </div>
+            <flux:button
+                size="sm"
+                variant="primary"
+                icon="printer"
+                :href="route('reports.print', ['report' => $report->report_code])"
+                target="_blank"
+            >
+                Cetak Dokumen Fisik
+            </flux:button>
+        </div>
+    @endif
+
+    <!-- Top Scan Console (Continuous Scan Loop) -->
+    @if($canEdit)
+        <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-700/80 dark:bg-zinc-900 space-y-4">
+            <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="flex size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                        High-Speed Barcode Scanner Console
                     </span>
                 </div>
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 hidden sm:inline">
+                    Arahkan scanner ke Kartu Mesin & tekan Enter
+                </span>
             </div>
-        @endif
-    </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                <!-- Input 1: Scan Barcode No PO -->
+                <div class="md:col-span-5">
+                    <flux:field>
+                        <flux:label class="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                            <flux:icon.qr-code class="size-4 text-emerald-600" />
+                            1. Scan / Masukkan No PO Barcode
+                        </flux:label>
+                        <input
+                            type="text"
+                            x-ref="scanInput"
+                            wire:model="scanPo"
+                            wire:keydown.enter.prevent="lookupPo"
+                            placeholder="Contoh: PO-2026-0001 lalu tekan Enter..."
+                            class="w-full h-11 px-3.5 text-base font-mono rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                            data-test="input-scan-po"
+                            autocomplete="off"
+                        />
+                    </flux:field>
+                </div>
+
+                <!-- Input 2: Jumlah Kemas / Produksi -->
+                <div class="md:col-span-4">
+                    <flux:field>
+                        <flux:label class="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                            <flux:icon.calculator class="size-4 text-indigo-600" />
+                            2. Jumlah Kemas (Lembar)
+                        </flux:label>
+                        <input
+                            type="number"
+                            x-ref="qtyInput"
+                            wire:model="productionQty"
+                            wire:keydown.enter.prevent="saveEntry"
+                            placeholder="Kuantitas kemas..."
+                            class="w-full h-11 px-3.5 text-base font-bold text-right rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            data-test="input-production-qty"
+                        />
+                    </flux:field>
+                </div>
+
+                <!-- Tombol Simpan Baris -->
+                <div class="md:col-span-3">
+                    <flux:button
+                        variant="primary"
+                        wire:click="saveEntry"
+                        icon="plus"
+                        class="w-full h-11 font-semibold text-base shadow-sm"
+                        data-test="btn-save-entry"
+                    >
+                        Simpan Item (Enter)
+                    </flux:button>
+                </div>
+            </div>
+
+            <!-- Matched SAP Specification Pill -->
+            @if($scannedOrder)
+                <div class="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm animate-fadeIn" data-test="matched-order-pill">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold font-mono text-emerald-900 dark:text-emerald-200">{{ $scannedOrder->po_number }}</span>
+                            <span class="text-zinc-400">•</span>
+                            <span class="font-semibold text-emerald-800 dark:text-emerald-300">{{ $scannedOrder->product_name }}</span>
+                        </div>
+                        <div class="text-xs text-zinc-600 dark:text-zinc-400">
+                            {{ $scannedOrder->specification ?? 'Spesifikasi pita cukai sekuriti' }}
+                            @if($scannedOrder->machine_number)
+                                • Mesin: <span class="font-mono font-medium">{{ $scannedOrder->machine_number }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400">Target SAP:</span>
+                        <span class="font-mono font-bold text-emerald-800 dark:text-emerald-200 text-base ml-1">
+                            {{ number_format($scannedOrder->target_quantity, 0, ',', '.') }} {{ $scannedOrder->unit }}
+                        </span>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
 
     <!-- Rekapitulasi Tabel Hasil Scan & Inline Edit -->
     <div class="rounded-xl border border-zinc-200 bg-white shadow-xs dark:border-zinc-700/80 dark:bg-zinc-900 overflow-hidden">
@@ -189,10 +243,14 @@
             <div>
                 <flux:heading size="base" class="font-bold">Daftar Hasil Pemindaian Barcode</flux:heading>
                 <flux:subheading size="xs" class="text-zinc-500 dark:text-zinc-400">
-                    Kuantitas kemas dapat diedit langsung pada kotak angka di tabel bawah tanpa dialog popup.
+                    @if($canEdit)
+                        Kuantitas kemas dapat diedit langsung pada kotak angka di tabel bawah tanpa dialog popup.
+                    @else
+                        Data tabel terkunci sesuai status finalisasi laporan.
+                    @endif
                 </flux:subheading>
             </div>
-            <flux:badge color="zinc" size="sm" class="font-mono">
+            <flux:badge color="zinc" size="sm" class="font-mono" data-test="badge-total-items-count">
                 Total: {{ $items->count() }} Order
             </flux:badge>
         </div>
@@ -207,6 +265,7 @@
                         <th class="p-3.5 text-center">Mesin</th>
                         <th class="p-3.5 text-right">Target SAP</th>
                         <th class="p-3.5 w-48 text-right font-bold text-indigo-700 dark:text-indigo-400">Jumlah Kemas (Edit Langsung)</th>
+                        <th class="p-3.5 text-center">Satuan</th>
                         <th class="p-3.5 text-center">Waktu Scan</th>
                         <th class="p-3.5 text-center w-16">Aksi</th>
                     </tr>
@@ -231,34 +290,49 @@
                             
                             <!-- Inline Editable Cell -->
                             <td class="p-2.5 text-right">
-                                <input
-                                    type="number"
-                                    value="{{ $item->good_quantity }}"
-                                    wire:change="updateItemQuantity({{ $item->id }}, $event.target.value)"
-                                    wire:keydown.enter.prevent="updateItemQuantity({{ $item->id }}, $event.target.value)"
-                                    class="w-36 h-9 px-2.5 text-right font-bold font-mono text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-all"
-                                    data-test="input-edit-qty-{{ $item->id }}"
-                                />
+                                @if($canEdit)
+                                    <input
+                                        type="number"
+                                        value="{{ $item->good_quantity }}"
+                                        wire:change="updateItemQuantity({{ $item->id }}, $event.target.value)"
+                                        wire:keydown.enter.prevent="updateItemQuantity({{ $item->id }}, $event.target.value)"
+                                        class="w-36 h-9 px-2.5 text-right font-bold font-mono text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-all"
+                                        data-test="input-edit-qty-{{ $item->id }}"
+                                    />
+                                @else
+                                    <span class="font-bold font-mono text-zinc-900 dark:text-zinc-100">
+                                        {{ number_format($item->good_quantity, 0, ',', '.') }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td class="p-3.5 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                                {{ $item->unit ?? 'lembar' }}
                             </td>
 
                             <td class="p-3.5 text-center text-xs font-mono text-zinc-500 dark:text-zinc-400">
                                 {{ $item->scanned_at ? $item->scanned_at->format('H:i:s') : '-' }}
                             </td>
+
                             <td class="p-3.5 text-center">
-                                <flux:button
-                                    size="sm"
-                                    variant="ghost"
-                                    icon="trash"
-                                    wire:click="deleteItem({{ $item->id }})"
-                                    wire:confirm="Yakin ingin menghapus item PO {{ $item->po_number }} dari laporan ini?"
-                                    class="text-rose-600 hover:text-rose-700 dark:text-rose-400"
-                                    data-test="btn-delete-item-{{ $item->id }}"
-                                />
+                                @if($canEdit)
+                                    <flux:button
+                                        size="sm"
+                                        variant="ghost"
+                                        icon="trash"
+                                        wire:click="deleteItem({{ $item->id }})"
+                                        wire:confirm="Yakin ingin menghapus item PO {{ $item->po_number }} dari laporan ini?"
+                                        class="text-rose-600 hover:text-rose-700 dark:text-rose-400"
+                                        data-test="btn-delete-item-{{ $item->id }}"
+                                    />
+                                @else
+                                    <span class="text-zinc-300 dark:text-zinc-600 text-xs">-</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="p-10 text-center text-zinc-400 dark:text-zinc-500 text-sm">
+                            <td colspan="9" class="p-10 text-center text-zinc-400 dark:text-zinc-500 text-sm">
                                 <flux:icon.qr-code class="size-8 mx-auto mb-2 text-zinc-300 dark:text-zinc-600" />
                                 Belum ada item PO yang dipindai. Silakan scan barcode pada Kartu Mesin Produksi di atas.
                             </td>
@@ -278,13 +352,16 @@
                             <td colspan="4" class="p-3.5 text-right text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                                 Total Rekapitulasi Sesi:
                             </td>
-                            <td class="p-3.5 text-right font-mono font-bold">
+                            <td class="p-3.5 text-right font-mono font-bold" data-test="footer-sum-target">
                                 {{ number_format($sumTarget, 0, ',', '.') }}
                             </td>
-                            <td class="p-3.5 text-right font-mono font-bold text-indigo-700 dark:text-indigo-400 text-base">
+                            <td class="p-3.5 text-right font-mono font-bold text-indigo-700 dark:text-indigo-400 text-base" data-test="footer-sum-good">
                                 {{ number_format($sumGood, 0, ',', '.') }} lbr
                             </td>
-                            <td class="p-3.5 text-center text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                            <td class="p-3.5 text-center text-xs text-zinc-500">
+                                lembar
+                            </td>
+                            <td class="p-3.5 text-center text-xs font-medium text-emerald-600 dark:text-emerald-400" data-test="footer-percentage">
                                 {{ $percentage }}%
                             </td>
                             <td></td>

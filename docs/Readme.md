@@ -17,6 +17,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [SAP File Import & Modal Preview](dev-docs/features/sap-file-import-and-preview.md)
   - [Master Data Explorer & Manual Order Management](dev-docs/features/master-data-explorer-and-manual-order.md)
   - [Daily Production Report Session & Code Generator](dev-docs/features/daily-production-report-session.md)
+  - [High-Speed Continuous Barcode Scanning & Inline Production Entry](dev-docs/features/continuous-barcode-scan-and-inline-production-entry.md)
 - **Architecture Decision Records (ADRs)**:
   - [ADR-001: Fortify Livewire & Multi-Identifier NP Authentication](dev-docs/decisions/001-fortify-livewire-and-np-authentication.md)
   - [ADR-002: Role-Based Access Control & Single-Surface Petugas Management](dev-docs/decisions/002-role-based-access-control-and-single-surface-user-management.md)
@@ -24,6 +25,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [ADR-004: Streaming SAP Import Parser and Modal Preview Architecture](dev-docs/decisions/004-streaming-sap-import-parser-and-modal-preview.md)
   - [ADR-005: Master Data Explorer, Audit Logging, and Manual Order Management Architecture](dev-docs/decisions/005-master-data-explorer-audit-log-and-manual-order-management.md)
   - [ADR-006: Daily Production Report Schema, Series Categorization, and Session Launcher Architecture](dev-docs/decisions/006-daily-production-report-schema-and-session-launcher.md)
+  - [ADR-007: High-Speed Continuous Barcode Scanning, Focus Management, and Inline Table Editing Architecture](dev-docs/decisions/007-high-speed-continuous-barcode-scanning-and-inline-table-editing.md)
 
 ### 2. User Guides (`docs/user-docs/`)
 Step-by-step guides for unit supervisors and packaging operators.
@@ -35,6 +37,7 @@ Step-by-step guides for unit supervisors and packaging operators.
   - [Panduan Master Data Order Produksi & Input Manual](user-docs/guides/panduan-master-data-order-produksi.md)
   - [Panduan Update Database Master Data SAP & Log Audit](user-docs/guides/panduan-update-database-sap.md)
   - [Panduan Inisiasi Sesi Laporan Produksi (Buat Laporan)](user-docs/guides/panduan-inisiasi-sesi-laporan-produksi.md)
+  - [Panduan Pemindaian Barcode & Input Hasil Produksi](user-docs/guides/panduan-pemindaian-barcode-dan-input-produksi.md)
 
 ### 3. Scrum Planning & Specifications
 - [Phase 01: Foundation, Auth & User Management](scrum-planning/phase-01-foundation-auth-user-management.md)

@@ -35,3 +35,11 @@ Selamat datang di pusat dokumentasi dan panduan operasional **Sistem Monitoring 
    - Memeriksa pratinjau kode laporan target (`PCHT-YYYY-MM-DD-S1`).
    - Melanjutkan sesi laporan aktif yang sudah pernah dibuat tanpa duplikasi data.
    - Membuka konsol pemindaian barcode berkecepatan tinggi.
+
+6. **[Panduan Pemindaian Barcode & Input Hasil Produksi](guides/panduan-pemindaian-barcode-dan-input-produksi.md)**
+   - Alur pemindaian berkelanjutan 100% keyboard dan scanner tanpa mouse (*Continuous Scan Loop*).
+   - Pengalihan fokus otomatis kursor antara input barcode dan input kuantitas kemas.
+   - Mengoreksi jumlah kemas langsung di dalam baris tabel (*Inline Table Edit*).
+   - Menghapus baris item PO yang salah pindai.
+   - Menyelesaikan laporan shift (*Finalisasi*) dan mencetak dokumen fisik standar A4.
+   - Membuka kembali sesi draft oleh Supervisor.
