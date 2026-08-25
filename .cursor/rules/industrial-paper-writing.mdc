@@ -1,103 +1,62 @@
 ---
-description: Standards and conventions for writing Industrial Papers, Kaizen reports, and operational case studies
+description: Standards and conventions for writing technical thesis chapters (Skripsi), operational reports, and system documentation
 globs: docs/**/*.md
 alwaysApply: false
 ---
 
-# Industrial Paper Writing Style & Standards
+# Academic & Industrial Technical Writing Standards
 
-Standards and conventions for authoring high-impact Industrial Papers, Kaizen reports, operational case studies, and technical innovation proposals.
+Standards and conventions for authoring rigorous, narrative-driven technical thesis chapters (Skripsi), operational case studies, and software engineering documentation.
 
 ---
 
 ## 1. Core Narrative, Tone & Anti-"AI-ism" Rules
 
-- **Flowing Industrial Storytelling:** Use structured, analytical, and narrative paragraphs to build operational context and shop-floor reality. **Strictly avoid dry, prompt-like bullet point lists or disjointed summaries.**
-- **Shop-Floor Operational Grounding:** Ground every argument in the real factory dynamics of Perum Peruri (Unit Cetak Pita Cukai, DJBC Kemenkeu RI, 9 mesin cetak: Komori KMR1–KMR4, Ryobi RYB1–RYB2, GTO 1–3, pola kerja 3 gilir/shift 24/7, kebiasaan operator di meja kontrol mesin, dan friksi *data silo*).
-- **Smooth Transition & Narrative Signposts:** Connect problem background, root causes, prescriptive solutions, and measurable impact naturally using transitional phrases (*"Pertama..."*, *"Kedua..."*, *"Sebagai contoh..."*, *"Sebaliknya..."*, *"Hasil investigasi membuktikan..."*).
-- **STRICTLY BANNED: Rhetorical Grandstanding & Formulaic Antithesis ("Not Just X, But Y" Trope):**
+- **Flowing Technical & Operational Storytelling:**
+  - Write in rich, structured, analytical, and cohesive narrative paragraphs.
+  - **Strictly avoid dry, prompt-like bullet point lists or shallow AI summaries.** Elaborate the context, mechanics, and rationale within flowing prose.
+  - Portray shop-floor realities, human workflows, operator behavior at the packaging station, machine operations, and administrative friction in cohesive narrative form.
+- **Strictly Ban AI Slop, Rhetorical Grandstanding & Artificial Fluff:**
   - ❌ **DILARANG:** Pola retoris klise khas AI seperti *"bukan sekadar X, melainkan Y"*, *"bukan hanya X biasa, melainkan sebuah restrukturisasi fundamental / transformasi revolusioner / lompatan paradigma..."*
   - ❌ **DILARANG:** Bahasa marketing/PR puffery & dramatisasi berlebihan: *"mengukir tonggak sejarah baru"*, *"sebuah bukti nyata dari"*, *"lompatan paradigma operasional"*, *"menyelami lebih dalam"*.
-  - ✅ **WAJIB:** Tulis secara lugas, teknis, dan berbasis fakta/mekanisme lapangan (*Show, don't preach*). Langsung jelaskan fungsi alat, komponen fisik, alur data, atau dampaknya tanpa retorika memuji diri sendiri.
-
-### Examples
-
-```markdown
-<!-- ❌ BAD (AI Cliché / Grandstanding) -->
-Keunggulan DSS SIRINE 4.0 bukan sekadar otomatisasi pencatatan biasa, melainkan sebuah restrukturisasi fundamental dalam tata kelola produksi pita cukai yang mengukir tonggak sejarah baru.
-
-<!-- ✅ GOOD (Factual, Mechanical, Direct) -->
-Kebaruan DSS SIRINE 4.0 terletak pada integrasi otomatis data transaksi meja mesin, data pesanan SAP, dan verifikasi mutu ke dalam dasbor tindakan preskriptif harian bagi operator dan penyelia.
-```
+  - ❌ **DILARANG:** Pengelompokan kata sifat klise AI berturut-turut (misal: *"tingkat keandalan, stabilitas, dan keterpakaian"* atau *"efisiensi, efektivitas, dan skalabilitas"*). Jelaskan fungsinya secara konkret dan wajar.
+  - ❌ **DILARANG:** Kata-kata hiperbolik/kaku buatan AI seperti *"data yang absolut"*, *"artefak dokumentasi"*, *"pengkodean"*, *"penulisan baris kode"*, *"masukan scanner fisik"*.
+  - ❌ **DILARANG:** Penggunaan tanda pisah em-dash ("—") yang berlebihan. Gunakan tanda koma (","), tanda kurung, atau kata hubung alami (*"yaitu"*, *"seperti"*, *"antara lain"*).
+  - ✅ **WAJIB:** Tulis secara lugas, teknis, akademis, dan berbasis fakta/mekanisme lapangan (*Show, don't preach*). Langsung jelaskan fungsi alat, komponen fisik, alur data, metode, atau dampaknya secara terukur tanpa retorika memuji diri sendiri.
+- **Smooth Transition & Narrative Signposts:** Connect problem background, root causes, methodology choices, engineering workflows, and system behavior naturally using transitional phrases (*"Pertama..."*, *"Kedua..."*, *"Sebagai contoh..."*, *"Sebaliknya..."*, *"Berdasarkan hasil observasi..."*).
 
 ---
 
 ## 2. Terminology & Natural Phrasing Standards
 
-### A. Avoid Awkward / Overly Academic Terms & Literal Translations
-- ❌ *Lantai produksi / lantai pabrik* $\rightarrow$ ✅ **"Lapangan"**, **"Lini Produksi"**, **"Area Mesin / Area Kerja"**, atau **"Unit Produksi"** (istilah 'lantai produksi' kaku dan tidak lazim dalam operasional harian Peruri).
-- ❌ *Data agregat* $\rightarrow$ ✅ **"Ringkasan Kerusakan Global (*Unit-Wide General Summary*)"** atau **"Data Akumulasi Kerusakan di Tingkat Unit"**.
-- ❌ *Data pasif* $\rightarrow$ ✅ **"Data Pasif (*Dormant Data*)"** (tabel CSV mentah SAP `ZPPRSIPPC0012` yang terkunci di komputer kantor dan tidak dapat diolah langsung di lapangan).
-- ❌ *Ketiadaan atribusi* $\rightarrow$ ✅ **"Kebutaan Atribusi (*Attribution Blindness*)"** (kondisi di mana total cacat diketahui tetapi nomor mesin, PO, dan *shift* pencetaknya tidak tercatat).
-
-### B. Machine Mechanical Root Causes: Grounding "Keausan" (*Wear & Tear*)
-**Never use vague terms like "keausan" or "wear and tear" in isolation without specifying the physical component, mechanical symptom, and the resulting defect on the print sheet:**
-- **Rol Karet Tinta & Air (*Inking & Dampening Rollers*):** Permukaan karet mengalami keausan fisik, pengerasan (*rubber hardening*), atau menjadi licin (*glazing*) $\rightarrow$ distribusi air pembasah & tinta sekuriti tidak merata $\rightarrow$ memicu cacat **blobor (*ink bleeding*)**, **noda bintik**, atau **garis warna (*streaking*)**.
-- **Selimut Karet Cetak (*Rubber Blanket*):** Mengalami penurunan ketebalan dan elastisitas (*blanket fatigue / indentation*) akibat tekanan silinder terus-menerus $\rightarrow$ memicu hasil cetak **membayang (*ghosting*)** atau kepekatan warna tidak rata (*density variation*).
-- **Penjepit Kertas Silinder (*Cylinder Grippers & Pads*):** Ujung penjepit aus dan tegangan pegas (*spring tension*) melemah $\rightarrow$ lembaran kertas sekuriti tergelincir miring (*misfeed*) $\rightarrow$ memicu cacat **pergeseran register antar-warna (*misregister*)** dan **kertas terlipat (*plooi / zig-zag*)**.
-
-### C. Human, Method & Material Dynamics
-- **Man (Faktor Manusia):** Ritme sirkadian dan kelelahan visual (*circadian fatigue*) pada *Shift* Malam (pukul 23.00–07.00 WIB) yang memperlambat deteksi cacat; disparitas jam terbang teknis senior vs junior.
-- **Method (Metode Kerja):** Penyetelan awal (*make-ready*) berbasis intuisi individual tanpa lembar parameter digital; pelaporan *troubleshooting* lisan tanpa rekam jejak historis; buku folio fisik di meja kontrol mesin yang baru direkap berbulan-bulan kemudian.
-- **Material & Lingkungan:** Karakteristik higroskopis kertas sekuriti berpengaman terhadap fluktuasi kelembaban ruangan (*Relative Humidity / RH*) yang memicu kertas bergelombang (*wavy edges / plooi*); penumpukan residu tinta sekuriti UV pada bak tinta.
+- ❌ *artefak dokumentasi* $\rightarrow$ ✅ **"dokumen hasil kerja"**, **"laporan"**, atau **"berkas spesifikasi"**.
+- ❌ *penulisan baris kode (coding) / pengkodean* $\rightarrow$ ✅ **"coding"** atau **"pembuatan aplikasi"**.
+- ❌ *sebelum pengkodean dimulai* $\rightarrow$ ✅ **"sebelum pembuatan aplikasi dimulai"**.
+- ❌ *masukan scanner fisik* $\rightarrow$ ✅ **"data hasil scanner"** atau **"hasil pembacaan scanner"**.
+- ❌ *data yang absolut* $\rightarrow$ ✅ **"data yang valid dan akurat"** atau **"keabsahan data"**.
+- ❌ *penyelia laporan* $\rightarrow$ ✅ **"Kepala Unit / Supervisor yang memeriksa laporan"**.
+- ❌ *tolok ukur* $\rightarrow$ ✅ **"acuan"** atau **"standar pengujian"**.
+- ❌ *nama pengguna (username) biasa* $\rightarrow$ ✅ **"NP (Nomor Pegawai)"** sebagai identitas akun dan kredensial login pengguna (petugas maupun supervisor).
+- ❌ *Lantai produksi / lantai pabrik* $\rightarrow$ ✅ **"Area Kerja"**, **"Lini Produksi"**, **"Unit Pengemasan"**, atau **"Unit Produksi"**.
+- ❌ *Data agregat* $\rightarrow$ ✅ **"Data Akumulasi Hasil Produksi"** atau **"Rekapitulasi Produksi Harian"**.
+- ❌ *Data pasif* $\rightarrow$ ✅ **"Data Pasif (*Dormant Data*)"** (berkas ekspor SAP mentah yang tersimpan statis sebelum diolah sistem).
+- **Grounding Mechanical & Operational Terms:**
+  - Sebutkan spesifikasi perangkat keras nyata: *Barcode Scanner Genggam (Handheld)* tipe **Code 128**, kartu fisik **Kartu Mesin Produksi**, Nomor Order (**No PO**), dan sistem **SAP Production Order**.
+  - Jelaskan alur kerja shift nyata: Shift 1 (Pagi), Shift 2 (Siang), dan Shift 3 (Malam), serta pembagian peran antara **Petugas (Operator Kemas)** dan **Kepala Unit / Supervisor**.
 
 ---
 
-## 3. Structure, Visual Callouts & Executive Blocks
+## 3. Formatting & Point Structuring Rules
 
-- **Executive Takeaways:** Always provide a high-level summary at the start of chapters using blockquotes:
-  ```markdown
-  > ***Executive Takeaway:***  
-  > [Summary of volume, baseline defect rate, financial cost, operational blind spots, and verified savings/impact]
-  ```
-- **Business & Financial Insights:** Pair charts and key tables with actionable takeaway callouts:
-  ```markdown
-  > ***Business Insight Gambar X.X:***  
-  > [1-2 sentences explaining what the visual trend implies for operations]
+- **Numbered Points with Titles:**
+  Ketika menyajikan daftar poin bernomor yang memiliki judul tebal (seperti tahapan atau use case), gunakan tag `<br>` atau baris baru agar paragraf pembahasan berada di bawah judul, bukan menyatu di baris yang sama.
   
-  > ***Key Financial Insight Tabel X.X:***  
-  > 1. [Key point 1]
-  > 2. [Key point 2]
-  ```
-- **Figure & Table Captions:** Always cite verified sources beneath visual assets:
+  *Contoh format yang benar:*
   ```markdown
-  *Gambar X.X: Deskripsi Visual (Sumber: SAP ZPPRSIPPC0012 / QC Verifikasi)*
+  1. **Analisis Kebutuhan (*Requirement Analysis*)**
+     <br>
+     Tahap pengumpulan data komprehensif melalui observasi langsung di area kerja pengemasan, wawancara bersama operator kemas dan supervisor, serta penelaahan dokumen fisik Kartu Mesin Produksi dan format laporan harian. Tahap ini menghasilkan spesifikasi kebutuhan fungsional dan non-fungsional sistem yang menjadi acuan utama perancangan.
   ```
 
----
-
-## 4. Data Integrity & Mathematical Transparency
-
-- **Strict 4-Attribute Data Standards:** Every metric and number must include:
-  1. **Value / Number (Nilai):** e.g., `177.636.930`, `4,61%`, `Rp 2,23 Miliar`
-  2. **Unit (Satuan):** e.g., `Lembar Cetak`, `pp`, `Rupiah`, `Jam / Mesin`
-  3. **Period (Periode):** e.g., `Jan – Mar 2025`, `Semester 1 2026`
-  4. **Verified Source (Sumber Data):** e.g., SAP T-Code `ZPPRSIPPC0012`, Modul Verifikasi Mutu
-- **Mathematical Transparency (LaTeX Block):** Format calculations using step-by-step LaTeX equations (e.g., standard tambah cetak @ Rp 3.000/lembar):
-  ```markdown
-  $$\begin{aligned}
-  \text{Volume Produksi Tahunan} &= 177.636.930 \text{ Lembar Cetak} \\
-  \text{Lembar Rusak Baseline (4,61\%)} &= 177.636.930 \times 4,61\% = \mathbf{8.189.062 \text{ Lembar}} \\
-  \text{Nilai Kerugian Finansial} &= 8.189.062 \times \text{Rp } 3.000 = \mathbf{\text{Rp } 24.567.186.000 \text{ / Tahun}}
-  \end{aligned}$$
-  ```
-
----
-
-## 5. Domain Terminology & Frameworks
-
-- **Inschiet:** Kerusakan cetak / defect rate.
-- **HCS / HCTS:** Hasil Cetak Sempurna / Hasil Cetak Tidak Sempurna.
-- **PCHT / MMEA:** Pita Cukai Hasil Tembakau / Minuman Mengandung Etil Alkohol.
-- **Evolutionary Context:** Reference SIRINE 3.5 (2024) as solving *what defect category occurred*, and DSS SIRINE 4.0 (2026) as solving *which machine, which shift, and what prescriptive maintenance action to execute*.
-- **5-Pillar Cost of Inaction:** Evaluate risks across Cost, Quality, Compliance, Safety & ESG, and Service SLA.
+- **Academic Tone:** Adapt narrative style to formal Indonesian academic writing (Bahasa Indonesia baku untuk Skripsi / Tugas Akhir). Jangan menyisipkan blok korporat seperti `Executive Takeaway` atau `Business Insight` ke dalam draf bab skripsi.
+- **Visual Citations:** Pasangkan diagram (Mermaid atau gambar) dengan takarir akademis deskriptif (`*Gambar X.X: Judul Gambar*`).

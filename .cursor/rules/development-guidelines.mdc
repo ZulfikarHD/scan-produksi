@@ -1,0 +1,210 @@
+---
+description: Pragmatic beginner-friendly development guidelines (single-controller feature design, no repository pattern, render/index at top, bilingual comments)
+globs: app/**/*.php, routes/**/*.php, resources/views/**/*.blade.php
+alwaysApply: true
+---
+
+# Project Development Guidelines (Beginner-Friendly & Pragmatic)
+
+Panduan pengembangan fitur untuk proyek ini dengan pendekatan praktis, mudah dipahami (*beginner-friendly*), dan tidak *over-engineered*.
+
+---
+
+## 1. Core Mindset: Simplicity & Direct Logic
+
+- **No Over-Abstraction:** Jangan gunakan Repository Pattern, Service Layer berlebihan, atau memecah logika CRUD sederhana ke banyak kelas/Action kecil jika hanya digunakan untuk fitur tersebut.
+- **Direct Eloquent:** Tulis query database dan operasi Eloquent langsung di Controller atau Livewire Component.
+- **Focus on Readability:** Kode harus mudah dibaca dari atas ke bawah tanpa harus melompat ke banyak file abstract.
+
+```php
+// ❌ BAD: Over-engineered dengan Repository & Service untuk CRUD biasa
+class ProductionController extends Controller {
+    public function __construct(
+        private ProductionRepositoryInterface $repo,
+        private ProductionProcessService $service
+    ) {}
+}
+
+// ✅ GOOD: Langsung gunakan Eloquent di Controller
+class ProductionController extends Controller {
+    // ...
+}
+```
+
+---
+
+## 2. Single Controller per Feature / Route
+
+- **Colocate Feature Functions:** Kumpulkan semua method terkait satu fitur (seperti alur CRUD, filter data, export/print, update status) di dalam **satu Controller**.
+- Jangan pisahkan satu fitur CRUD ke dalam 5–7 single-action (invokable) controller terpisah kecuali diminta secara eksplisit.
+- Satu Controller bertanggung jawab penuh atas halaman/fitur tersebut.
+
+---
+
+## 3. Method Ordering: `render()` / `index()` Selalu di Paling Atas
+
+Fungsi yang menampilkan view atau halaman harus selalu diletakkan di bagian paling atas method class, agar developer langsung tahu tampilan apa yang dihasilkan oleh class tersebut.
+
+1. **Urutan pada Laravel Controller:**
+   - `index()` atau method utama penampil view di paling atas.
+   - Diikuti method CRUD lainnya: `create()`, `store()`, `show()`, `edit()`, `update()`, `destroy()`, dan custom action helpers.
+
+2. **Urutan pada Livewire Component:**
+   - `render()` di paling atas (setelah deklarasi public properties/traits).
+   - Diikuti lifecycle hooks: `mount()`, `boot()`.
+   - Diikuti action methods: save, update, delete, trigger event, dll.
+
+```php
+// ✅ GOOD (Laravel Controller): index() di posisi paling atas
+class MachineScheduleController extends Controller
+{
+    public function index(Request $request)
+    {
+        $machines = Machine::with('schedules')->get();
+        return view('machines.index', compact('machines'));
+    }
+
+    public function store(Request $request)
+    {
+        // action logic...
+    }
+
+    public function destroy(Machine $machine)
+    {
+        // action logic...
+    }
+}
+```
+
+```php
+// ✅ GOOD (Livewire Component): render() di posisi paling atas method
+class MachineSchedule extends Component
+{
+    public string $machineId = '';
+    public array $filters = [];
+
+    public function render()
+    {
+        $schedules = Schedule::where('machine_id', $this->machineId)->get();
+        return view('livewire.machine-schedule', compact('schedules'));
+    }
+
+    public function mount(string $machineId): void
+    {
+        $this->machineId = $machineId;
+    }
+
+    public function saveSchedule(): void
+    {
+        // action logic...
+    }
+}
+```
+
+---
+
+## 4. Commenting Standards: Bermanfaat & Tidak Berlebihan
+
+- **Kapan memberi comment:** Berikan komentar penjelas pada alur bisnis yang rumit, variabel dengan tujuan khusus, atau kalkulasi angka/kondisi yang tidak langsung jelas maknanya.
+- **Kapan TIDAK memberi comment:** Jangan beri komentar pada kode yang *self-explanatory* (misal: `$user->save();` tidak perlu diberi `// simpan user`).
+- Tujuan komentar adalah membantu developer memahami **apa fungsi variabel/fitur tersebut** dan **kenapa logika tersebut dibuat**.
+
+```php
+// ❌ BAD: Komentar berlebihan dan tidak berguna
+// Mengambil request nama
+$name = $request->input('name');
+// Simpan ke database
+$product->save();
+
+// ✅ GOOD: Komentar pada logika bisnis penting / variabel khusus
+// Buffer toleransi inschiet lembar cetak standar (3% dari target PO)
+$toleranceThreshold = $targetQuantity * 0.03;
+
+// Flag untuk menandai order membutuhkan verifikasi fisik ganda di meja kontrol
+$requiresDualInspection = $order->is_security_paper && $defectRate > 2.5;
+```
+
+---
+
+## 5. Bahasa & Terminologi (Bilingual: Bahasa Indonesia + English Tech Terms)
+
+- **Penjelasan & Komentar:** Gunakan Bahasa Indonesia santun, jelas, dan komunikatif.
+- **Istilah Teknis (Technical Terms):** Tetap gunakan istilah teknis dalam Bahasa Inggris (*Controller, Query, Route, Request, Response, Payload, Middleware, Render, Mount, Validation, Database, Relationship, Component, Dispatch, Event*).
+- Hindari terjemahan kaku yang aneh (misal: gunakan *“jalankan query database”*, bukan *“jalankan kueri pangkalan data”*).
+
+---
+
+## 6. Contoh Lengkap Controller
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ProductionBatch;
+use Illuminate\Http\Request;
+
+class ProductionBatchController extends Controller
+{
+    /**
+     * Tampilkan halaman utama monitoring batch produksi.
+     */
+    public function index(Request $request)
+    {
+        // Filter batch berdasarkan status aktif dan tanggal hari ini
+        $query = ProductionBatch::query()
+            ->with(['machine', 'operator'])
+            ->latest();
+
+        if ($request->filled('machine_id')) {
+            $query->where('machine_id', $request->machine_id);
+        }
+
+        $batches = $query->paginate(15);
+
+        return view('production.batches.index', compact('batches'));
+    }
+
+    /**
+     * Simpan batch baru dari form input operator.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'po_number' => ['required', 'string'],
+            'machine_id' => ['required', 'exists:machines,id'],
+            'target_sheets' => ['required', 'integer', 'min:1'],
+        ]);
+
+        // Hitung estimasi waktu cetak berdasarkan kecepatan standar mesin (lembar/jam)
+        $standardSpeed = 5000;
+        $estimatedHours = ceil($validated['target_sheets'] / $standardSpeed);
+
+        $batch = ProductionBatch::create([
+            ...$validated,
+            'status' => 'pending',
+            'estimated_hours' => $estimatedHours,
+        ]);
+
+        return redirect()
+            ->route('production.batches.index')
+            ->with('success', 'Batch produksi berhasil dibuat.');
+    }
+
+    /**
+     * Hapus batch jika belum masuk status proses cetak.
+     */
+    public function destroy(ProductionBatch $batch)
+    {
+        if ($batch->status === 'in_progress') {
+            return back()->with('error', 'Batch yang sedang berjalan tidak dapat dihapus.');
+        }
+
+        $batch->delete();
+
+        return redirect()
+            ->route('production.batches.index')
+            ->with('success', 'Batch produksi berhasil dihapus.');
+    }
+}
+```
