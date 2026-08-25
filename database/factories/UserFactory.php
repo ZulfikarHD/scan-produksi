@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             // NP 4-6 karakter kombinasi huruf dan angka (contoh: 7426 atau T0087)
             'nip' => fake()->unique()->regexify('[A-Z0-9]{4,6}'),
-            'username' => fake()->unique()->userName(),
+            'username' => str_replace('.', '_', fake()->unique()->userName()),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
