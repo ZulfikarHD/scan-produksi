@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\ProductionOrderStatus;
 use Database\Factories\ProductionOrderFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * Model data master order produksi (sinkronisasi dari berkas SAP).
+ *
  * @property int $id
  * @property string $po_number
  * @property string|null $no_obc
@@ -49,49 +50,11 @@ use Illuminate\Support\Carbon;
  * @property-read User|null $creator
  * @property-read User|null $user
  */
-#[Fillable([
-    'po_number',
-    'no_obc',
-    'perso_type',
-    'seri',
-    'product_code',
-    'product_name',
-    'customer_name',
-    'specification',
-    'paper_type',
-    'machine_number',
-    'order_date',
-    'delivery_deadline',
-    'tgl_pakai_bb',
-    'tgl_cetak',
-    'tgl_verifikasi',
-    'packaging_date',
-    'target_quantity',
-    'rencet_quantity',
-    'jml_bb',
-    'jml_cd',
-    'total_bb',
-    'jml_cetak',
-    'baik_verifikasi',
-    'rusak_verifikasi',
-    'hcts_baik',
-    'total_hcts',
-    'kemas_quantity',
-    'kirim_quantity',
-    'unit',
-    'status',
-    'created_by',
-])]
 class ProductionOrder extends Model
 {
     /** @use HasFactory<ProductionOrderFactory> */
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'po_number',
         'no_obc',
@@ -126,11 +89,6 @@ class ProductionOrder extends Model
         'created_by',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -158,7 +116,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * The user (supervisor/operator) who created or imported this order.
+     * Akun Supervisor atau Petugas yang mengimpor/membuat order ini.
      *
      * @return BelongsTo<User, $this>
      */
@@ -168,7 +126,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Alias for creator relationship.
+     * Alias relasi creator untuk kemudahan akses $order->user.
      *
      * @return BelongsTo<User, $this>
      */
@@ -178,7 +136,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query to search by keyword across PO number, OBC number, product code, product name, or customer name.
+     * Pencarian cepat berdasarkan nomor PO, nomor OBC, kode produk, nama produk, atau pelanggan.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -201,7 +159,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query by status (enum or string).
+     * Filter query berdasarkan status order.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -218,7 +176,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query by machine number (WORK CENTER).
+     * Filter query berdasarkan nomor mesin (Work Center cetak).
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -233,7 +191,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query by OBC number.
+     * Filter query berdasarkan nomor OBC.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -248,7 +206,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query by customer name.
+     * Filter query berdasarkan nama pelanggan.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -263,7 +221,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query by date range (order_date).
+     * Filter query berdasarkan rentang tanggal order.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -286,7 +244,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query for ready status.
+     * Shortcut filter order yang siap dikemas.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -297,7 +255,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query for in_progress status.
+     * Shortcut filter order yang sedang berjalan.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -308,7 +266,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query for completed status.
+     * Shortcut filter order yang telah selesai.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -319,7 +277,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query for cancelled status.
+     * Shortcut filter order yang dibatalkan.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -330,7 +288,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Fast indexed lookup by PO number (< 20ms for barcode scanner).
+     * Pencarian indexed cepat berdasarkan nomor PO (dioptimalkan untuk barcode scanner di bawah 20ms).
      */
     public static function findByPoNumber(string $poNumber): ?self
     {
@@ -343,7 +301,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Fast indexed lookup by barcode identifier (sanitizes input).
+     * Pencarian berdasarkan barcode (nomor PO sebagai identifier barcode).
      */
     public static function findByBarcode(string $barcode): ?self
     {
@@ -351,7 +309,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Format target quantity with thousand separator (e.g., "10.000").
+     * Format angka target kuantitas dengan pemisah ribuan titik (contoh: 10.000).
      */
     public function formattedTargetQuantity(): string
     {
@@ -359,7 +317,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Format rencet quantity with thousand separator.
+     * Format angka rencet kuantitas dengan pemisah ribuan titik.
      */
     public function formattedRencetQuantity(): string
     {
@@ -367,7 +325,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Format kemas quantity with thousand separator.
+     * Format angka kuantitas yang sudah dikemas dengan pemisah ribuan titik.
      */
     public function formattedKemasQuantity(): string
     {
@@ -375,7 +333,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Calculate packaging fulfillment percentage relative to target quantity.
+     * Hitung persentase ketercapaian kemas dibanding target (0 - 100%).
      */
     public function fulfillmentPercentage(): float
     {
@@ -387,7 +345,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Get the human-readable Indonesian label for order status.
+     * Label status berbahasa Indonesia dari Enum ProductionOrderStatus.
      */
     public function statusLabel(): string
     {
@@ -395,40 +353,28 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Get the badge color corresponding to current status.
+     * Warna badge status dari Enum ProductionOrderStatus.
      */
     public function statusBadgeColor(): string
     {
         return $this->status->badgeColor();
     }
 
-    /**
-     * Check if the order is ready for packaging.
-     */
     public function isReady(): bool
     {
         return $this->status === ProductionOrderStatus::READY;
     }
 
-    /**
-     * Check if the order is currently in progress.
-     */
     public function isInProgress(): bool
     {
         return $this->status === ProductionOrderStatus::IN_PROGRESS;
     }
 
-    /**
-     * Check if the order is completed.
-     */
     public function isCompleted(): bool
     {
         return $this->status === ProductionOrderStatus::COMPLETED;
     }
 
-    /**
-     * Check if the order is cancelled.
-     */
     public function isCancelled(): bool
     {
         return $this->status === ProductionOrderStatus::CANCELLED;
