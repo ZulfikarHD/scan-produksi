@@ -14,16 +14,34 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property string $po_number
+ * @property string|null $no_obc
+ * @property string|null $perso_type
+ * @property string|null $seri
  * @property string|null $product_code
  * @property string $product_name
- * @property string $customer_name
+ * @property string|null $customer_name
  * @property string|null $specification
  * @property string|null $paper_type
  * @property string|null $machine_number
- * @property int $target_quantity
- * @property string $unit
  * @property Carbon $order_date
  * @property Carbon|null $delivery_deadline
+ * @property Carbon|null $tgl_pakai_bb
+ * @property Carbon|null $tgl_cetak
+ * @property Carbon|null $tgl_verifikasi
+ * @property Carbon|null $packaging_date
+ * @property int $target_quantity
+ * @property int $rencet_quantity
+ * @property int $jml_bb
+ * @property int $jml_cd
+ * @property int $total_bb
+ * @property int $jml_cetak
+ * @property int $baik_verifikasi
+ * @property int $rusak_verifikasi
+ * @property int $hcts_baik
+ * @property int $total_hcts
+ * @property int $kemas_quantity
+ * @property int $kirim_quantity
+ * @property string $unit
  * @property ProductionOrderStatus $status
  * @property int|null $created_by
  * @property Carbon|null $created_at
@@ -33,16 +51,34 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([
     'po_number',
+    'no_obc',
+    'perso_type',
+    'seri',
     'product_code',
     'product_name',
     'customer_name',
     'specification',
     'paper_type',
     'machine_number',
-    'target_quantity',
-    'unit',
     'order_date',
     'delivery_deadline',
+    'tgl_pakai_bb',
+    'tgl_cetak',
+    'tgl_verifikasi',
+    'packaging_date',
+    'target_quantity',
+    'rencet_quantity',
+    'jml_bb',
+    'jml_cd',
+    'total_bb',
+    'jml_cetak',
+    'baik_verifikasi',
+    'rusak_verifikasi',
+    'hcts_baik',
+    'total_hcts',
+    'kemas_quantity',
+    'kirim_quantity',
+    'unit',
     'status',
     'created_by',
 ])]
@@ -58,16 +94,34 @@ class ProductionOrder extends Model
      */
     protected $fillable = [
         'po_number',
+        'no_obc',
+        'perso_type',
+        'seri',
         'product_code',
         'product_name',
         'customer_name',
         'specification',
         'paper_type',
         'machine_number',
-        'target_quantity',
-        'unit',
         'order_date',
         'delivery_deadline',
+        'tgl_pakai_bb',
+        'tgl_cetak',
+        'tgl_verifikasi',
+        'packaging_date',
+        'target_quantity',
+        'rencet_quantity',
+        'jml_bb',
+        'jml_cd',
+        'total_bb',
+        'jml_cetak',
+        'baik_verifikasi',
+        'rusak_verifikasi',
+        'hcts_baik',
+        'total_hcts',
+        'kemas_quantity',
+        'kirim_quantity',
+        'unit',
         'status',
         'created_by',
     ];
@@ -80,9 +134,24 @@ class ProductionOrder extends Model
     protected function casts(): array
     {
         return [
-            'target_quantity' => 'integer',
             'order_date' => 'date',
             'delivery_deadline' => 'date',
+            'tgl_pakai_bb' => 'date',
+            'tgl_cetak' => 'date',
+            'tgl_verifikasi' => 'date',
+            'packaging_date' => 'date',
+            'target_quantity' => 'integer',
+            'rencet_quantity' => 'integer',
+            'jml_bb' => 'integer',
+            'jml_cd' => 'integer',
+            'total_bb' => 'integer',
+            'jml_cetak' => 'integer',
+            'baik_verifikasi' => 'integer',
+            'rusak_verifikasi' => 'integer',
+            'hcts_baik' => 'integer',
+            'total_hcts' => 'integer',
+            'kemas_quantity' => 'integer',
+            'kirim_quantity' => 'integer',
             'status' => ProductionOrderStatus::class,
             'created_by' => 'integer',
         ];
@@ -109,7 +178,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query to search by keyword across PO number, product code, product name, or customer name.
+     * Scope query to search by keyword across PO number, OBC number, product code, product name, or customer name.
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -124,6 +193,7 @@ class ProductionOrder extends Model
 
         return $query->where(function (Builder $q) use ($term) {
             $q->where('po_number', 'like', "%{$term}%")
+                ->orWhere('no_obc', 'like', "%{$term}%")
                 ->orWhere('product_code', 'like', "%{$term}%")
                 ->orWhere('product_name', 'like', "%{$term}%")
                 ->orWhere('customer_name', 'like', "%{$term}%");
@@ -148,7 +218,7 @@ class ProductionOrder extends Model
     }
 
     /**
-     * Scope query by machine number.
+     * Scope query by machine number (WORK CENTER).
      *
      * @param  Builder<ProductionOrder>  $query
      * @return Builder<ProductionOrder>
@@ -160,6 +230,21 @@ class ProductionOrder extends Model
         }
 
         return $query->where('machine_number', trim($machineNumber));
+    }
+
+    /**
+     * Scope query by OBC number.
+     *
+     * @param  Builder<ProductionOrder>  $query
+     * @return Builder<ProductionOrder>
+     */
+    public function scopeByObc(Builder $query, ?string $noObc): Builder
+    {
+        if (blank($noObc)) {
+            return $query;
+        }
+
+        return $query->where('no_obc', trim($noObc));
     }
 
     /**
@@ -234,7 +319,12 @@ class ProductionOrder extends Model
      */
     public static function findByPoNumber(string $poNumber): ?self
     {
-        return static::where('po_number', trim($poNumber))->first();
+        $poNumber = trim($poNumber);
+        if ($poNumber === '') {
+            return null;
+        }
+
+        return static::where('po_number', $poNumber)->first();
     }
 
     /**
@@ -251,6 +341,14 @@ class ProductionOrder extends Model
     public function formattedTargetQuantity(): string
     {
         return number_format($this->target_quantity, 0, ',', '.');
+    }
+
+    /**
+     * Format kemas quantity with thousand separator.
+     */
+    public function formattedKemasQuantity(): string
+    {
+        return number_format($this->kemas_quantity, 0, ',', '.');
     }
 
     /**

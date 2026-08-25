@@ -6,24 +6,67 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\QueryException;
 
-test('production order can be instantiated via factory with proper casts', function () {
+test('production order can be instantiated via factory with all 24 sap columns and proper casts', function () {
     $order = ProductionOrder::factory()->create([
         'po_number' => 'PO-2026-9999',
+        'no_obc' => 'OBC-2026-9999',
+        'perso_type' => 'Non Perso',
+        'seri' => 'A',
         'product_code' => 'PRD-999',
         'product_name' => 'Sertifikat Khusus',
         'customer_name' => 'Lembaga Negara',
-        'target_quantity' => 12500,
         'order_date' => '2026-08-20',
         'delivery_deadline' => '2026-08-30',
+        'tgl_pakai_bb' => '2026-08-21',
+        'tgl_cetak' => '2026-08-23',
+        'tgl_verifikasi' => '2026-08-25',
+        'packaging_date' => '2026-08-26',
+        'target_quantity' => 12500,
+        'rencet_quantity' => 12875,
+        'jml_bb' => 12500,
+        'jml_cd' => 375,
+        'total_bb' => 12875,
+        'jml_cetak' => 12875,
+        'baik_verifikasi' => 12850,
+        'rusak_verifikasi' => 25,
+        'hcts_baik' => 0,
+        'total_hcts' => 25,
+        'kemas_quantity' => 12500,
+        'kirim_quantity' => 12500,
+        'machine_number' => 'MESIN-01',
         'status' => ProductionOrderStatus::READY,
     ]);
 
     expect($order->po_number)->toBe('PO-2026-9999');
+    expect($order->no_obc)->toBe('OBC-2026-9999');
+    expect($order->perso_type)->toBe('Non Perso');
+    expect($order->seri)->toBe('A');
     expect($order->target_quantity)->toBeInt()->toBe(12500);
+    expect($order->rencet_quantity)->toBeInt()->toBe(12875);
+    expect($order->jml_bb)->toBeInt()->toBe(12500);
+    expect($order->jml_cd)->toBeInt()->toBe(375);
+    expect($order->total_bb)->toBeInt()->toBe(12875);
+    expect($order->jml_cetak)->toBeInt()->toBe(12875);
+    expect($order->baik_verifikasi)->toBeInt()->toBe(12850);
+    expect($order->rusak_verifikasi)->toBeInt()->toBe(25);
+    expect($order->hcts_baik)->toBeInt()->toBe(0);
+    expect($order->total_hcts)->toBeInt()->toBe(25);
+    expect($order->kemas_quantity)->toBeInt()->toBe(12500);
+    expect($order->kirim_quantity)->toBeInt()->toBe(12500);
+
     expect($order->order_date)->toBeInstanceOf(CarbonInterface::class);
     expect($order->order_date->format('Y-m-d'))->toBe('2026-08-20');
     expect($order->delivery_deadline)->toBeInstanceOf(CarbonInterface::class);
     expect($order->delivery_deadline->format('Y-m-d'))->toBe('2026-08-30');
+    expect($order->tgl_pakai_bb)->toBeInstanceOf(CarbonInterface::class);
+    expect($order->tgl_pakai_bb->format('Y-m-d'))->toBe('2026-08-21');
+    expect($order->tgl_cetak)->toBeInstanceOf(CarbonInterface::class);
+    expect($order->tgl_cetak->format('Y-m-d'))->toBe('2026-08-23');
+    expect($order->tgl_verifikasi)->toBeInstanceOf(CarbonInterface::class);
+    expect($order->tgl_verifikasi->format('Y-m-d'))->toBe('2026-08-25');
+    expect($order->packaging_date)->toBeInstanceOf(CarbonInterface::class);
+    expect($order->packaging_date->format('Y-m-d'))->toBe('2026-08-26');
+
     expect($order->status)->toBe(ProductionOrderStatus::READY);
 });
 
@@ -41,9 +84,10 @@ test('production order belongs to a creator user and user has many production or
     expect($user->productionOrders->first()->id)->toBe($order->id);
 });
 
-test('search scope filters by po number, product code, product name, and customer name', function () {
+test('search scope filters by po number, obc number, product code, product name, and customer name', function () {
     ProductionOrder::factory()->create([
         'po_number' => 'PO-2026-1111',
+        'no_obc' => 'OBC-2026-1111',
         'product_code' => 'PRD-ABC',
         'product_name' => 'Cetak Ijazah Nasional',
         'customer_name' => 'Kementerian Dikdasmen',
@@ -51,6 +95,7 @@ test('search scope filters by po number, product code, product name, and custome
 
     ProductionOrder::factory()->create([
         'po_number' => 'PO-2026-2222',
+        'no_obc' => 'OBC-2026-2222',
         'product_code' => 'PRD-XYZ',
         'product_name' => 'Pita Cukai Minuman',
         'customer_name' => 'Bea Cukai RI',
@@ -59,6 +104,9 @@ test('search scope filters by po number, product code, product name, and custome
     // Search by PO number
     expect(ProductionOrder::search('PO-2026-1111')->count())->toBe(1);
     expect(ProductionOrder::search('1111')->count())->toBe(1);
+
+    // Search by OBC number
+    expect(ProductionOrder::search('OBC-2026-2222')->count())->toBe(1);
 
     // Search by Product Code
     expect(ProductionOrder::search('PRD-XYZ')->count())->toBe(1);
@@ -72,6 +120,15 @@ test('search scope filters by po number, product code, product name, and custome
     // Empty search returns all
     expect(ProductionOrder::search('')->count())->toBe(2);
     expect(ProductionOrder::search(null)->count())->toBe(2);
+});
+
+test('byObc scope filters orders by OBC number accurately', function () {
+    ProductionOrder::factory()->create(['no_obc' => 'OBC-100']);
+    ProductionOrder::factory()->create(['no_obc' => 'OBC-200']);
+
+    expect(ProductionOrder::byObc('OBC-100')->count())->toBe(1);
+    expect(ProductionOrder::byObc('OBC-200')->count())->toBe(1);
+    expect(ProductionOrder::byObc(null)->count())->toBe(2);
 });
 
 test('status scopes filter orders correctly', function () {
@@ -137,12 +194,14 @@ test('findByPoNumber and findByBarcode locate orders quickly and sanitize whites
     expect(ProductionOrder::findByPoNumber('PO-NON-EXISTENT'))->toBeNull();
 });
 
-test('formattedTargetQuantity formats number with Indonesian thousand separator', function () {
+test('formattedTargetQuantity and formattedKemasQuantity format numbers with Indonesian thousand separator', function () {
     $order = ProductionOrder::factory()->make([
         'target_quantity' => 1250000,
+        'kemas_quantity' => 950000,
     ]);
 
     expect($order->formattedTargetQuantity())->toBe('1.250.000');
+    expect($order->formattedKemasQuantity())->toBe('950.000');
 });
 
 test('status boolean helper methods and label/badge methods return accurate values', function () {
@@ -181,23 +240,38 @@ test('production order handles nullable attributes gracefully', function () {
     $order = ProductionOrder::create([
         'po_number' => 'PO-2026-NULL-TEST',
         'product_name' => 'Minimal Order',
-        'customer_name' => 'Klien Minimalis',
         'target_quantity' => 500,
         'order_date' => '2026-08-26',
         'status' => ProductionOrderStatus::READY,
+        'no_obc' => null,
+        'perso_type' => null,
+        'seri' => null,
         'product_code' => null,
+        'customer_name' => null,
         'specification' => null,
         'paper_type' => null,
         'machine_number' => null,
         'delivery_deadline' => null,
+        'tgl_pakai_bb' => null,
+        'tgl_cetak' => null,
+        'tgl_verifikasi' => null,
+        'packaging_date' => null,
         'created_by' => null,
     ]);
 
+    expect($order->no_obc)->toBeNull();
+    expect($order->perso_type)->toBeNull();
+    expect($order->seri)->toBeNull();
     expect($order->product_code)->toBeNull();
+    expect($order->customer_name)->toBeNull();
     expect($order->specification)->toBeNull();
     expect($order->paper_type)->toBeNull();
     expect($order->machine_number)->toBeNull();
     expect($order->delivery_deadline)->toBeNull();
+    expect($order->tgl_pakai_bb)->toBeNull();
+    expect($order->tgl_cetak)->toBeNull();
+    expect($order->tgl_verifikasi)->toBeNull();
+    expect($order->packaging_date)->toBeNull();
     expect($order->created_by)->toBeNull();
     expect($order->creator)->toBeNull();
 });
