@@ -13,11 +13,11 @@
 
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 10.5pt;
+            line-height: 1.35;
             color: #111827;
             background: #ffffff;
-            padding: 24px;
+            padding: 20px;
         }
 
         .no-print-bar {
@@ -25,7 +25,7 @@
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 12px 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -64,55 +64,55 @@
         .header {
             text-align: center;
             border-bottom: 2px solid #111827;
-            padding-bottom: 12px;
-            margin-bottom: 16px;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
         }
 
         .header h1 {
-            font-size: 15pt;
+            font-size: 14pt;
             font-weight: 800;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
         .header h2 {
-            font-size: 11pt;
+            font-size: 10pt;
             font-weight: 500;
             color: #4b5563;
-            margin: 2px 0 6px;
+            margin: 2px 0 4px;
         }
 
         .header h3 {
-            font-size: 12pt;
+            font-size: 11pt;
             font-weight: 700;
             text-transform: uppercase;
             text-decoration: underline;
-            margin-top: 6px;
+            margin-top: 4px;
         }
 
         .meta-table {
             width: 100%;
-            margin-bottom: 16px;
-            font-size: 10pt;
+            margin-bottom: 14px;
+            font-size: 9.5pt;
             border-collapse: collapse;
         }
 
         .meta-table td {
-            padding: 4px 6px;
+            padding: 3px 4px;
             vertical-align: top;
         }
 
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            font-size: 9.5pt;
+            margin-bottom: 16px;
+            font-size: 9pt;
         }
 
         .data-table th,
         .data-table td {
             border: 1px solid #374151;
-            padding: 6px 8px;
+            padding: 5px 6px;
         }
 
         .data-table th {
@@ -120,7 +120,7 @@
             text-align: center;
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 8.5pt;
+            font-size: 8pt;
         }
 
         .text-center { text-align: center; }
@@ -130,8 +130,8 @@
 
         .signatures {
             width: 100%;
-            margin-top: 28px;
-            font-size: 10pt;
+            margin-top: 24px;
+            font-size: 9.5pt;
             border-collapse: collapse;
             page-break-inside: avoid;
         }
@@ -144,19 +144,19 @@
         }
 
         .sign-space {
-            height: 65px;
+            height: 55px;
         }
 
         .status-stamp {
             display: inline-block;
-            border: 2px solid #059669;
+            border: 1.5px solid #059669;
             color: #059669;
-            padding: 2px 10px;
-            font-weight: 800;
-            font-size: 9pt;
+            padding: 1px 8px;
+            font-weight: 700;
+            font-size: 8.5pt;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 4px;
+            letter-spacing: 0.5px;
+            border-radius: 3px;
         }
 
         @media print {
@@ -186,12 +186,12 @@
 
     <div class="no-print-bar">
         <div>
-            <strong>Pratinjau Cetak Dokumen Fisik</strong>
-            <span style="color: #6b7280; font-size: 12px; margin-left: 8px;">(Format standar A4 portrait)</span>
+            <strong>Pratinjau Cetak Dokumen Resmi Produksi</strong>
+            <span style="color: #6b7280; font-size: 12px; margin-left: 8px;">(Format standar A4 portrait PT PDS)</span>
         </div>
         <div>
             <button class="btn-print" onclick="window.print()">
-                Cetak Dokumen Sekarang (Print)
+                Cetak Dokumen (Print)
             </button>
             <button class="btn-close" onclick="window.close()">
                 Tutup
@@ -237,10 +237,11 @@
             <tr>
                 <th style="width: 5%;">No</th>
                 <th style="width: 20%;">No PO / Barcode</th>
-                <th style="width: 32%;">Nama Produk & Spesifikasi</th>
-                <th style="width: 10%;">Mesin</th>
-                <th style="width: 15%;">Target SAP</th>
-                <th style="width: 18%;">Hasil Kemas Baik</th>
+                <th style="width: 30%;">Nama Produk & Spesifikasi</th>
+                <th style="width: 9%;">Mesin</th>
+                <th style="width: 12%;">Target SAP</th>
+                <th style="width: 12%;">Kemas Baik</th>
+                <th style="width: 12%;">Reject</th>
             </tr>
         </thead>
         <tbody>
@@ -257,10 +258,11 @@
                     <td class="text-center font-mono">{{ $item->machine_number ?? '-' }}</td>
                     <td class="text-right font-mono">{{ number_format($item->target_quantity, 0, ',', '.') }} {{ $item->unit }}</td>
                     <td class="text-right font-mono font-bold">{{ number_format($item->good_quantity, 0, ',', '.') }} {{ $item->unit }}</td>
+                    <td class="text-right font-mono text-amber-600">{{ number_format($item->reject_quantity, 0, ',', '.') }} {{ $item->unit }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center" style="padding: 24px; color: #6b7280;">
+                    <td colspan="7" class="text-center" style="padding: 20px; color: #6b7280;">
                         Tidak ada item PO tercatat dalam sesi laporan ini.
                     </td>
                 </tr>
@@ -270,13 +272,14 @@
             @php
                 $totalTarget = $report->items->sum('target_quantity');
                 $totalGood = $report->items->sum('good_quantity');
-                $realization = $totalTarget > 0 ? round(($totalGood / $totalTarget) * 100, 1) : 100;
+                $totalReject = $report->items->sum('reject_quantity');
             @endphp
             <tfoot>
                 <tr class="font-bold" style="background-color: #f3f4f6;">
                     <td colspan="4" class="text-right">TOTAL AKUMULASI ({{ $report->items->count() }} ORDER)</td>
                     <td class="text-right font-mono">{{ number_format($totalTarget, 0, ',', '.') }} lbr</td>
                     <td class="text-right font-mono">{{ number_format($totalGood, 0, ',', '.') }} lbr</td>
+                    <td class="text-right font-mono">{{ number_format($totalReject, 0, ',', '.') }} lbr</td>
                 </tr>
             </tfoot>
         @endif
@@ -288,13 +291,13 @@
                 <p>Dibuat oleh (Petugas Kemas):</p>
                 <div class="sign-space"></div>
                 <p class="font-bold" style="text-decoration: underline;">{{ $report->user?->name ?? '............................................' }}</p>
-                <p style="font-size: 9pt; color: #4b5563;">NIP: {{ $report->user?->nip ?? '............................................' }}</p>
+                <p style="font-size: 8.5pt; color: #4b5563;">NP: {{ $report->user?->nip ?? '............................................' }}</p>
             </td>
             <td>
                 <p>Mengetahui (Kepala Unit / Supervisor):</p>
                 <div class="sign-space"></div>
-                <p class="font-bold" style="text-decoration: underline;">{{ $report->supervisor?->name ?? '............................................' }}</p>
-                <p style="font-size: 9pt; color: #4b5563;">NIP: {{ $report->supervisor?->nip ?? '............................................' }}</p>
+                <p class="font-bold" style="text-decoration: underline;">{{ $report->supervisor?->name ?? '( ............................................ )' }}</p>
+                <p style="font-size: 8.5pt; color: #4b5563;">NP: {{ $report->supervisor?->nip ?? '............................................' }}</p>
             </td>
         </tr>
     </table>

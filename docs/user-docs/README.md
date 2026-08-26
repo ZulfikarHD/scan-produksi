@@ -43,3 +43,10 @@ Selamat datang di pusat dokumentasi dan panduan operasional **Sistem Monitoring 
    - Menghapus baris item PO yang salah pindai.
    - Menyelesaikan laporan shift (*Finalisasi*) dan mencetak dokumen fisik standar A4.
    - Membuka kembali sesi draft oleh Supervisor.
+
+7. **[Panduan Arsip Laporan, Koreksi, Verifikasi, dan Cetak Fisik](guides/panduan-arsip-laporan-verifikasi-dan-cetak.md)**
+   - Menjelajah, memfilter (seri produk, shift, status, preset tanggal), dan mencari riwayat arsip laporan produksi.
+   - Melihat rincian item order terscan dan jejak audit verifikasi.
+   - Memperbaiki data laporan dan menambahkan order susulan dalam batas waktu 24 jam.
+   - Memberikan persetujuan verifikasi resmi oleh Supervisor.
+   - Mencetak dokumen fisik standar A4 dan mengekspor data ke format Excel (`.xlsx`).

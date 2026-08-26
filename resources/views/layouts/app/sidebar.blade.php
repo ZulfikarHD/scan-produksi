@@ -38,7 +38,7 @@
                     <flux:navlist.item
                         icon="document-plus"
                         :href="route('reports.session')"
-                        :current="request()->routeIs('reports.*') || request()->routeIs('laporan.create')"
+                        :current="request()->routeIs('reports.session') || request()->routeIs('reports.create') || request()->routeIs('reports.entry') || request()->routeIs('laporan.create')"
                         wire:navigate
                     >
                         Buat Laporan
@@ -46,8 +46,8 @@
 
                     <flux:navlist.item
                         icon="document-text"
-                        :href="Route::has('laporan.index') ? route('laporan.index') : '#'"
-                        :current="request()->routeIs('laporan.index*')"
+                        :href="route('reports.index')"
+                        :current="request()->routeIs('reports.index') || request()->routeIs('reports.show') || request()->routeIs('reports.edit') || request()->routeIs('laporan.index')"
                         wire:navigate
                     >
                         Lihat Laporan

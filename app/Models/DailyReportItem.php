@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $machine_number
  * @property int $target_quantity
  * @property int $good_quantity
+ * @property int $reject_quantity
  * @property string $unit
  * @property string|null $notes
  * @property Carbon|null $scanned_at
@@ -42,6 +43,7 @@ class DailyReportItem extends Model
         'machine_number',
         'target_quantity',
         'good_quantity',
+        'reject_quantity',
         'unit',
         'notes',
         'scanned_at',
@@ -52,6 +54,7 @@ class DailyReportItem extends Model
         return [
             'target_quantity' => 'integer',
             'good_quantity' => 'integer',
+            'reject_quantity' => 'integer',
             'scanned_at' => 'datetime',
         ];
     }

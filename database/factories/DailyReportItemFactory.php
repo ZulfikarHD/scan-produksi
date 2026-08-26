@@ -32,6 +32,7 @@ class DailyReportItemFactory extends Factory
             'machine_number' => 'M-'.fake()->numberBetween(1, 10),
             'target_quantity' => $targetQty,
             'good_quantity' => $targetQty,
+            'reject_quantity' => 0,
             'unit' => 'lembar',
             'notes' => null,
             'scanned_at' => now(),
@@ -51,6 +52,7 @@ class DailyReportItemFactory extends Factory
                 'machine_number' => $order->machine_number,
                 'target_quantity' => $order->target_quantity,
                 'good_quantity' => $order->target_quantity,
+                'reject_quantity' => 0,
                 'unit' => $order->unit,
             ];
         });

@@ -34,6 +34,7 @@ class DailyReportFactory extends Factory
             'supervisor_id' => null,
             'total_items_count' => 0,
             'total_good_quantity' => 0,
+            'total_reject_quantity' => 0,
             'notes' => fake()->optional()->sentence(),
             'status' => ReportStatus::DRAFT,
         ];
@@ -51,6 +52,7 @@ class DailyReportFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => ReportStatus::VERIFIED,
             'supervisor_id' => User::factory()->state(['role' => UserRole::SUPERVISOR]),
+            'verified_at' => now(),
         ]);
     }
 }
