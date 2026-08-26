@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ReportExportController;
+use App\Livewire\Dashboard\DashboardIndex;
 use App\Livewire\MasterData\UpdateDatabase;
 use App\Livewire\Petugas\PetugasIndex;
 use App\Livewire\Reports\EditReport;
@@ -9,14 +10,15 @@ use App\Livewire\Reports\ReportDetail;
 use App\Livewire\Reports\ReportIndex;
 use App\Livewire\Reports\ReportSessionLauncher;
 use App\Models\DailyReport;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
+    return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardIndex::class)->name('dashboard');
 
     // Modul Laporan Produksi — Buat Laporan & Sesi Pemindaian (Phase 03)
     Route::get('reports/session', ReportSessionLauncher::class)->name('reports.session');

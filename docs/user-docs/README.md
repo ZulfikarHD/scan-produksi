@@ -50,3 +50,10 @@ Selamat datang di pusat dokumentasi dan panduan operasional **Sistem Monitoring 
    - Memperbaiki data laporan dan menambahkan order susulan dalam batas waktu 24 jam.
    - Memberikan persetujuan verifikasi resmi oleh Supervisor.
    - Mencetak dokumen fisik standar A4 dan mengekspor data ke format Excel (`.xlsx`).
+
+8. **[Panduan Beranda & Analitik Produksi (Dashboard)](guides/panduan-beranda-dan-analitik-dashboard.md)**
+   - Memantau 5 kartu indikator kinerja utama (KPI) harian secara *real-time*.
+   - Membaca grafik analitik tren produksi 14 hari terakhir dengan fitur filter rentang waktu dan tipe grafik.
+   - Memeriksa proporsi kontribusi antar shift kerja dan peringkat 5 mesin cetak terproduktif.
+   - Memanfaatkan pintasan aksi cepat ke seluruh modul operasional sistem.
+   - Memeriksa riwayat 5 berkas laporan produksi terbaru dan menyegarkan data seketika.

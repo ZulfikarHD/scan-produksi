@@ -40,7 +40,7 @@ test('petugas does not see supervisor-only menu items in sidebar', function () {
         'role' => UserRole::PETUGAS,
     ]);
 
-    $response = $this->actingAs($petugas)->get(route('dashboard'));
+    $response = $this->actingAs($petugas)->get(route('reports.index'));
 
     $response->assertOk();
     $response->assertDontSee('Data Petugas');

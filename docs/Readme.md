@@ -19,6 +19,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [Daily Production Report Session & Code Generator](dev-docs/features/daily-production-report-session.md)
   - [High-Speed Continuous Barcode Scanning & Inline Production Entry](dev-docs/features/continuous-barcode-scan-and-inline-production-entry.md)
   - [Daily Production Report Management, Verification & Export](dev-docs/features/report-management-verification-and-export.md)
+  - [Dashboard Analytics & 14-Day Production Visualization](dev-docs/features/dashboard-analytics-and-14-day-chart.md)
 - **Architecture Decision Records (ADRs)**:
   - [ADR-001: Fortify Livewire & Multi-Identifier NP Authentication](dev-docs/decisions/001-fortify-livewire-and-np-authentication.md)
   - [ADR-002: Role-Based Access Control & Single-Surface Petugas Management](dev-docs/decisions/002-role-based-access-control-and-single-surface-user-management.md)
@@ -28,6 +29,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [ADR-006: Daily Production Report Schema, Series Categorization, and Session Launcher Architecture](dev-docs/decisions/006-daily-production-report-schema-and-session-launcher.md)
   - [ADR-007: High-Speed Continuous Barcode Scanning, Focus Management, and Inline Table Editing Architecture](dev-docs/decisions/007-high-speed-continuous-barcode-scanning-and-inline-table-editing.md)
   - [ADR-008: Daily Report Verification, Correction Window, and Streaming Export Architecture](dev-docs/decisions/008-daily-report-verification-and-streaming-export-architecture.md)
+  - [ADR-009: Dashboard Analytics Aggregation, Zero-Fill Timeseries, and Chart.js Integration](dev-docs/decisions/009-dashboard-analytics-aggregation-and-chartjs-visualization.md)
 
 ### 2. User Guides (`docs/user-docs/`)
 Step-by-step guides for unit supervisors and packaging operators.
@@ -41,6 +43,7 @@ Step-by-step guides for unit supervisors and packaging operators.
   - [Panduan Inisiasi Sesi Laporan Produksi (Buat Laporan)](user-docs/guides/panduan-inisiasi-sesi-laporan-produksi.md)
   - [Panduan Pemindaian Barcode & Input Hasil Produksi](user-docs/guides/panduan-pemindaian-barcode-dan-input-produksi.md)
   - [Panduan Arsip Laporan, Koreksi, Verifikasi, dan Cetak Fisik](user-docs/guides/panduan-arsip-laporan-verifikasi-dan-cetak.md)
+  - [Panduan Beranda & Analitik Produksi (Dashboard)](user-docs/guides/panduan-beranda-dan-analitik-dashboard.md)
 
 ### 3. Scrum Planning & Specifications
 - [Phase 01: Foundation, Auth & User Management](scrum-planning/phase-01-foundation-auth-user-management.md)
