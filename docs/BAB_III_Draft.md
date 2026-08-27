@@ -1,11 +1,11 @@
 # BAB III
 # PENGEMBANGAN PERANGKAT LUNAK
 
-Bab ini menguraikan secara komprehensif metodologi, alur kerja, serta tahapan rekayasa perangkat lunak yang diterapkan dalam membangun Sistem Dokumentasi Hasil Produksi Harian Berbasis Web dengan Scan Barcode dan Grafik Performa 14 Hari Kerja. Objek penelitian ini berpusat pada Unit Pengemasan di PT Percetakan Dokumen Sekuriti, Ciampel, Karawang, yang bertanggung jawab atas proses akhir verifikasi kuantitas, pengemasan dokumen berpengaman tinggi, dan pelaporan hasil kerja harian kepada Kepala Unit/Supervisor. Seluruh tahapan pengembangan disusun secara terstruktur untuk menjawab permasalahan inefisiensi pencatatan manual, mengurangi potensi kesalahan manusia (*human error*), serta menghadirkan sistem pemantauan produktivitas harian yang transparan dan terukur.
+Bab ini menguraikan secara komprehensif metodologi, alur kerja, serta tahapan rekayasa perangkat lunak yang diterapkan dalam membangun Sistem Dokumentasi Hasil Produksi Harian Berbasis Web dengan Scan Barcode dan Grafik Performa 14 Hari Kerja. Objek penelitian ini berpusat pada Unit Pengemasan di PT Percetakan Dokumen Sekuriti, Karawang, yang bertanggung jawab atas proses akhir verifikasi kuantitas, pengemasan dokumen berpengaman tinggi, dan pelaporan hasil kerja harian kepada Kepala Unit / Supervisor. Seluruh tahapan pengembangan disusun secara terstruktur untuk menjawab permasalahan inefisiensi pencatatan manual, mengurangi potensi kesalahan manusia (*human error*), serta menghadirkan sistem pemantauan produktivitas harian yang transparan dan terukur.
 
 ---
 
-## 3.1 Metode Pengembangan Perangkat Lunak
+## 3.1. Metode Pengembangan Perangkat Lunak
 
 ### 3.1.1 Nama dan Konsep Dasar Metode Pengembangan
 Model pengembangan perangkat lunak yang diterapkan dalam penelitian ini adalah **Metode Waterfall** (*Classic Life Cycle*). Metode Waterfall merupakan pendekatan rekayasa perangkat lunak yang bersifat sekuensial dan sistematis, di mana kemajuan proses pengembangan diposisikan mengalir secara linier ke arah bawah melalui tahapan-tahapan yang terdefinisi secara baku. Dalam model ini, suatu fase pengembangan harus diselesaikan secara tuntas dan menghasilkan dokumen spesifikasi serta hasil kerja yang valid sebelum fase berikutnya dapat dimulai.
@@ -17,7 +17,7 @@ Pemilihan metode Waterfall dalam pengembangan sistem dokumentasi hasil produksi 
 
 Pertama, karakteristik kebutuhan fungsional sistem telah teridentifikasi secara jelas dan terperinci sejak tahap awal observasi lapangan di Unit Pengemasan PT Percetakan Dokumen Sekuriti. Format data pesanan dari sistem SAP, struktur Nomor PO yang tertuang dalam bentuk barcode tipe Code 128 pada Kartu Mesin Produksi, serta kebutuhan formulir pelaporan hasil kemas memiliki format dan aturan bisnis yang sudah baku. Kondisi kebutuhan yang pasti ini sangat selaras dengan sifat metode Waterfall yang tidak membutuhkan perubahan arsitektur secara berulang-ulang di tengah proses konstruksi.
 
-Kedua, prosedur operasional standar (SOP) di area kerja pengemasan memiliki alur kerja yang stabil dan terikat pada hierarki pertanggungjawaban produksi. Hubungan kerja antara Petugas Pengemasan sebagai pelaksana pencatatan dan Kepala Unit/Supervisor sebagai pemeriksa dan penanggung jawab laporan harian menuntut kejelasan peran serta keabsahan data yang akurat dan dapat dipertanggungjawabkan. Dengan metode Waterfall, pembagian hak akses pengguna dan alur verifikasi laporan dapat dirancang dengan jelas sejak awal.
+Kedua, prosedur operasional standar (SOP) di area kerja pengemasan memiliki alur kerja yang stabil dan terikat pada hierarki pertanggungjawaban produksi. Hubungan kerja antara Petugas Pengemasan sebagai pelaksana pencatatan dan Kepala Unit / Supervisor sebagai pemeriksa dan penanggung jawab laporan harian menuntut kejelasan peran serta keabsahan data yang valid dan akurat. Dengan metode Waterfall, pembagian hak akses pengguna dan alur verifikasi laporan dapat dirancang dengan jelas sejak awal.
 
 Ketiga, keterbatasan waktu pengerjaan dan sumber daya penelitian memerlukan manajemen proyek yang teratur dengan batas pencapaian (*milestones*) yang terukur. Dengan membagi pengembangan ke dalam tahapan sekuensial yang berurutan, evaluasi terhadap keberhasilan setiap fase, mulai dari analisis alur data, pemodelan basis data, hingga pengujian scanner, dapat dilakukan secara terstruktur tanpa menimbulkan tumpang tindih aktivitas.
 
@@ -28,23 +28,23 @@ Secara umum, metode Waterfall yang diterapkan dalam penelitian ini terdiri atas 
 
 1. **Analisis Kebutuhan (*Requirement Analysis*)**
    <br>
-   Tahap pengumpulan data komprehensif melalui observasi langsung di area kerja pengemasan, wawancara mendalam bersama operator kemas dan supervisor, serta penelaahan dokumen fisik Kartu Mesin Produksi dan format laporan harian. Tahap ini menghasilkan spesifikasi kebutuhan fungsional dan non-fungsional sistem yang menjadi acuan utama perancangan.
+   Tahap pengumpulan data komprehensif melalui wawancara, observasi langsung di area kerja pengemasan, serta studi pustaka. Tahap ini menghasilkan dokumen spesifikasi kebutuhan sistem pengguna yang mencakup kebutuhan fungsional dan non-fungsional sebagai acuan utama perancangan.
 
 2. **Perancangan Sistem (*System Design*)**
    <br>
-   Tahap perancangan arsitektur perangkat lunak yang menerjemahkan kebutuhan sistem ke dalam representasi logis dan fisik. Aktivitas ini mencakup pemodelan perilaku sistem menggunakan diagram UML (*Use Case Diagram* dan *Activity Diagram*), perancangan relasi data menggunakan *Class Diagram* / ERD, serta perancangan antarmuka visual pengguna (*UI/UX Mockups*).
+   Tahap perancangan arsitektur perangkat lunak yang menerjemahkan kebutuhan sistem ke dalam representasi logis dan fisik. Aktivitas ini mencakup pemodelan use case diagram beserta skenario lengkapnya, activity diagram, perancangan Entity Relationship Diagram (ERD), transformasi Logical Record Structure (LRS), spesifikasi tabel basis data, dan perancangan antarmuka pengguna.
 
 3. **Implementasi (*Implementation*)**
    <br>
-   Tahap penerjemahan seluruh dokumen perancangan ke dalam pembuatan aplikasi. Pada tahap ini, basis data dibangun, logika bisnis backend diimplementasikan menggunakan Laravel dengan pola *Service Layer*, antarmuka reaktif dibangun dengan teknologi berbasis web, fungsi penangkap data barcode scanner diintegrasikan, dan kalkulasi data grafik performa 14 hari kerja dikonfigurasikan.
+   Tahap penerjemahan seluruh dokumen perancangan ke dalam pembuatan aplikasi fungsional. Pada tahap ini, basis data dikonfigurasikan, logika backend dibangun menggunakan Laravel dengan arsitektur MVC, antarmuka reaktif diwujudkan melalui Livewire dan Flux UI, integrasi pembacaan barcode Code 128 dikonfigurasikan, dan modul kalkulasi analitik grafik 14 hari kerja diaktifkan.
 
 4. **Pengujian Sistem (*Testing*)**
    <br>
-   Tahap pengujian fungsionalitas aplikasi yang telah selesai dibangun guna memastikan bahwa setiap modul bekerja sesuai rancangan dan terbebas dari kesalahan logika maupun kegagalan sistem. Pengujian dilakukan dengan teknik *Black Box Testing* yang menguji keakuratan masukan dan keluaran sistem pada skenario operasional nyata.
+   Tahap verifikasi dan validasi aplikasi untuk memastikan setiap fungsi bekerja sesuai dengan rancangan spesifikasi kebutuhan. Pengujian dilakukan menggunakan metode *Black Box Testing* yang menguji keakuratan masukan dan keluaran sistem pada skenario operasional nyata.
 
 5. **Pemeliharaan (*Maintenance*)**
    <br>
-   Tahap pemeliharaan dan penjaminan keberlanjutan operasional sistem setelah aplikasi diimplementasikan di lingkungan kerja. Kegiatan ini mencakup pencadangan basis data berkala, penanganan kendala yang tidak terdeteksi saat pengujian, serta penyesuaian konfigurasi jika terjadi pembaruan format data ekspor dari sistem SAP.
+   Tahap pemeliharaan sistem setelah aplikasi diterapkan di lingkungan kerja. Kegiatan ini mencakup pencadangan basis data berkala, penanganan kendala teknis yang timbul, pembaruan keamanan, serta penyesuaian logika sistem terhadap perubahan format data ekspor SAP.
 
 ### 3.1.4 Kesesuaian Metode dengan Penelitian
 Penerapan metode Waterfall memberikan kepastian alur kerja yang mendukung tujuan penelitian. Dengan menetapkan analisis dan desain arsitektur secara matang sebelum pembuatan aplikasi dimulai, pengembang dapat mengantisipasi kendala integrasi antara data hasil scanner dan basis data master SAP. Setiap fungsi yang dikembangkan, mulai dari pembacaan barcode cepat hingga penyajian grafik performa 14 hari kerja, memiliki acuan pengujian yang jelas, sehingga aplikasi yang dihasilkan dapat berfungsi dengan stabil, akurat, dan mudah digunakan oleh petugas di Unit Pengemasan.
@@ -54,10 +54,10 @@ Alur tahapan pengembangan perangkat lunak menggunakan model Waterfall diilustras
 
 ```mermaid
 flowchart TD
-    A["1. Analisis Kebutuhan (Requirements Analysis)<br/>- Investigasi alur pencatatan manual di Unit Pengemasan<br/>- Identifikasi kebutuhan fungsional & non-fungsional"] --> B["2. Perancangan Sistem (System Design)<br/>- Pemodelan UML (Use Case & Activity Diagram)<br/>- Perancangan Basis Data (Class Diagram & Kamus Data)<br/>- Perancangan Antarmuka Pengguna (UI/UX Mockups)"]
-    B --> C["3. Implementasi (Implementation)<br/>- Pembuatan program backend & frontend web<br/>- Integrasi scanner barcode Code 128 & data master SAP<br/>- Pembuatan modul analitik grafik performa 14 hari"]
-    C --> D["4. Pengujian Sistem (Testing)<br/>- Pengujian fungsionalitas menggunakan Black Box Testing<br/>- Verifikasi keakuratan input barcode & kalkulasi agregasi"]
-    D --> E["5. Pemeliharaan (Maintenance)<br/>- Pemeliharaan sistem & pencadangan basis data rutin<br/>- Penyesuaian skema SAP & penanganan kendala operasional"]
+    A["1. Analisis Kebutuhan (Requirements Analysis)<br/>- Pengumpulan Data: Wawancara, Observasi, Studi Pustaka<br/>- Identifikasi Kebutuhan Fungsional & Non-Fungsional"] --> B["2. Perancangan Sistem (System Design)<br/>- Pemodelan UML: Use Case Diagram & Activity Diagram<br/>- Perancangan Data: ERD, LRS, & Spesifikasi File Basis Data<br/>- Perancangan Antarmuka Pengguna (UI/UX Mockups)"]
+    B --> C["3. Implementasi (Implementation)<br/>- Konfigurasi Environment: Windows 11, Laragon, MySQL<br/>- Pembuatan Aplikasi: Laravel, Livewire, Flux UI, Tailwind CSS<br/>- Integrasi Scanner Barcode Code 128 & Grafik Chart.js"]
+    C --> D["4. Pengujian Sistem (Testing)<br/>- Pengujian Fungsionalitas Menggunakan Black Box Testing<br/>- Verifikasi Validitas Input Barcode, Peran Akun, & Agregasi"]
+    D --> E["5. Pemeliharaan (Maintenance)<br/>- Pemeliharaan Korektif, Adaptif SAP, & Perfektif<br/>- Prosedur Pencadangan Basis Data & Optimasi Indeks"]
 
     classDef stage fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a;
     class A,B,C,D,E stage;
@@ -68,84 +68,106 @@ flowchart TD
 
 ## 3.2 Tahap Pengembangan Perangkat Lunak
 
-### A. Analisis Kebutuhan
+### A. Tahapan Perencanaan Kebutuhan
 
-Tahap analisis kebutuhan merupakan langkah awal dalam siklus pengembangan perangkat lunak. Pada tahap ini, pengembang melakukan investigasi menyeluruh mengenai mekanisme operasional yang sedang berjalan pada Unit Pengemasan PT Percetakan Dokumen Sekuriti untuk mengidentifikasi akar permasalahan, memetakan kendala operasional, dan merumuskan batasan solusi teknologi yang tepat sasaran.
+Tahap perencanaan kebutuhan merupakan langkah fondasional dalam siklus rekayasa perangkat lunak. Pada tahap ini, pengembang melakukan investigasi menyeluruh mengenai mekanisme operasional yang sedang berjalan pada Unit Pengemasan PT Percetakan Dokumen Sekuriti untuk mengidentifikasi akar permasalahan, memetakan kendala operasional, dan merumuskan batasan solusi teknologi yang tepat sasaran.
 
-#### 1. Analisis Permasalahan dan Kebutuhan Pengguna
-Unit Pengemasan pada PT Percetakan Dokumen Sekuriti merupakan bagian akhir dalam proses produksi percetakan sekuriti sebelum produk dikirimkan kepada pelanggan (kementerian, perbankan, dan lembaga negara). Pada unit kerja ini, lembaran produk cetak yang telah melewati proses pencetakan dan pemeriksaan mutu akan dihitung, diverifikasi identitas pesanannya, dan dikemas rapi sesuai spesifikasi pemesanan.
+#### 1. Tahap Pengumpulan Data
+Untuk memperoleh data yang akurat, komprehensif, dan relevan dengan kebutuhan sistem, proses pengumpulan data dilakukan melalui tiga tahapan utama:
 
-Berdasarkan hasil observasi dan penelaahan alur kerja lapangan, proses dokumentasi hasil produksi harian saat ini masih mengandalkan pencatatan manual berbasis kertas (tulis tangan pada lembar formulir folio). Setiap lembar Kartu Mesin Produksi yang menyertai tumpukan produk kemas memuat data identitas order, seperti Nomor Order/PO, nama produk, spesifikasi bahan kertas berpengaman, nomor mesin cetak asal, dan jumlah cetak siap kirim. Petugas pengemasan harus menyalin ulang seluruh atribut informasi tersebut satu per satu menggunakan pulpen ke dalam lembar laporan rekapitulasi harian.
-
-Kondisi pencatatan manual ini menimbulkan serangkaian permasalahan operasional:
-Pertama, terjadi inefisiensi waktu kerja. Petugas membutuhkan waktu rata-rata 2 hingga 3 menit untuk menyalin rincian spesifikasi satu kartu mesin secara manual. Apabila dalam satu giliran kerja (*shift*) terdapat puluhan hingga ratusan pesanan kemas, akumulasi waktu yang terbuang hanya untuk kegiatan administrasi tulis tangan cukup besar, sehingga mengurangi efisiensi kerja operator pada kegiatan fisik pengemasan.
-Kedua, risiko kesalahan pencatatan (*human error*). Penulisan angka jumlah kemas baik maupun reject yang tidak terbaca jelas atau salah tulis mengakibatkan ketidaksinkronan data antara lembar laporan harian dengan stok fisik barang yang siap dikirim.
-Ketiga, potensi dokumen terselip. Penumpukan fisik berkas Kartu Mesin Produksi di meja kerja pengemasan rawan tercecer atau terselip di tumpukan lain, yang berakibat pada terhambatnya penelusuran riwayat produksi suatu pesanan sekuriti.
-Keempat, keterlambatan pelaporan kepada Kepala Unit/Supervisor. Karena proses rekapitulasi dan penghitungan total output harian baru dapat dilakukan secara manual setelah jam kerja berakhir, laporan produksi harian sering kali terlambat diserahkan untuk proses evaluasi dan perencanaan produksi hari berikutnya.
-Kelima, ketiadaan sarana pemantauan tren produktivitas. Supervisor tidak memiliki alat bantu visual untuk meninjau dinamika pencapaian volume produksi harian, perbandingan hasil antar-shift, maupun tren performa dalam rentang 14 hari kerja terakhir guna mendeteksi penurunan output secara cepat.
-
-Padahal, pada Kartu Mesin Produksi telah tercetak kode barcode tipe Code 128 yang merepresentasikan Nomor PO, dan di ruang kerja unit pengemasan telah tersedia fasilitas komputer serta perangkat *barcode scanner* yang selama ini belum dimanfaatkan secara optimal untuk pencatatan internal. Oleh karena itu, dibangun sebuah Sistem Dokumentasi Hasil Produksi Harian berbasis web yang mengintegrasikan pembacaan barcode dari kartu mesin, terhubung dengan master data SAP, dan dilengkapi dasbor visualisasi grafik performa 14 hari kerja terakhir.
-
-#### 2. Kebutuhan Fungsional (*Functional Requirements*)
-Kebutuhan fungsional mendefinisikan kapabilitas, proses kerja, dan layanan interaktif yang wajib disediakan oleh sistem aplikasi untuk memenuhi kebutuhan pengguna:
-
-1. **Modul Autentikasi Pengguna**
+##### a. Wawancara
+Wawancara mendalam (*in-depth interview*) dilakukan secara langsung dengan para pemangku kepentingan (*stakeholders*) di lingkungan Unit Pengemasan PT Percetakan Dokumen Sekuriti, antara lain:
+1. **Kepala Unit / Supervisor Pengemasan (Bpk. Agus Soelistyo)**
    <br>
-   Sistem menyediakan antarmuka otentikasi berbasis formulir login yang memvalidasi kombinasi Nomor Pegawai (NP) dan kata sandi (*password*) terenkripsi. Sistem membedakan hak akses secara ketat berdasarkan dua peran pengguna, yaitu **Petugas** (operator pengemasan yang berwenang melakukan scan barcode, mencatat hasil kemas, dan mencetak laporan) serta **Supervisor** (Kepala Unit/Admin yang memiliki wewenang tambahan mengelola master akun petugas, mengimpor master data SAP, memverifikasi laporan, dan menganalisis grafik performa). Sistem juga menyediakan mekanisme keluar sistem (*logout*) yang aman.
-
-2. **Modul Manajemen Data Petugas**
+   Wawancara difokuskan pada prosedur operasional standar (SOP) pemeriksaan hasil produksi, mekanisme verifikasi laporan harian, kendala lambatnya penerimaan rekapitulasi kerja dari giliran kerja (*shift*) sebelumnya, serta kebutuhan terhadap instrumen pemantauan visual berupa grafik performa 14 hari kerja terakhir untuk mengevaluasi stabilitas produktivitas dan fluktuasi angka *reject*.
+2. **Petugas Operator Pengemasan (Bpk. Umar Ibnu Zainal M. dan Operator Shift)**
    <br>
-   Sistem menyediakan antarmuka khusus bagi Supervisor untuk mengelola data akun operator pengemasan. Fungsionalitas ini mencakup penambahan akun baru, peninjauan daftar seluruh petugas beserta status aktif/nonaktif, pembaruan profil pengguna, pengubahan status akses, dan pengaturan ulang (*reset*) kata sandi akun secara terpusat berdasarkan Nomor Pegawai (NP).
+   Wawancara difokuskan pada alur teknis pencatatan fisik yang selama ini dilakukan di meja kerja pengemasan, kendala penyalinan manual dari Kartu Mesin Produksi ke lembar kertas folio, durasi waktu yang dihabiskan untuk mencatat data satu kartu mesin (mencapai 2 hingga 3 menit per pesanan), serta kesulitan dalam menelusuri riwayat pesanan yang terselip.
 
-3. **Modul Update Database (Master Data SAP)**
-   <br>
-   Sistem menyediakan antarmuka pengunggahan berkas master pesanan produksi hasil ekspor dari sistem ERP SAP dalam format spreadsheet (`.xlsx` atau `.csv`). Sistem menjalankan proses pembacaan dan validasi data secara otomatis untuk mengekstrak kolom Nomor PO, Kode Produk, Nama Barang, Spesifikasi Sekuriti, Nomor Mesin Asal, dan Target Kuantitas Siap Kemas, kemudian menyimpannya ke dalam basis data master sebagai referensi utama saat pemindaian barcode berlangsung.
+Dari hasil wawancara, disimpulkan bahwa pengguna sangat membutuhkan sistem berbasis web yang dapat mengisi data spesifikasi pesanan secara otomatis hanya dengan memindai barcode Nomor PO, sehingga petugas dapat berfokus pada aktivitas fisik pengemasan tanpa terbebani administrasi tulis tangan.
 
-4. **Modul Buat Laporan (Scan Barcode & Entri Data Kemas)**
-   <br>
-   Sistem menyediakan halaman kerja utama bagi Petugas yang mengarahkan fokus kursor secara otomatis ke kolom pembacaan barcode. Saat petugas memindai kode barcode Code 128 pada Kartu Mesin Produksi menggunakan scanner, sistem secara instan mencari rekaman Nomor PO pada basis data master dan menampilkan spesifikasi produk (Nama Produk, Spesifikasi Kertas/Hologram, Nomor Mesin, dan Target Order) secara otomatis tanpa pengetikan manual. Petugas selanjutnya memasukkan jumlah hasil kemas baik (siap kirim) dan kuantitas *reject* (rusak/tidak sempurna). Data item tersebut ditambahkan ke tabel penampungan sementara (*staging table*) multi-item sebelum difinalisasi. Sistem menghasilkan Nomor Laporan unik terstandarisasi (`LAP-YYYYMMDD-XXXX`) dan mencatat seluruh transaksi ke basis data secara aman.
+##### b. Observasi
+Observasi lapangan dilakukan dengan mengamati secara langsung alur kerja fisik di ruang Unit Pengemasan PT Percetakan Dokumen Sekuriti di Karawang selama jam kerja aktif (meliputi Shift 1 Pagi, Shift 2 Siang, dan Shift 3 Malam).
 
-5. **Modul Manajemen dan Cetak Laporan (Lihat Laporan)**
-   <br>
-   Sistem menyediakan tabel daftar riwayat laporan hasil produksi harian yang dilengkapi fitur pencarian dinamis, penyaringan (*filtering*) berdasarkan rentang tanggal atau status verifikasi, serta peninjauan rincian item per laporan. Petugas dapat melakukan pengeditan korektif terhadap draf laporan selama belum diverifikasi oleh Supervisor. Supervisor memiliki wewenang untuk meninjau dan menyetujui (*verify*) laporan harian. Selain itu, sistem menyediakan fitur cetak dokumen fisik standar ukuran kertas A4 lengkap dengan kolom pengesahan tanda tangan antara Petugas Pelaksana dan Kepala Unit.
+Fokus pengamatan meliputi:
+1. **Pemeriksaan Fisik Kartu Mesin Produksi:** Mengamati struktur atribut data yang tertera pada lembaran kartu mesin, termasuk keberadaan kode barcode linier tipe **Code 128** yang merepresentasikan Nomor PO (*Production Order*), nomor mesin cetak asal, jenis bahan kertas berpengaman, dan target kuantitas.
+2. **Peralatan Kerja Tersedia:** Memeriksa ketersediaan fasilitas komputer PC dan perangkat *barcode scanner* genggam berbasis USB yang berada di meja kontrol pengemasan, yang selama ini belum terintegrasi ke dalam sistem pencatatan terpusat.
+3. **Penanganan Dokumen Fisik:** Mengamati bagaimana lembaran formulir laporan harian ditumpuk, disalin ulang pada akhir shift, ditandatangani secara manual, dan disimpan dalam ordner arsip fisik yang rentan mengalami kerusakan fisik atau kehilangan data historis.
 
-6. **Modul Dashboard dan Visualisasi Grafik Performa 14 Hari Kerja**
-   <br>
-   Sistem menyajikan halaman beranda terpadu yang menampilkan kartu ringkasan metrik kinerja operasional harian (Total Kemas Baik Hari Ini, Total Reject, Total PO Terscan, dan Status Laporan Harian). Sistem secara otomatis menghitung akumulasi output kerja harian dan merender visualisasi **Grafik Analitik Hasil Produksi 14 Hari Kerja Terakhir** yang membandingkan tren volume kemas baik terhadap kuantitas reject, serta menyajikan indikator rata-rata output harian dan capaian hari produksi tertinggi.
+##### c. Studi Pustaka
+Studi pustaka dilakukan dengan mengkaji berbagai referensi ilmiah, jurnal rekayasa perangkat lunak, buku teks, dan dokumentasi teknis yang relevan dengan topik penelitian.
 
-#### 3. Kebutuhan Non-Fungsional (*Non-Functional Requirements*)
-Kebutuhan non-fungsional menetapkan batasan kualitas teknis, performa, dan lingkungan operasional perangkat lunak:
-
-1. **Performa dan Kecepatan Respon**
-   <br>
-   Sistem dirancang untuk memberikan respon pencarian data produk pada saat barcode Nomor PO dipindai dalam waktu kurang dari 1 detik. Proses kalkulasi akumulasi data dan penampilan grafik analitik 14 hari kerja pada halaman dashboard diselesaikan dalam waktu di bawah 2 detik pada kondisi jaringan lokal.
-
-2. **Keandalan dan Integritas Transaksi Data**
-   <br>
-   Sistem menerapkan mekanisme pencegahan duplikasi entri data barcode Nomor PO dalam satu sesi pembuatan laporan harian guna mencegah penggandaan pencatatan. Seluruh proses penyimpanan laporan multi-item dibungkus dalam mekanisme transaksi basis data (*database transaction*) untuk menjamin konsistensi data.
-
-3. **Kompatibilitas Perangkat Keras dan Perangkat Lunak**
-   <br>
-   Sistem kompatibel secara langsung (*Plug-and-Play*) dengan perangkat *barcode scanner* genggam berbasis USB yang membaca format standar Code 128. Sistem dapat diakses melalui peramban web modern (*Google Chrome, Mozilla Firefox, Microsoft Edge*) dan format keluaran cetak disesuaikan untuk printer standar kantor pada kertas A4.
-
-4. **Kemudahan Penggunaan (*Usability*)**
-   <br>
-   Tata letak antarmuka dirancang bersih, intuitif, dan kontras, sehingga mempermudah pembacaan data oleh operator di area kerja pengemasan. Sistem dilengkapi dengan notifikasi umpan balik saat proses simpan berhasil atau terjadi kesalahan pengisian data.
-
-5. **Keamanan Sistem dan Data**
-   <br>
-   Seluruh kata sandi pengguna disimpan menggunakan algoritma hashing (*Bcrypt*). Sistem menerapkan pengamanan terhadap ancaman aplikasi web seperti *Cross-Site Request Forgery* (CSRF), *SQL Injection*, serta pembatasan akses halaman berdasarkan peran pengguna (*role-based middleware*).
+Kajian pustaka mencakup:
+1. Teori rekayasa perangkat lunak model Waterfall dan pemodelan visual menggunakan Unified Modeling Language (UML) dari literatur standar akademik.
+2. Prinsip kerja simbologi barcode linier **Code 128** serta teknik penangkapan data masukan scanner melalui antarmuka *Human Interface Device* (HID) pada aplikasi web.
+3. Arsitektur pengembangan web modern menggunakan kerangka kerja Laravel, Livewire untuk reaktivitas antarmuka, dan integrasi pustaka Chart.js untuk perenderan grafik analitik deret waktu (*time-series*).
+4. Dokumentasi teknis mengenai standar keamanan dokumen sekuriti dan regulasi pengelolaan produksi dokumen sekuriti negara.
 
 ---
 
-### B. Perancangan Sistem
+#### 2. Analisa Kebutuhan Sistem Pengguna
+Berdasarkan hasil pengumpulan data, dilakukan analisis kebutuhan sistem pengguna yang dikelompokkan ke dalam kebutuhan fungsional dan kebutuhan non-fungsional:
 
-Tahap perancangan sistem bertujuan untuk memetakan kebutuhan fungsional ke dalam model arsitektur logis, struktur basis data yang terelasi secara utuh, diagram aliran proses bisnis, serta tata letak antarmuka pengguna sebelum proses pembuatan aplikasi dilakukan.
+##### a. Kebutuhan Fungsional (*Functional Requirements*)
+Kebutuhan fungsional mendefinisikan kapabilitas dan layanan operasional yang wajib disediakan oleh sistem aplikasi:
 
-#### 1. Pemodelan Sistem (UML - Unified Modeling Language)
+1. **Modul Autentikasi Pengguna (Login Sistem)**
+   <br>
+   Sistem menyediakan form login yang memvalidasi identitas pengguna menggunakan Nomor Pegawai (NP) dan password terenkripsi. Sistem membedakan hak akses secara ketat berdasarkan dua peran pengguna, yaitu **Petugas** (operator pengemasan yang berwenang melakukan scan barcode, mencatat hasil kemas, dan mencetak laporan) serta **Supervisor** (Kepala Unit yang memiliki wewenang tambahan mengelola master akun petugas, mengimpor master data SAP, memverifikasi laporan, dan menganalisis grafik performa). Sistem juga menyediakan fungsi *logout* yang aman.
 
-##### a. Use Case Diagram
-Use Case Diagram mendeskripsikan interaksi antara aktor (pengguna sistem) dengan fungsionalitas sistem yang tersedia. Sistem ini melibatkan dua aktor utama, yaitu **Petugas (Operator Pengemasan)** dan **Supervisor (Kepala Unit/Admin)**. Hubungan antara aktor dan fungsi-fungsi sistem dimodelkan pada Gambar 3.2:
+2. **Modul Manajemen Data Petugas**
+   <br>
+   Sistem menyediakan antarmuka bagi Supervisor untuk mengelola data akun operator pengemasan, meliputi penambahan data petugas baru, peninjauan daftar petugas, pembaruan data akun, pengubahan status aktif/nonaktif, dan pengaturan ulang (*reset*) kata sandi akun berdasarkan Nomor Pegawai (NP).
+
+3. **Modul Update Database (Master Data SAP)**
+   <br>
+   Sistem menyediakan fasilitas pengunggahan berkas master pesanan produksi dari sistem ERP SAP dalam format spreadsheet (`.xlsx` atau `.csv`). Sistem mengekstrak kolom Nomor PO, Kode Produk, Nama Barang, Spesifikasi Sekuriti, Nomor Mesin Asal, dan Target Kuantitas Siap Kemas, kemudian menyimpannya ke dalam tabel master sistem secara massal (*bulk upsert*).
+
+4. **Modul Buat Laporan (Scan Barcode & Entri Kemas)**
+   <br>
+   Sistem menyediakan halaman kerja utama bagi Petugas yang mengarahkan fokus kursor secara otomatis ke kolom pembacaan barcode. Saat petugas memindai kode barcode Code 128 pada Kartu Mesin Produksi, sistem secara instan mencari rekaman Nomor PO pada basis data master dan menampilkan spesifikasi produk secara otomatis. Petugas selanjutnya memasukkan jumlah hasil kemas baik dan kuantitas reject, lalu menambahkan data ke tabel penampungan sementara (*staging table*) sebelum difinalisasi menjadi dokumen laporan dengan Nomor Laporan unik otomatis (`LAP-YYYYMMDD-XXXX`).
+
+5. **Modul Manajemen dan Cetak Laporan (Lihat Laporan)**
+   <br>
+   Sistem menyediakan tabel riwayat laporan hasil produksi harian yang dilengkapi fitur pencarian, penyaringan tanggal/status, peninjauan rincian item kemas, pengeditan korektif oleh Petugas (selama status draf), verifikasi persetujuan oleh Supervisor, serta pencetakan dokumen fisik rapi standar ukuran kertas A4 lengkap dengan kolom pengesahan tanda tangan.
+
+6. **Modul Dashboard dan Grafik Performa 14 Hari Kerja**
+   <br>
+   Sistem menyajikan halaman beranda terpadu yang menampilkan kartu ringkasan metrik kinerja operasional harian (Total Kemas Baik, Total Reject, Total PO Terscan, dan Status Laporan), serta merender visualisasi **Grafik Analitik Hasil Produksi 14 Hari Kerja Terakhir** yang membandingkan volume kemas baik terhadap kuantitas reject secara interaktif.
+
+##### b. Kebutuhan Non-Fungsional (*Non-Functional Requirements*)
+Kebutuhan non-fungsional menetapkan batasan kualitas teknis dan performa sistem:
+
+1. **Performa dan Kecepatan Respon**
+   <br>
+   Sistem dirancang untuk memberikan respon pencarian data produk pada saat barcode Nomor PO dipindai dalam waktu kurang dari 1 detik. Proses kalkulasi data dan penampilan grafik analitik 14 hari kerja pada dashboard diselesaikan dalam waktu di bawah 2 detik pada jaringan lokal.
+
+2. **Keandalan dan Integritas Transaksi Data**
+   <br>
+   Sistem menerapkan validasi pencegahan duplikasi entri barcode Nomor PO dalam satu sesi laporan harian. Seluruh proses penyimpanan transaksi laporan multi-item dibungkus dalam mekanisme transaksi basis data (*database transaction*) untuk menjamin konsistensi data.
+
+3. **Kompatibilitas Perangkat Keras dan Perangkat Lunak**
+   <br>
+   Sistem kompatibel secara langsung (*Plug-and-Play*) dengan perangkat *barcode scanner* USB yang membaca format Code 128, dapat diakses melalui peramban web modern (*Google Chrome, Mozilla Firefox, Microsoft Edge*), dan format cetak disesuaikan untuk kertas standar A4.
+
+4. **Kemudahan Penggunaan (*Usability*)**
+   <br>
+   Tata letak antarmuka dirancang bersih, intuitif, dan kontras tinggi, mempermudah pengoperasian di meja kerja pengemasan, serta dilengkapi notifikasi umpan balik atas setiap aksi pengguna.
+
+5. **Keamanan Sistem dan Data**
+   <br>
+   Seluruh kata sandi pengguna dienkripsi dengan algoritma *Bcrypt*. Sistem dilengkapi proteksi terhadap serangan web umum (CSRF, SQL Injection, XSS) serta otorisasi berbasis peran pengguna (*role-based access control*).
+
+---
+
+### B. Tahap Analisis Pemodelan
+
+Tahap analisis pemodelan bertujuan untuk memvisualisasikan struktur fungsional, aliran aktivitas proses, skema basis data terelasi, representasi record logis, serta spesifikasi detail berkas tabel data sebelum pembuatan aplikasi dilaksanakan.
+
+#### 1. Use Case Diagram
+Use Case Diagram mendeskripsikan interaksi fungsional antara aktor (pengguna sistem) dengan kapabilitas yang disediakan oleh sistem. Sistem ini melibatkan dua aktor utama, yaitu **Petugas (Operator Pengemasan)** dan **Supervisor (Kepala Unit / Admin)**.
+
+Hubungan fungsional antara kedua aktor dengan modul-modul sistem dimodelkan pada Gambar 3.2:
 
 ```mermaid
 flowchart LR
@@ -153,15 +175,15 @@ flowchart LR
     Supervisor((Supervisor))
 
     subgraph SYSTEM["Sistem Dokumentasi Hasil Produksi Harian"]
-        UC1["Login Sistem (NP & Password)"]
-        UC2["Kelola Data Petugas"]
-        UC3["Update Database (Import SAP)"]
-        UC4["Buat Laporan (Scan Barcode)"]
-        UC5["Simpan Laporan Harian"]
-        UC6["Lihat & Edit Laporan"]
-        UC7["Verifikasi Laporan"]
-        UC8["Cetak Dokumen Laporan"]
-        UC9["Pantau Dashboard & Grafik 14 Hari"]
+        UC1["UC-01: Login Sistem (NP & Password)"]
+        UC2["UC-02: Kelola Data Petugas"]
+        UC3["UC-03: Update Database (Import SAP)"]
+        UC4["UC-04: Buat Laporan (Scan Barcode)"]
+        UC5["UC-05: Simpan Laporan Harian"]
+        UC6["UC-06: Lihat & Edit Laporan"]
+        UC7["UC-07: Verifikasi Laporan"]
+        UC8["UC-08: Cetak Dokumen Laporan A4"]
+        UC9["UC-09: Pantau Dashboard & Grafik 14 Hari"]
     end
 
     Petugas --> UC1
@@ -189,287 +211,779 @@ flowchart LR
 ```
 *Gambar 3.2: Use Case Diagram Sistem Dokumentasi Hasil Produksi Harian*
 
-Rincian peran aktor dan deskripsi fungsional masing-masing use case dijabarkan pada Tabel 3.1 dan Tabel 3.2:
+Rincian peran aktor didefinisikan pada Tabel 3.1:
 
 *Tabel 3.1: Definisi Peran Aktor Sistem*
 | No | Aktor | Deskripsi Peran dan Hak Akses |
 |---|---|---|
-| 1 | **Petugas** | Operator pada Unit Pengemasan yang bertugas melakukan login ke sistem menggunakan Nomor Pegawai (NP), memindai barcode Nomor PO pada Kartu Mesin Produksi, menginputkan kuantitas hasil kemas harian, menyimpan draf dan finalisasi laporan, mencetak lembar laporan fisik, serta memantau ringkasan performa pada dashboard. |
+| 1 | **Petugas** | Operator pada Unit Pengemasan yang bertugas login ke sistem menggunakan Nomor Pegawai (NP), memindai barcode Nomor PO pada Kartu Mesin Produksi, menginputkan kuantitas hasil kemas harian, menyimpan draf dan finalisasi laporan, mencetak lembar laporan fisik, serta memantau ringkasan performa pada dashboard. |
 | 2 | **Supervisor** | Kepala Unit yang bertugas mengelola akun pengguna petugas, mengunggah data master pesanan produksi dari berkas ekspor SAP, meninjau dan memverifikasi laporan produksi harian, mencetak laporan terverifikasi, serta menganalisis visualisasi tren performa pada grafik 14 hari kerja. |
 
-*Tabel 3.2: Deskripsi Fungsional Use Case Sistem*
-| No | Use Case | Aktor Terlibat | Deskripsi Fungsional |
-|---|---|---|---|
-| 1 | Login Sistem | Petugas, Supervisor | Memvalidasi identitas pengguna melalui pencocokan Nomor Pegawai (NP) dan password terenkripsi sebelum memberikan akses ke halaman utama. |
-| 2 | Kelola Data Petugas | Supervisor | Mengelola data akun pengguna sistem, mencakup penambahan akun baru, penonaktifan akun, pembaruan data, dan pengaturan ulang kata sandi berdasarkan Nomor Pegawai (NP). |
-| 3 | Update Database (Import SAP) | Supervisor | Mengunggah dan memvalidasi berkas master data pesanan produksi dari SAP ke dalam tabel master sistem. |
-| 4 | Buat Laporan (Scan Barcode) | Petugas | Menerima data hasil scanner barcode Code 128 dan mengambil spesifikasi produk secara otomatis dari basis data. |
-| 5 | Simpan Laporan Harian | Petugas | Membentuk Nomor Laporan unik otomatis (`LAP-YYYYMMDD-XXXX`) dan menyimpan seluruh rincian transaksi hasil kemas ke basis data. |
-| 6 | Lihat & Edit Laporan | Petugas, Supervisor | Menampilkan daftar riwayat laporan harian, menampilkan detail item barang, dan mengakomodasi koreksi data sebelum verifikasi. |
-| 7 | Verifikasi Laporan | Supervisor | Memberikan status persetujuan resmi (*verified*) terhadap laporan produksi harian yang telah ditinjau keabsahannya. |
-| 8 | Cetak Dokumen Laporan | Petugas, Supervisor | Menerbitkan keluaran cetak lembaran laporan fisik standar ukuran kertas A4 lengkap dengan kolom pengesahan tanda tangan. |
-| 9 | Pantau Dashboard & Grafik 14 Hari | Petugas, Supervisor | Menyajikan kartu metrik ringkasan harian dan visualisasi grafik batang/garis performa produksi selama 14 hari kerja terakhir. |
+Ringkasan fungsional dari sembilan *use case* yang teridentifikasi disajikan pada Tabel 3.2:
+
+*Tabel 3.2: Definisi Fungsional Use Case Sistem*
+| No | Kode Use Case | Nama Use Case | Aktor Terlibat | Deskripsi Fungsional |
+|---|---|---|---|---|
+| 1 | UC-01 | Login Sistem | Petugas, Supervisor | Memvalidasi identitas pengguna melalui pencocokan Nomor Pegawai (NP) dan password terenkripsi sebelum memberikan akses ke halaman utama. |
+| 2 | UC-02 | Kelola Data Petugas | Supervisor | Mengelola data akun pengguna sistem, mencakup penambahan akun baru, penonaktifan akun, pembaruan data, dan reset password berdasarkan Nomor Pegawai (NP). |
+| 3 | UC-03 | Update Database (Import SAP) | Supervisor | Mengunggah dan memvalidasi berkas master data pesanan produksi dari SAP ke dalam tabel master sistem. |
+| 4 | UC-04 | Buat Laporan (Scan Barcode) | Petugas | Menerima data hasil scanner barcode Code 128 dan mengambil spesifikasi produk secara otomatis dari basis data. |
+| 5 | UC-05 | Simpan Laporan Harian | Petugas | Membentuk Nomor Laporan unik otomatis (`LAP-YYYYMMDD-XXXX`) dan menyimpan seluruh rincian transaksi hasil kemas ke basis data. |
+| 6 | UC-06 | Lihat & Edit Laporan | Petugas, Supervisor | Menampilkan daftar riwayat laporan harian, menampilkan detail item barang, dan mengakomodasi koreksi data sebelum verifikasi. |
+| 7 | UC-07 | Verifikasi Laporan | Supervisor | Memberikan status persetujuan resmi (*verified*) terhadap laporan produksi harian yang telah ditinjau keabsahannya. |
+| 8 | UC-08 | Cetak Dokumen Laporan | Petugas, Supervisor | Menerbitkan keluaran cetak lembaran laporan fisik standar ukuran kertas A4 lengkap dengan kolom pengesahan tanda tangan. |
+| 9 | UC-09 | Pantau Dashboard & Grafik 14 Hari | Petugas, Supervisor | Menyajikan kartu metrik ringkasan harian dan visualisasi grafik batang/garis performa produksi selama 14 hari kerja terakhir. |
+
+Guna memperjelas mekanisme operasional setiap *use case*, berikut disajikan tabel spesifikasi skenario detail untuk seluruh *use case* sistem (Tabel 3.3 s.d. Tabel 3.11):
+
+*Tabel 3.3: Skenario Use Case 1 - Login Sistem (UC-01)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-01 |
+| **Nama Use Case** | Login Sistem |
+| **Aktor** | Petugas, Supervisor |
+| **Deskripsi** | Proses autentikasi pengguna ke dalam sistem menggunakan kombinasi Nomor Pegawai (NP) dan password. |
+| **Kondisi Awal (*Pre-condition*)** | Pengguna berada pada halaman form login dan belum terautentikasi. |
+| **Kondisi Akhir (*Post-condition*)** | Pengguna berhasil masuk ke sistem dan diarahkan ke halaman Dashboard sesuai perannya. |
+| **Alur Utama (*Normal Flow*)** | 1. Pengguna membuka peramban web dan mengakses alamat sistem.<br>2. Sistem menampilkan antarmuka form login.<br>3. Pengguna menginputkan Nomor Pegawai (NP) dan kata sandi.<br>4. Pengguna menekan tombol "Masuk Sistem".<br>5. Sistem memvalidasi kredensial ke tabel `users`.<br>6. Kredensial valid, sistem menginisialisasi sesi dan mengarahkan ke Dashboard. |
+| **Alur Alternatif (*Alternative Flow*)** | 5a. Jika NP atau password salah, sistem menampilkan notifikasi kesalahan dan tetap pada halaman login.<br>5b. Jika akun berstatus nonaktif, sistem menampilkan pesan bahwa akun tidak diizinkan masuk. |
+
+*Tabel 3.4: Skenario Use Case 2 - Kelola Data Petugas (UC-02)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-02 |
+| **Nama Use Case** | Kelola Data Petugas |
+| **Aktor** | Supervisor |
+| **Deskripsi** | Menambah, melihat, mengubah data profil, status aktif/nonaktif, dan mereset password akun petugas. |
+| **Kondisi Awal (*Pre-condition*)** | Supervisor telah login dan mengakses menu Data Petugas. |
+| **Kondisi Akhir (*Post-condition*)** | Data akun petugas berhasil tersimpan, terbarui, atau dinonaktifkan pada basis data. |
+| **Alur Utama (*Normal Flow*)** | 1. Supervisor memilih menu "Data Petugas".<br>2. Sistem menampilkan daftar tabel akun petugas.<br>3. Supervisor menekan tombol "Tambah Petugas" atau "Edit".<br>4. Sistem menampilkan modal dialog form isian petugas.<br>5. Supervisor menginputkan NP, Nama, Email, Peran, dan Password.<br>6. Supervisor menekan tombol "Simpan Data".<br>7. Sistem memvalidasi data dan menyimpan perubahan ke tabel `users`.<br>8. Sistem memperbarui daftar tabel petugas dan menampilkan notifikasi sukses. |
+| **Alur Alternatif (*Alternative Flow*)** | 7a. Jika Nomor Pegawai (NP) atau email sudah terdaftar sebelumnya, sistem menampilkan pesan kesalahan duplikasi data dan meminta input ulang. |
+
+*Tabel 3.5: Skenario Use Case 3 - Update Database / Import Master SAP (UC-03)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-03 |
+| **Nama Use Case** | Update Database (Import SAP) |
+| **Aktor** | Supervisor |
+| **Deskripsi** | Mengunggah dan mengekstrak berkas spreadsheet master pesanan produksi dari sistem SAP ke basis data aplikasi. |
+| **Kondisi Awal (*Pre-condition*)** | Supervisor telah login dan memiliki berkas ekspor SAP (`.xlsx`/`.csv`). |
+| **Kondisi Akhir (*Post-condition*)** | Data pesanan produksi tersimpan pada tabel `production_orders` dan riwayat tercatat di `import_logs`. |
+| **Alur Utama (*Normal Flow*)** | 1. Supervisor memilih menu "Update Database".<br>2. Sistem menampilkan halaman unggah berkas dan riwayat impor.<br>3. Supervisor memilih berkas ekspor SAP dari komputer lokal.<br>4. Supervisor menekan tombol "Proses & Impor ke Master Data".<br>5. Sistem memvalidasi format berkas dan memetakan struktur kolom.<br>6. Sistem melakukan *bulk upsert* data pesanan ke tabel `production_orders`.<br>7. Sistem mencatat log impor ke tabel `import_logs` dan menampilkan jumlah baris data yang berhasil diproses. |
+| **Alur Alternatif (*Alternative Flow*)** | 5a. Jika format berkas tidak sesuai atau kolom wajib tidak ditemukan, sistem membatalkan proses dan menampilkan pesan galat validasi struktur berkas. |
+
+*Tabel 3.6: Skenario Use Case 4 - Buat Laporan / Scan Barcode (UC-04)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-04 |
+| **Nama Use Case** | Buat Laporan (Scan Barcode & Entri Kemas) |
+| **Aktor** | Petugas |
+| **Deskripsi** | Memindai barcode Nomor PO pada Kartu Mesin Produksi, memuat spesifikasi produk, dan menginputkan hasil kemas. |
+| **Kondisi Awal (*Pre-condition*)** | Petugas telah login dan berada pada halaman Buat Laporan. |
+| **Kondisi Akhir (*Post-condition*)** | Rincian data kemas tertampung pada tabel penampungan sementara (*staging table*). |
+| **Alur Utama (*Normal Flow*)** | 1. Petugas memilih shift kerja operasional.<br>2. Petugas mengarahkan scanner ke barcode Code 128 pada Kartu Mesin Produksi.<br>3. Scanner membaca data Nomor PO dan mengirimkannya ke sistem.<br>4. Sistem mencari rekaman Nomor PO pada tabel `production_orders`.<br>5. Sistem menampilkan Nama Produk, Spesifikasi Bahan, Nomor Mesin, dan Target Kuantitas.<br>6. Petugas menginputkan kuantitas kemas baik dan kuantitas reject.<br>7. Petugas menekan tombol "Tambah ke Daftar Laporan".<br>8. Sistem memvalidasi input dan memasukkan item ke daftar draf laporan sementara. |
+| **Alur Alternatif (*Alternative Flow*)** | 4a. Jika Nomor PO tidak ditemukan di master SAP, sistem membunyikan peringatan dan memunculkan notifikasi bahwa Nomor PO belum diimpor. |
+
+*Tabel 3.7: Skenario Use Case 5 - Simpan Laporan Harian (UC-05)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-05 |
+| **Nama Use Case** | Simpan Laporan Harian |
+| **Aktor** | Petugas |
+| **Deskripsi** | Memfinalisasi seluruh item hasil kemas yang tertampung pada draf laporan menjadi satu rekaman dokumen resmi. |
+| **Kondisi Awal (*Pre-condition*)** | Terdapat minimal satu item kemas pada tabel penampungan sementara. |
+| **Kondisi Akhir (*Post-condition*)** | Laporan tersimpan permanen di tabel `daily_reports` dan `daily_report_items`. |
+| **Alur Utama (*Normal Flow*)** | 1. Petugas memeriksa rekapitulasi total item, total baik, dan total reject.<br>2. Petugas menekan tombol "Finalisasi & Simpan Laporan".<br>3. Sistem membangkitkan Nomor Laporan unik otomatis format `LAP-YYYYMMDD-XXXX`.<br>4. Sistem menjalankan transaksi basis data untuk menyimpan data header dan relasi rincian item.<br>5. Sistem mengosongkan tabel sementara dan menampilkan notifikasi sukses disertai opsi cetak. |
+| **Alur Alternatif (*Alternative Flow*)** | 4a. Jika terjadi kegagalan jaringan atau basis data, sistem melakukan *rollback* transaksi dan menampilkan pesan kegagalan penyimpanan. |
+
+*Tabel 3.8: Skenario Use Case 6 - Lihat dan Edit Laporan (UC-06)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-06 |
+| **Nama Use Case** | Lihat dan Edit Laporan |
+| **Aktor** | Petugas, Supervisor |
+| **Deskripsi** | Menampilkan daftar riwayat laporan harian, meninjau rincian item, dan melakukan koreksi data (khusus status draf). |
+| **Kondisi Awal (*Pre-condition*)** | Pengguna mengakses menu Lihat Laporan. |
+| **Kondisi Akhir (*Post-condition*)** | Pengguna melihat daftar laporan atau perubahan kuantitas berhasil diperbarui di basis data. |
+| **Alur Utama (*Normal Flow*)** | 1. Pengguna membuka menu "Lihat Laporan".<br>2. Sistem menampilkan tabel daftar laporan lengkap dengan filter tanggal dan status.<br>3. Pengguna menekan tombol "Lihat" pada salah satu nomor laporan.<br>4. Sistem menampilkan rincian detail seluruh item pesanan.<br>5. (Opsi Petugas) Petugas mengoreksi angka kemas pada laporan berstatus draf dan menekan "Update Data".<br>6. Sistem memperbarui rekaman data dan memuat ulang rincian laporan. |
+| **Alur Alternatif (*Alternative Flow*)** | 5a. Jika laporan telah berstatus *verified*, sistem mengunci formulir sehingga perubahan data tidak dapat dilakukan. |
+
+*Tabel 3.9: Skenario Use Case 7 - Verifikasi Laporan (UC-07)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-07 |
+| **Nama Use Case** | Verifikasi Laporan |
+| **Aktor** | Supervisor |
+| **Deskripsi** | Memvalidasi kebenaran fisik data hasil kemas dan memberikan status pengesahan resmi (*verified*). |
+| **Kondisi Awal (*Pre-condition*)** | Supervisor membuka rincian laporan harian yang berstatus draf/submitted. |
+| **Kondisi Akhir (*Post-condition*)** | Status laporan berubah menjadi *verified* dan identitas supervisor tercatat sebagai pemeriksa. |
+| **Alur Utama (*Normal Flow*)** | 1. Supervisor meninjau rincian item kemas pada dokumen laporan terpilih.<br>2. Supervisor memastikan kesesuaian angka kemas baik dan reject dengan kondisi lapangan.<br>3. Supervisor menekan tombol "Verifikasi & Setujui Laporan".<br>4. Sistem memperbarui kolom `status` menjadi `verified` dan mencatat `supervisor_id`.<br>5. Sistem menampilkan notifikasi bahwa laporan telah resmi disahkan. |
+| **Alur Alternatif (*Alternative Flow*)** | 3a. Jika terdapat ketidaksesuaian data, Supervisor menambahkan catatan koreksi pada kolom `notes` dan meminta petugas melakukan perbaikan. |
+
+*Tabel 3.10: Skenario Use Case 8 - Cetak Dokumen Laporan (UC-08)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-08 |
+| **Nama Use Case** | Cetak Dokumen Laporan |
+| **Aktor** | Petugas, Supervisor |
+| **Deskripsi** | Menerbitkan dokumen fisik laporan produksi harian berformat standar ukuran kertas A4 untuk pengesahan tanda tangan. |
+| **Kondisi Awal (*Pre-condition*)** | Pengguna membuka rincian laporan yang ingin dicetak. |
+| **Kondisi Akhir (*Post-condition*)** | Dokumen tercetak rapi pada media kertas A4 melalui perangkat printer. |
+| **Alur Utama (*Normal Flow*)** | 1. Pengguna menekan tombol "Cetak Laporan".<br>2. Sistem memicu stylesheet cetak khusus (`@media print`) yang menyembunyikan navigasi web.<br>3. Sistem merender format lembar dokumen resmi standar A4 lengkap dengan kop perusahaan, tabel rincian item, dan kolom tanda tangan Petugas serta Supervisor.<br>4. Pengguna memilih printer dan mencetak dokumen fisik. |
+| **Alur Alternatif (*Alternative Flow*)** | 4a. Pengguna dapat memilih opsi simpan sebagai berkas PDF melalui dialog cetak peramban. |
+
+*Tabel 3.11: Skenario Use Case 9 - Pantau Dashboard dan Grafik 14 Hari Kerja (UC-09)*
+| Komponen Skenario | Deskripsi |
+|---|---|
+| **Nomor Use Case** | UC-09 |
+| **Nama Use Case** | Pantau Dashboard & Grafik 14 Hari |
+| **Aktor** | Petugas, Supervisor |
+| **Deskripsi** | Menampilkan kartu metrik kinerja harian dan grafik analitik performa produksi 14 hari kerja terakhir. |
+| **Kondisi Awal (*Pre-condition*)** | Pengguna telah login ke sistem. |
+| **Kondisi Akhir (*Post-condition*)** | Informasi kartu metrik dan grafik analitik tampil secara interaktif pada antarmuka pengguna. |
+| **Alur Utama (*Normal Flow*)** | 1. Pengguna mengakses menu Dashboard (Beranda).<br>2. Sistem melakukan agregasi data produksi hari berjalan untuk menghitung total kemas baik, reject, dan order terscan.<br>3. Sistem mengeksekusi query agregasi deret waktu untuk rentang 14 hari kerja aktif terakhir.<br>4. Sistem menampilkan kartu ringkasan metrik KPI harian.<br>5. Pustaka Chart.js merender visualisasi grafik tren performa perbandingan output baik terhadap reject.<br>6. Pengguna dapat mengarahkan kursor (*hover*) pada grafik untuk melihat rincian capaian tanggal tertentu. |
+| **Alur Alternatif (*Alternative Flow*)** | 3a. Jika belum ada data transaksi pada rentang 14 hari, grafik menampilkan visualisasi garis awal nol (*zero-baseline*). |
 
 ---
 
-##### b. Activity Diagram
-Activity Diagram menggambarkan aliran aktivitas operasional dan logika transisi sistem pada masing-masing fitur utama:
+#### 2. Activity Diagram
+Activity Diagram memodelkan aliran aktivitas operasional dan logika transisi sistem pada masing-masing fitur utama dengan membagi peran ke dalam partisi jalur aktivitas (*swimlanes*):
 
-**1. Activity Diagram Login Sistem**
-Diagram ini menggambarkan alur kerja saat pengguna melakukan autentikasi ke dalam sistem, dimulai dari pengisian form hingga inisialisasi sesi kerja yang valid:
+##### a. Activity Diagram Login Sistem
+Diagram ini menggambarkan alur kerja saat pengguna (Petugas atau Supervisor) melakukan autentikasi ke dalam sistem, dimulai dari pengisian form hingga inisialisasi sesi kerja yang valid:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
 flowchart TD
-    Start([Mulai]) --> A1[Pengguna mengakses halaman Login]
-    A1 --> A2[Sistem menampilkan formulir Login]
-    A2 --> A3[Pengguna memasukkan Nomor Pegawai dan Password]
-    A3 --> A4[Pengguna menekan tombol Masuk Sistem]
-    A4 --> S1{Sistem memvalidasi kredensial pengguna?}
-    S1 -- Kredensial Salah --> A5[Sistem menampilkan pesan peringatan autentikasi gagal]
-    A5 --> A2
-    S1 -- Kredensial Benar --> S2[Sistem menginisialisasi sesi kerja & mengarahkan ke Dashboard]
-    S2 --> End([Selesai])
+    subgraph Pengguna ["Pengguna (Petugas / Supervisor)"]
+        P_Start(( ))
+        P_Buka(Buka Halaman<br/>Login)
+        P_Input(Input Nomor Pegawai<br/>dan Password)
+        P_Kirim(Klik Tombol<br/>Masuk Sistem)
+        P_Dash(Tampil Halaman<br/>Dashboard)
+        P_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        S_Form(Tampilkan Form<br/>Login)
+        S_Val{Validasi<br/>Kredensial?}
+        S_Err(Tampilkan Pesan<br/>Kredensial Salah)
+        S_Auth(Inisialisasi Sesi<br/>Pengguna)
+    end
+
+    P_Start --> P_Buka
+    P_Buka --> S_Form
+    S_Form --> P_Input
+    P_Input --> P_Kirim
+    P_Kirim --> S_Val
+    S_Val -- Tidak Valid --> S_Err
+    S_Err --> S_Form
+    S_Val -- Valid --> S_Auth
+    S_Auth --> P_Dash
+    P_Dash --> P_End
+
+    style P_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style P_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
 *Gambar 3.3: Activity Diagram Login Sistem*
 
-**2. Activity Diagram Update Database (Import Master SAP)**
-Diagram ini menggambarkan proses pengunggahan berkas data pesanan produksi SAP oleh Supervisor, validasi format berkas, serta penyimpanan data ke dalam tabel master:
+##### b. Activity Diagram Manajemen Data Petugas
+Diagram ini memodelkan aktivitas pengelolaan data akun operator pengemasan oleh Supervisor, mencakup peninjauan daftar petugas, penambahan atau pembaruan profil melalui modal dialog terpusat, validasi keunikan Nomor Pegawai (NP), hingga penyimpanan rekaman data akun:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
 flowchart TD
-    Start([Mulai]) --> A1[Supervisor membuka menu Update Database]
-    A1 --> A2[Sistem menampilkan antarmuka unggah berkas SAP]
-    A2 --> A3[Supervisor memilih berkas master berformat .xlsx atau .csv]
-    A3 --> A4[Supervisor menekan tombol Impor Data SAP]
-    A4 --> S1{Sistem memeriksa format dan skema kolom berkas?}
-    S1 -- Format Tidak Sesuai --> A5[Sistem membatalkan proses & menampilkan pesan galat validasi berkas]
-    A5 --> A2
-    S1 -- Format Valid --> S2[Sistem membaca baris data pesanan dan melakukan parsing atribut]
-    S2 --> S3[Sistem menyimpan/memperbarui data ke tabel Master Pesanan Produksi]
-    S3 --> S4[Sistem mencatat log riwayat impor dan menampilkan notifikasi sukses]
-    S4 --> End([Selesai])
-```
-*Gambar 3.4: Activity Diagram Update Database (Import SAP)*
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Menu<br/>Data Petugas)
+        SP_Pilih(Pilih Aksi:<br/>Tambah / Edit / Status)
+        SP_Input(Input Data Akun<br/>dan Password)
+        SP_Simpan(Klik Tombol<br/>Simpan Data)
+        SP_Lihat(Terima Pembaruan<br/>Daftar Petugas)
+        SP_End((( )))
+    end
 
-**3. Activity Diagram Buat Laporan (Scan Barcode & Entri Kemas)**
-Diagram ini memodelkan aktivitas operasional di area pengemasan saat petugas memindai barcode kartu mesin, memverifikasi data produk, dan menyimpan laporan:
+    subgraph Sistem ["Sistem"]
+        SS_Tampil(Tampilkan Tabel<br/>Daftar Petugas)
+        SS_Modal(Tampilkan Modal<br/>Form Petugas)
+        SS_Val{Validasi<br/>Data & NP?}
+        SS_Err(Tampilkan Notifikasi<br/>Galat Validasi)
+        SS_Save(Simpan Rekaman<br/>ke Database)
+        SS_Notif(Tutup Modal & Kirim<br/>Notifikasi Sukses)
+    end
+
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Tampil
+    SS_Tampil --> SP_Pilih
+    SP_Pilih --> SS_Modal
+    SS_Modal --> SP_Input
+    SP_Input --> SP_Simpan
+    SP_Simpan --> SS_Val
+    SS_Val -- Tidak Valid --> SS_Err
+    SS_Err --> SS_Modal
+    SS_Val -- Valid --> SS_Save
+    SS_Save --> SS_Notif
+    SS_Notif --> SP_Lihat
+    SP_Lihat --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*Gambar 3.4: Activity Diagram Manajemen Data Petugas*
+
+##### c. Activity Diagram Update Database (Import Master SAP)
+Diagram ini menggambarkan alur kerja pengunggahan berkas data pesanan produksi SAP oleh Supervisor, validasi format dan skema kolom berkas, proses parsing atribut pesanan, hingga pembaruan massal (*bulk upsert*) ke dalam tabel master sistem:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
 flowchart TD
-    Start([Mulai]) --> A1[Petugas membuka menu Buat Laporan]
-    A1 --> A2[Sistem menyiapkan form laporan dan mengaktifkan kursor pada kolom Scan Barcode]
-    A2 --> A3[Petugas memindai barcode Nomor PO pada Kartu Mesin Produksi menggunakan Scanner]
-    A3 --> S1{Sistem mencari rekaman Nomor PO pada Master Data?}
-    S1 -- Data Tidak Ada --> A4[Sistem membunyikan nada peringatan & menampilkan notifikasi PO tidak terdaftar]
-    A4 --> A2
-    S1 -- Data Ditemukan --> S2[Sistem mengisi otomatis Nama Produk, Spesifikasi Kertas, dan Nomor Mesin]
-    S2 --> A5[Petugas memasukkan angka Kuantitas Kemas Baik dan Kuantitas Reject]
-    A5 --> A6[Petugas menekan tombol Tambah Item ke Tabel Laporan]
-    A6 --> S3[Sistem memasukkan item ke dalam tabel penampungan sementara]
-    S3 --> A7{Terdapat Kartu Mesin Produksi lain yang akan dikemas?}
-    A7 -- Ya --> A3
-    A7 -- Tidak --> A8[Petugas menekan tombol Simpan & Finalisasi Laporan]
-    A8 --> S4[Sistem membangkitkan Nomor Laporan unik: LAP-YYYYMMDD-XXXX]
-    S4 --> S5[Sistem menyimpan Header Laporan dan seluruh Rincian Item ke Basis Data secara atomik]
-    S5 --> S6[Sistem menampilkan dialog konfirmasi sukses dan opsi cetak dokumen]
-    S6 --> End([Selesai])
-```
-*Gambar 3.5: Activity Diagram Buat Laporan dengan Scan Barcode*
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        S_Start(( ))
+        S_Buka(Buka Menu<br/>Update Database)
+        S_Pilih(Pilih Berkas<br/>Excel / CSV SAP)
+        S_Upload(Klik Tombol<br/>Proses & Impor)
+        S_Lihat(Terima Konfirmasi<br/>Data Terimpor)
+        S_End((( )))
+    end
 
-**4. Activity Diagram Manajemen dan Cetak Laporan**
-Diagram ini menggambarkan alur peninjauan daftar laporan harian, proses pengeditan data korektif, verifikasi persetujuan oleh Supervisor, dan pencetakan dokumen fisik:
+    subgraph Sistem ["Sistem"]
+        SIS_Form(Tampilkan Form<br/>Upload & Riwayat)
+        SIS_Val{Validasi Format<br/>& Skema Kolom?}
+        SIS_Err(Tampilkan Pesan<br/>Format Tidak Sesuai)
+        SIS_Parse(Parsing Baris Data<br/>Pesanan SAP)
+        SIS_Upsert(Simpan Data ke<br/>Tabel Master Order)
+        SIS_Notif(Catat Log Riwayat &<br/>Kirim Notifikasi)
+    end
+
+    S_Start --> S_Buka
+    S_Buka --> SIS_Form
+    SIS_Form --> S_Pilih
+    S_Pilih --> S_Upload
+    S_Upload --> SIS_Val
+    SIS_Val -- Tidak Valid --> SIS_Err
+    SIS_Err --> SIS_Form
+    SIS_Val -- Valid --> SIS_Parse
+    SIS_Parse --> SIS_Upsert
+    SIS_Upsert --> SIS_Notif
+    SIS_Notif --> S_Lihat
+    S_Lihat --> S_End
+
+    style S_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style S_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*Gambar 3.5: Activity Diagram Update Database (Import SAP)*
+
+##### d. Activity Diagram Buat Laporan (Scan Barcode & Entri Kemas)
+Diagram ini memodelkan aktivitas operasional di area pengemasan saat Petugas memindai barcode Nomor PO pada Kartu Mesin Produksi menggunakan scanner, verifikasi instan data spesifikasi produk, pengisian kuantitas hasil kemas baik dan reject, hingga finalisasi penyimpanan laporan harian:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
 flowchart TD
-    Start([Mulai]) --> A1[Pengguna membuka menu Lihat Laporan]
-    A1 --> A2[Sistem memuat dan menampilkan tabel riwayat laporan harian]
-    A2 --> A3[Pengguna memilih salah satu baris laporan]
-    A3 --> S1[Sistem menampilkan rincian detail item hasil produksi]
-    S1 --> Decision{Pilih Aksi Pengelolaan?}
-    Decision -- Edit Laporan --> ActEdit[Petugas menyesuaikan kuantitas kemas dan menyimpan perubahan]
-    Decision -- Verifikasi Laporan --> ActVerif[Supervisor menyetujui laporan dan status berubah menjadi Terverifikasi]
-    Decision -- Cetak Laporan --> ActPrint[Sistem membuka jendela pratinjau cetak standar kertas A4]
-    ActEdit --> S2[Sistem memperbarui rekaman di basis data]
-    ActVerif --> S2
-    ActPrint --> End([Selesai])
-    S2 --> End
-```
-*Gambar 3.6: Activity Diagram Manajemen dan Cetak Laporan*
+    subgraph Petugas ["Petugas (Operator Kemas)"]
+        P_Start(( ))
+        P_Buka(Buka Menu Buat<br/>Laporan & Pilih Shift)
+        P_Scan(Scan Barcode No PO<br/>pada Kartu Mesin)
+        P_Input(Input Kuantitas Kemas<br/>Baik & Reject)
+        P_Tambah(Klik Tambah ke<br/>Daftar Laporan)
+        P_Cek{Ada Kartu Mesin<br/>Lain?}
+        P_Simpan(Klik Finalisasi &<br/>Simpan Laporan)
+        P_Lihat(Terima Konfirmasi<br/>Laporan Tersimpan)
+        P_End((( )))
+    end
 
-**5. Activity Diagram Dashboard dan Visualisasi Grafik Performa 14 Hari Kerja**
-Diagram ini menjelaskan alur pemrosesan data riwayat produksi untuk menghasilkan kartu metrik dan grafik analitik pada halaman beranda sistem:
+    subgraph Sistem ["Sistem"]
+        S_Form(Tampilkan Form &<br/>Fokus Kolom Barcode)
+        S_Cari{Cari No PO di<br/>Master SAP?}
+        S_Err(Peringatan Nomor PO<br/>Tidak Terdaftar)
+        S_Info(Tampilkan Spesifikasi<br/>Produk & Mesin)
+        S_Stage(Tambahkan Item ke<br/>Tabel Sementara)
+        S_Save(Generate No Laporan<br/>& Simpan ke Database)
+        S_Notif(Tampilkan Notifikasi<br/>Sukses & Dialog Cetak)
+    end
+
+    P_Start --> P_Buka
+    P_Buka --> S_Form
+    S_Form --> P_Scan
+    P_Scan --> S_Cari
+    S_Cari -- Tidak Ditemukan --> S_Err
+    S_Err --> S_Form
+    S_Cari -- Ditemukan --> S_Info
+    S_Info --> P_Input
+    P_Input --> P_Tambah
+    P_Tambah --> S_Stage
+    S_Stage --> P_Cek
+    P_Cek -- Ya --> P_Scan
+    P_Cek -- Tidak --> P_Simpan
+    P_Simpan --> S_Save
+    S_Save --> S_Notif
+    S_Notif --> P_Lihat
+    P_Lihat --> P_End
+
+    style P_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style P_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*Gambar 3.6: Activity Diagram Buat Laporan dengan Scan Barcode*
+
+##### e. Activity Diagram Manajemen dan Cetak Laporan
+Diagram ini menggambarkan alur kerja peninjauan daftar riwayat laporan hasil produksi harian, proses pengeditan korektif data kemas oleh Petugas, proses persetujuan verifikasi oleh Supervisor, serta pencetakan lembar laporan fisik berformat standar A4 lengkap dengan kolom pengesahan tanda tangan:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
 flowchart TD
-    Start([Mulai]) --> A1[Pengguna mengakses halaman Dashboard / Beranda]
-    A1 --> S1[Sistem mengeksekusi query agregasi data produksi 14 hari kerja aktif terakhir]
-    S1 --> S2[Sistem menghitung total output kemas baik, total reject, rata-rata harian, dan capaian puncak]
-    S2 --> S3[Sistem merender kartu metrik KPI produksi harian]
-    S3 --> S4[Sistem merender grafik garis/batang analitik tren performa 14 hari kerja]
-    S4 --> A2[Pengguna meninjau ringkasan performa dan grafik visualisasi produktivitas]
-    A2 --> End([Selesai])
+    subgraph Petugas ["Petugas (Operator Kemas)"]
+        P_Start(( ))
+        P_Buka(Buka Menu<br/>Lihat Laporan)
+        P_Pilih(Pilih Nomor<br/>Laporan)
+        P_Aksi{Pilih Aksi<br/>Pengelolaan?}
+        P_Edit(Edit Kuantitas Kemas<br/>& Simpan)
+        P_Cetak(Klik Tombol<br/>Cetak Laporan)
+        P_End((( )))
+    end
+
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Menu<br/>Lihat Laporan)
+        SP_Pilih(Pilih Nomor<br/>Laporan)
+        SP_Aksi{Pilih Aksi<br/>Pengelolaan?}
+        SP_Verif(Verifikasi & Setujui<br/>Laporan Harian)
+        SP_Cetak(Klik Tombol<br/>Cetak Laporan)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        S_Tampil(Tampilkan Tabel<br/>Daftar Laporan)
+        S_Detail(Tampilkan Rincian<br/>Detail Item Kemas)
+        S_Update(Update Perubahan Data<br/>ke Database)
+        S_SetVerif(Ubah Status Laporan<br/>Menjadi Verified)
+        S_Print(Render Format Cetak<br/>Standar Kertas A4)
+    end
+
+    P_Start --> P_Buka
+    P_Buka --> S_Tampil
+    SP_Start --> SP_Buka
+    SP_Buka --> S_Tampil
+
+    S_Tampil --> P_Pilih
+    S_Tampil --> SP_Pilih
+    P_Pilih --> S_Detail
+    SP_Pilih --> S_Detail
+
+    S_Detail --> P_Aksi
+    P_Aksi -- Edit Data --> P_Edit
+    P_Edit --> S_Update
+    S_Update --> S_Tampil
+    P_Aksi -- Cetak --> P_Cetak
+    P_Cetak --> S_Print
+
+    S_Detail --> SP_Aksi
+    SP_Aksi -- Verifikasi --> SP_Verif
+    SP_Verif --> S_SetVerif
+    S_SetVerif --> S_Tampil
+    SP_Aksi -- Cetak --> SP_Cetak
+    SP_Cetak --> S_Print
+
+    S_Print --> P_End
+    S_Print --> SP_End
+
+    style P_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style P_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
-*Gambar 3.7: Activity Diagram Dashboard dan Visualisasi Grafik Performa 14 Hari Kerja*
+*Gambar 3.7: Activity Diagram Manajemen dan Cetak Laporan*
+
+##### f. Activity Diagram Dashboard dan Visualisasi Grafik Performa 14 Hari Kerja
+Diagram ini menjelaskan alur pemrosesan data riwayat produksi untuk menghasilkan kartu metrik dan grafik analitik pada halaman beranda sistem, mulai dari inisialisasi rentang 14 hari kerja aktif terakhir (WIB), eksekusi query agregasi basis data, kalkulasi metrik capaian produksi, hingga penampilan visualisasi grafik garis dan batang yang interaktif:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Pengguna ["Pengguna (Petugas / Supervisor)"]
+        U_Start(( ))
+        U_Buka(Mengakses Halaman<br/>Dashboard / Beranda)
+        U_Lihat(Meninjau Metrik KPI &<br/>Grafik 14 Hari Kerja)
+        U_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        S_Filter(Filter Rentang 14 Hari<br/>Kerja Aktif Terakhir)
+        S_Query(Eksekusi Query Agregasi<br/>Kemas Baik & Reject)
+        S_Hitung(Kalkulasi Rata-Rata &<br/>Capaian Puncak)
+        S_KPI(Render Kartu Metrik<br/>KPI Harian)
+        S_Grafik(Render Grafik Analitik<br/>Performa 14 Hari)
+    end
+
+    U_Start --> U_Buka
+    U_Buka --> S_Filter
+    S_Filter --> S_Query
+    S_Query --> S_Hitung
+    S_Hitung --> S_KPI
+    S_KPI --> S_Grafik
+    S_Grafik --> U_Lihat
+    U_Lihat --> U_End
+
+    style U_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style U_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*Gambar 3.8: Activity Diagram Dashboard dan Visualisasi Grafik Performa 14 Hari Kerja*
 
 ---
 
-#### 2. Perancangan Basis Data (*Database Design*)
+#### 3. Entity Relationship Diagram (ERD)
+Entity Relationship Diagram (ERD) memodelkan keterhubungan logis antar-entitas data dalam sistem dokumentasi hasil produksi harian. Basis data dirancang dalam bentuk relasional yang dinormalisasi untuk menjamin integritas referensial dan mencegah anomali data.
 
-##### a. Entity Relationship Diagram (ERD) / Class Diagram
-Perancangan struktur data sistem dibangun menggunakan model relasional yang dinormalisasi untuk mencegah redundansi dan menjamin keutuhan data (*referential integrity*). Hubungan antar-entitas data dimodelkan melalui Class Diagram pada Gambar 3.8:
+Struktur ERD digambarkan pada Gambar 3.9:
+
+```mermaid
+erDiagram
+    USERS ||--o{ PRODUCTION_ORDERS : "mengimpor (imported_by)"
+    USERS ||--o{ DAILY_REPORTS : "mencatat (user_id)"
+    USERS ||--o{ DAILY_REPORTS : "memverifikasi (supervisor_id)"
+    USERS ||--o{ IMPORT_LOGS : "mengunggah (user_id)"
+    DAILY_REPORTS ||--|{ DAILY_REPORT_ITEMS : "memuat rincian (daily_report_id)"
+    PRODUCTION_ORDERS ||--o{ DAILY_REPORT_ITEMS : "menjadi acuan (production_order_id)"
+
+    USERS {
+        bigint id PK
+        string np UK "Nomor Pegawai"
+        string name "Nama Lengkap"
+        string email UK "Alamat Email"
+        string password "Hash Password"
+        enum role "supervisor, petugas"
+        boolean is_active "Status Akun"
+        timestamp last_login_at "Waktu Login Terakhir"
+    }
+
+    PRODUCTION_ORDERS {
+        bigint id PK
+        string po_number UK "Nomor PO / Barcode"
+        string product_code "Kode Produk"
+        string product_name "Nama Produk"
+        string customer_name "Nama Pemesan"
+        text specification "Spesifikasi Sekuriti"
+        string paper_type "Jenis Kertas"
+        string machine_number "Nomor Mesin"
+        integer target_quantity "Target Kuantitas"
+        string unit "Satuan"
+        date order_date "Tanggal Pesanan"
+        enum status "ready, in_progress, completed"
+        bigint imported_by FK "ID Pengunggah"
+    }
+
+    DAILY_REPORTS {
+        bigint id PK
+        string report_number UK "Nomor Dokumen Laporan"
+        date report_date "Tanggal Pengemasan"
+        enum shift "shift_1, shift_2, shift_3"
+        bigint user_id FK "ID Petugas"
+        bigint supervisor_id FK "ID Supervisor"
+        integer total_items_count "Jumlah Order"
+        integer total_good_quantity "Total Kemas Baik"
+        integer total_reject_quantity "Total Reject"
+        text notes "Catatan Operasional"
+        enum status "draft, submitted, verified"
+    }
+
+    DAILY_REPORT_ITEMS {
+        bigint id PK
+        bigint daily_report_id FK "ID Laporan Header"
+        bigint production_order_id FK "ID Pesanan SAP"
+        string po_number "Nomor PO Snapshot"
+        string product_name "Nama Produk Snapshot"
+        text specification "Spesifikasi Snapshot"
+        string machine_number "Nomor Mesin Snapshot"
+        integer good_quantity "Jumlah Kemas Baik"
+        integer reject_quantity "Jumlah Reject"
+        string unit "Satuan"
+        string item_notes "Catatan Item"
+    }
+
+    IMPORT_LOGS {
+        bigint id PK
+        string file_name "Nama Berkas SAP"
+        integer total_rows "Total Baris"
+        integer imported_rows "Baris Berhasil"
+        bigint user_id FK "ID Pengunggah"
+    }
+```
+*Gambar 3.9: Entity Relationship Diagram (ERD) Sistem Dokumentasi Produksi Harian*
+
+Hubungan kardinalitas antar-entitas dalam ERD dijelaskan sebagai berikut:
+1. **`USERS` ke `PRODUCTION_ORDERS` (One-to-Many / 1:N):** Satu pengguna (khususnya Supervisor) dapat mengimpor banyak rekaman data pesanan produksi SAP (`imported_by`).
+2. **`USERS` ke `DAILY_REPORTS` (One-to-Many / 1:N):** Satu pengguna Petugas dapat membuat banyak laporan harian (`user_id`), dan satu pengguna Supervisor dapat memverifikasi banyak laporan harian (`supervisor_id`).
+3. **`USERS` ke `IMPORT_LOGS` (One-to-Many / 1:N):** Satu pengguna Supervisor dapat memiliki banyak catatan riwayat berkas impor SAP (`user_id`).
+4. **`DAILY_REPORTS` ke `DAILY_REPORT_ITEMS` (One-to-Many / 1:N):** Satu dokumen laporan harian memuat satu atau banyak baris rincian item hasil kemas (`daily_report_id`) dengan aturan penghapusan berjenjang (*Cascade on Delete*).
+5. **`PRODUCTION_ORDERS` ke `DAILY_REPORT_ITEMS` (One-to-Many / 1:N):** Satu rekaman pesanan produksi SAP dapat menjadi referensi bagi satu atau lebih rincian item hasil kemas pada laporan harian (`production_order_id`).
+
+---
+
+#### 4. Logical Record Structure (LRS)
+Logical Record Structure (LRS) dibentuk dari hasil transformasi diagram relasi entitas (ERD) ke dalam bentuk struktur rekaman tabel yang telah melalui proses penentuan kunci utama (*Primary Key*) dan penempatan kunci tamu (*Foreign Key*).
+
+Aturan transformasi ERD ke LRS yang diterapkan meliputi:
+1. Hubungan kardinalitas *One-to-Many* (1:N) ditransformasikan dengan menempatkan *Primary Key* dari entitas di sisi "One" sebagai *Foreign Key* pada entitas di sisi "Many".
+2. Seluruh atribut dari entitas diubah menjadi elemen data (*fields*) yang memiliki tipe dan ukuran data yang presisi.
+
+Struktur LRS Sistem Dokumentasi Hasil Produksi Harian disajikan pada Gambar 3.10:
 
 ```mermaid
 classDiagram
-    class User {
-        +bigint id PK
-        +string name
-        +string np UK
-        +string email
-        +string password
-        +enum role (supervisor, petugas)
-        +boolean is_active
-        +timestamp last_login_at
-        +timestamps
+    class USERS {
+        *id (PK) : BIGINT
+        np : VARCHAR(50) [UK]
+        name : VARCHAR(100)
+        email : VARCHAR(100) [UK]
+        password : VARCHAR(255)
+        role : ENUM('supervisor', 'petugas')
+        is_active : BOOLEAN
+        last_login_at : TIMESTAMP
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
     }
 
-    class ProductionOrder {
-        +bigint id PK
-        +string po_number UK
-        +string product_code
-        +string product_name
-        +string customer_name
-        +text specification
-        +string paper_type
-        +string machine_number
-        +integer target_quantity
-        +string unit
-        +date order_date
-        +enum status (ready, in_progress, completed)
-        +bigint imported_by FK
-        +timestamps
+    class PRODUCTION_ORDERS {
+        *id (PK) : BIGINT
+        po_number : VARCHAR(50) [UK]
+        product_code : VARCHAR(50)
+        product_name : VARCHAR(150)
+        customer_name : VARCHAR(150)
+        specification : TEXT
+        paper_type : VARCHAR(100)
+        machine_number : VARCHAR(50)
+        target_quantity : INT
+        unit : VARCHAR(20)
+        order_date : DATE
+        status : ENUM('ready', 'in_progress', 'completed')
+        #imported_by (FK) : BIGINT
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
     }
 
-    class DailyReport {
-        +bigint id PK
-        +string report_number UK
-        +date report_date
-        +enum shift (shift_1, shift_2, shift_3)
-        +bigint user_id FK
-        +bigint supervisor_id FK
-        +integer total_items_count
-        +integer total_good_quantity
-        +integer total_reject_quantity
-        +text notes
-        +enum status (draft, submitted, verified)
-        +timestamps
+    class DAILY_REPORTS {
+        *id (PK) : BIGINT
+        report_number : VARCHAR(30) [UK]
+        report_date : DATE
+        shift : ENUM('shift_1', 'shift_2', 'shift_3')
+        #user_id (FK) : BIGINT
+        #supervisor_id (FK) : BIGINT
+        total_items_count : INT
+        total_good_quantity : INT
+        total_reject_quantity : INT
+        notes : TEXT
+        status : ENUM('draft', 'submitted', 'verified')
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
     }
 
-    class DailyReportItem {
-        +bigint id PK
-        +bigint daily_report_id FK
-        +bigint production_order_id FK
-        +string po_number
-        +string product_name
-        +text specification
-        +string machine_number
-        +integer good_quantity
-        +integer reject_quantity
-        +string unit
-        +string item_notes
-        +timestamps
+    class DAILY_REPORT_ITEMS {
+        *id (PK) : BIGINT
+        #daily_report_id (FK) : BIGINT
+        #production_order_id (FK) : BIGINT
+        po_number : VARCHAR(50)
+        product_name : VARCHAR(150)
+        specification : TEXT
+        machine_number : VARCHAR(50)
+        good_quantity : INT
+        reject_quantity : INT
+        unit : VARCHAR(20)
+        item_notes : VARCHAR(255)
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
     }
 
-    class ImportLog {
-        +bigint id PK
-        +string file_name
-        +integer total_rows
-        +integer imported_rows
-        +bigint user_id FK
-        +timestamps
+    class IMPORT_LOGS {
+        *id (PK) : BIGINT
+        file_name : VARCHAR(255)
+        total_rows : INT
+        imported_rows : INT
+        #user_id (FK) : BIGINT
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
     }
 
-    User "1" --> "0..*" ProductionOrder : mengimpor berkas SAP
-    User "1" --> "0..*" DailyReport : mencatat laporan harian (Petugas)
-    User "1" --> "0..*" DailyReport : memverifikasi laporan (Supervisor)
-    User "1" --> "0..*" ImportLog : mencatat riwayat impor
-    DailyReport "1" --> "1..*" DailyReportItem : memuat rincian item
-    ProductionOrder "1" --> "0..*" DailyReportItem : menjadi acuan data PO
+    USERS "1" --> "0..*" PRODUCTION_ORDERS : imported_by
+    USERS "1" --> "0..*" DAILY_REPORTS : user_id / supervisor_id
+    USERS "1" --> "0..*" IMPORT_LOGS : user_id
+    DAILY_REPORTS "1" --> "1..*" DAILY_REPORT_ITEMS : daily_report_id
+    PRODUCTION_ORDERS "1" --> "0..*" DAILY_REPORT_ITEMS : production_order_id
 ```
-*Gambar 3.8: Class Diagram Struktur Basis Data Sistem Dokumentasi Produksi Harian*
-
-##### b. Kamus Data dan Struktur Tabel Basis Data
-Struktur detail kamus data yang memuat atribut, tipe data, serta batasan (*constraints*) untuk masing-masing tabel basis data dijabarkan pada Tabel 3.3 hingga Tabel 3.6:
-
-*Tabel 3.3: Struktur Tabel `users` (Data Akun Pengguna & Petugas)*
-| Nama Field | Tipe Data | Kunci | Keterangan |
-|---|---|---|---|
-| `id` | BIGINT UNSIGNED | PK, Auto Increment | Identifikator unik akun pengguna |
-| `name` | VARCHAR(100) | - | Nama lengkap petugas atau supervisor |
-| `np` | VARCHAR(50) | Unique Index | Nomor Pegawai (NP) untuk autentikasi login |
-| `email` | VARCHAR(100) | Unique Index | Alamat surat elektronik pengguna |
-| `password` | VARCHAR(255) | - | Nilai hash kata sandi terenkripsi (Bcrypt) |
-| `role` | ENUM('supervisor', 'petugas') | - | Hak akses dan peran operasional pengguna |
-| `is_active` | BOOLEAN | Default: true | Status keaktifan akun dalam sistem |
-| `last_login_at` | TIMESTAMP | Nullable | Rekam waktu terakhir kali pengguna berhasil login |
-| `created_at` / `updated_at` | TIMESTAMP | - | Jejak waktu pembuatan dan pembaruan rekaman data |
-
-*Tabel 3.4: Struktur Tabel `production_orders` (Master Data Pesanan SAP)*
-| Nama Field | Tipe Data | Kunci | Keterangan |
-|---|---|---|---|
-| `id` | BIGINT UNSIGNED | PK, Auto Increment | Identifikator unik rekaman pesanan produksi |
-| `po_number` | VARCHAR(50) | Unique Index | Nomor PO / barcode pada Kartu Mesin Produksi |
-| `product_code` | VARCHAR(50) | Index | Kode identitas material barang |
-| `product_name` | VARCHAR(150) | - | Nama produk cetak sekuriti (misal: Sertifikat A4) |
-| `customer_name` | VARCHAR(150) | - | Nama instansi atau lembaga pemesan |
-| `specification` | TEXT | - | Deskripsi spesifikasi bahan kertas dan pengaman |
-| `paper_type` | VARCHAR(100) | Nullable | Jenis bahan baku kertas berpengaman |
-| `machine_number` | VARCHAR(50) | Nullable | Nomor identitas mesin cetak asal |
-| `target_quantity` | INT UNSIGNED | - | Target kuantitas cetak siap kemas |
-| `unit` | VARCHAR(20) | Default: 'lembar' | Satuan hitung produk (lembar, rim, buku) |
-| `order_date` | DATE | - | Tanggal pesanan produksi diterbitkan di SAP |
-| `status` | ENUM('ready', 'in_progress', 'completed') | - | Status pengerjaan pesanan pada unit produksi |
-| `imported_by` | BIGINT UNSIGNED | FK ke `users.id` | Identitas pengguna yang melakukan impor berkas SAP |
-| `created_at` / `updated_at` | TIMESTAMP | - | Jejak waktu pembuatan dan pembaruan rekaman data |
-
-*Tabel 3.5: Struktur Tabel `daily_reports` (Header Laporan Produksi Harian)*
-| Nama Field | Tipe Data | Kunci | Keterangan |
-|---|---|---|---|
-| `id` | BIGINT UNSIGNED | PK, Auto Increment | Identifikator unik laporan produksi harian |
-| `report_number` | VARCHAR(30) | Unique Index | Nomor dokumen laporan (`LAP-YYYYMMDD-XXXX`) |
-| `report_date` | DATE | Index | Tanggal pelaksanaan proses pengemasan |
-| `shift` | ENUM('shift_1', 'shift_2', 'shift_3') | - | Giliran kerja operasional pengemasan |
-| `user_id` | BIGINT UNSIGNED | FK ke `users.id` | Identitas Petugas yang menyusun dan mencatat laporan |
-| `supervisor_id` | BIGINT UNSIGNED | FK ke `users.id`, Nullable | Identitas Supervisor yang memverifikasi laporan |
-| `total_items_count` | INT UNSIGNED | - | Akumulasi jumlah jenis PO yang dikemas pada shift |
-| `total_good_quantity` | INT UNSIGNED | - | Akumulasi total kuantitas kemas baik siap kirim |
-| `total_reject_quantity` | INT UNSIGNED | - | Akumulasi total kuantitas reject/cacat harian |
-| `notes` | TEXT | Nullable | Catatan khusus kendala operasional selama shift |
-| `status` | ENUM('draft', 'submitted', 'verified') | Index | Status tahapan verifikasi laporan harian |
-| `created_at` / `updated_at` | TIMESTAMP | - | Jejak waktu pembuatan dan pembaruan rekaman data |
-
-*Tabel 3.6: Struktur Tabel `daily_report_items` (Rincian Item Hasil Kemas)*
-| Nama Field | Tipe Data | Kunci | Keterangan |
-|---|---|---|---|
-| `id` | BIGINT UNSIGNED | PK, Auto Increment | Identifikator unik baris rincian item kemas |
-| `daily_report_id` | BIGINT UNSIGNED | FK ke `daily_reports.id` | Kunci relasi ke header laporan (Cascade on Delete) |
-| `production_order_id` | BIGINT UNSIGNED | FK ke `production_orders.id` | Kunci relasi ke master data pesanan SAP |
-| `po_number` | VARCHAR(50) | Index | Salinan (*snapshot*) Nomor PO saat laporan dicatat |
-| `product_name` | VARCHAR(150) | - | Salinan nama produk cetak sekuriti |
-| `specification` | TEXT | - | Salinan spesifikasi teknis barang |
-| `machine_number` | VARCHAR(50) | Nullable | Salinan nomor mesin cetak asal |
-| `good_quantity` | INT UNSIGNED | - | Kuantitas hasil kemas baik (siap didistribusikan) |
-| `reject_quantity` | INT UNSIGNED | Default: 0 | Kuantitas hasil cetak rusak / reject |
-| `unit` | VARCHAR(20) | Default: 'lembar' | Satuan hitung kuantitas produk |
-| `item_notes` | VARCHAR(255) | Nullable | Catatan khusus pada item kemas terkait |
-| `created_at` / `updated_at` | TIMESTAMP | - | Jejak waktu pembuatan dan pembaruan rekaman data |
+*Gambar 3.10: Logical Record Structure (LRS) Sistem Dokumentasi Produksi Harian*
 
 ---
 
-#### 3. Perancangan Antarmuka Pengguna (*User Interface Mockups*)
-Perancangan antarmuka visual dirancang dengan mengedepankan prinsip kejelasan informasi, keterbacaan tinggi di lingkungan area kerja pabrik, serta alur navigasi yang efisien bagi operator:
+#### 5. Spesifikasi File
+Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang digunakan dalam sistem, mencakup nama field, tipe data, panjang ukuran data, dan keterangan batasannya:
 
-##### a. Rancangan Halaman Login
-Halaman login dirancang dengan tata letak minimalis dan terpusat yang memfasilitasi proses autentikasi cepat bagi pengguna:
+##### a. Spesifikasi File `users`
+- **Nama File / Tabel:** `users`
+- **Akronim File:** USR
+- **Fungsi File:** Menyimpan data akun pengguna, peran hak akses, dan kredensial login
+- **Tipe File:** File Master
+- **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
+- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Unik (*Unique Key*):** `np`, `email`
+- **Struktur Tabel:** Disajikan pada Tabel 3.12
+
+*Tabel 3.12: Spesifikasi File Tabel `users`*
+| No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
+|---|---|---|---|---|---|
+| 1 | ID Pengguna | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | Nama Lengkap | `name` | VARCHAR | 100 | Not Null |
+| 3 | Nomor Pegawai | `np` | VARCHAR | 50 | Unique, Not Null (Kredensial Login) |
+| 4 | Alamat Email | `email` | VARCHAR | 100 | Unique, Not Null |
+| 5 | Kata Sandi | `password` | VARCHAR | 255 | Not Null (Terenkripsi Bcrypt) |
+| 6 | Peran Akun | `role` | ENUM | - | Value: 'supervisor', 'petugas' |
+| 7 | Status Keaktifan | `is_active` | BOOLEAN | 1 | Default: true (1) |
+| 8 | Login Terakhir | `last_login_at` | TIMESTAMP | - | Nullable |
+| 9 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 10 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+
+##### b. Spesifikasi File `production_orders`
+- **Nama File / Tabel:** `production_orders`
+- **Akronim File:** PO
+- **Fungsi File:** Menyimpan data master pesanan produksi hasil ekspor dari sistem SAP
+- **Tipe File:** File Master
+- **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
+- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Unik (*Unique Key*):** `po_number`
+- **Kunci Tamu (*Foreign Key*):** `imported_by` (Relasi ke `users.id`)
+- **Struktur Tabel:** Disajikan pada Tabel 3.13
+
+*Tabel 3.13: Spesifikasi File Tabel `production_orders`*
+| No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
+|---|---|---|---|---|---|
+| 1 | ID Pesanan | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | Nomor PO / Barcode | `po_number` | VARCHAR | 50 | Unique, Not Null (Simbologi Code 128) |
+| 3 | Kode Produk | `product_code` | VARCHAR | 50 | Index, Not Null |
+| 4 | Nama Produk | `product_name` | VARCHAR | 150 | Not Null |
+| 5 | Nama Instansi Pemesan | `customer_name` | VARCHAR | 150 | Not Null |
+| 6 | Spesifikasi Teknis | `specification` | TEXT | - | Not Null (Bahan Kertas, Pengaman) |
+| 7 | Jenis Kertas | `paper_type` | VARCHAR | 100 | Nullable |
+| 8 | Nomor Mesin Asal | `machine_number` | VARCHAR | 50 | Nullable (Identitas Mesin Cetak) |
+| 9 | Target Kuantitas | `target_quantity` | INT UNSIGNED | 10 | Not Null |
+| 10 | Satuan Hitung | `unit` | VARCHAR | 20 | Default: 'lembar' |
+| 11 | Tanggal Pesanan | `order_date` | DATE | - | Not Null |
+| 12 | Status Pengerjaan | `status` | ENUM | - | Value: 'ready', 'in_progress', 'completed' |
+| 13 | ID Pengimpor | `imported_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
+| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+
+##### c. Spesifikasi File `daily_reports`
+- **Nama File / Tabel:** `daily_reports`
+- **Akronim File:** DREP
+- **Fungsi File:** Menyimpan data header laporan hasil pengemasan produksi harian
+- **Tipe File:** File Transaksi
+- **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
+- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Unik (*Unique Key*):** `report_number`
+- **Kunci Tamu (*Foreign Key*):** `user_id`, `supervisor_id` (Relasi ke `users.id`)
+- **Struktur Tabel:** Disajikan pada Tabel 3.14
+
+*Tabel 3.14: Spesifikasi File Tabel `daily_reports`*
+| No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
+|---|---|---|---|---|---|
+| 1 | ID Laporan | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | Nomor Dokumen Laporan | `report_number` | VARCHAR | 30 | Unique, Not Null (`LAP-YYYYMMDD-XXXX`) |
+| 3 | Tanggal Pengemasan | `report_date` | DATE | - | Index, Not Null |
+| 4 | Giliran Kerja | `shift` | ENUM | - | Value: 'shift_1', 'shift_2', 'shift_3' |
+| 5 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
+| 6 | ID Supervisor Pemeriksa | `supervisor_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 7 | Total Jenis Order | `total_items_count` | INT UNSIGNED | 5 | Default: 0 |
+| 8 | Total Hasil Kemas Baik | `total_good_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 9 | Total Kuantitas Reject | `total_reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 10 | Catatan Operasional | `notes` | TEXT | - | Nullable |
+| 11 | Status Verifikasi | `status` | ENUM | - | Value: 'draft', 'submitted', 'verified' |
+| 12 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 13 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+
+##### d. Spesifikasi File `daily_report_items`
+- **Nama File / Tabel:** `daily_report_items`
+- **Akronim File:** DRIT
+- **Fungsi File:** Menyimpan baris rincian item hasil kemas per pesanan produksi
+- **Tipe File:** File Transaksi (Detail)
+- **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
+- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Tamu (*Foreign Key*):** `daily_report_id` (ke `daily_reports.id`), `production_order_id` (ke `production_orders.id`)
+- **Struktur Tabel:** Disajikan pada Tabel 3.15
+
+*Tabel 3.15: Spesifikasi File Tabel `daily_report_items`*
+| No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
+|---|---|---|---|---|---|
+| 1 | ID Rincian Item | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | ID Header Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `daily_reports.id` (Cascade) |
+| 3 | ID Pesanan SAP | `production_order_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `production_orders.id` |
+| 4 | Nomor PO Snapshot | `po_number` | VARCHAR | 50 | Index, Not Null |
+| 5 | Nama Produk Snapshot | `product_name` | VARCHAR | 150 | Not Null |
+| 6 | Spesifikasi Snapshot | `specification` | TEXT | - | Not Null |
+| 7 | Nomor Mesin Snapshot | `machine_number` | VARCHAR | 50 | Nullable |
+| 8 | Jumlah Kemas Baik | `good_quantity` | INT UNSIGNED | 10 | Not Null |
+| 9 | Jumlah Kemas Reject | `reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 10 | Satuan Hitung | `unit` | VARCHAR | 20 | Default: 'lembar' |
+| 11 | Catatan Khusus Item | `item_notes` | VARCHAR | 255 | Nullable |
+| 12 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 13 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+
+##### e. Spesifikasi File `import_logs`
+- **Nama File / Tabel:** `import_logs`
+- **Akronim File:** IMPL
+- **Fungsi File:** Menyimpan catatan riwayat aktivitas pengunggahan berkas ekspor master SAP
+- **Tipe File:** File Log Riwayat
+- **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
+- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Tamu (*Foreign Key*):** `user_id` (Relasi ke `users.id`)
+- **Struktur Tabel:** Disajikan pada Tabel 3.16
+
+*Tabel 3.16: Spesifikasi File Tabel `import_logs`*
+| No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
+|---|---|---|---|---|---|
+| 1 | ID Riwayat Impor | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | Nama Berkas Unggahan | `file_name` | VARCHAR | 255 | Not Null |
+| 3 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Not Null |
+| 4 | Jumlah Baris Berhasil | `imported_rows` | INT UNSIGNED | 8 | Not Null |
+| 5 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
+| 6 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 7 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+
+---
+
+### C. Implementasi
+
+Tahap implementasi merupakan fase eksekusi rekayasa di mana seluruh spesifikasi kebutuhan, diagram pemodelan UML, skema basis data, dan rancangan antarmuka diterjemahkan ke dalam pembuatan aplikasi fungsional yang dapat dijalankan secara nyata pada lingkungan kerja operasional.
+
+#### 1. Lingkungan Pengembangan Perangkat Lunak
+Pelaksanaan implementasi didukung oleh konfigurasi lingkungan perangkat keras dan perangkat lunak yang disajikan pada Tabel 3.17 dan Tabel 3.18:
+
+*Tabel 3.17: Spesifikasi Lingkungan Perangkat Keras (Hardware Environment)*
+| No | Komponen Perangkat Keras | Spesifikasi Teknis Lingkungan Kerja | Peruntukan / Fungsi |
+|---|---|---|---|
+| 1 | **Komputer Pengembang** | Prosesor AMD Ryzen 5 / Intel Core i5, RAM 16 GB DDR4, Penyimpanan SSD 512 GB NVMe | Pembuatan program, pengujian unit, kompilasi aset frontend, dan simulasi server |
+| 2 | **Komputer Klien (Unit Pengemasan)** | PC Desktop dengan prosesor Intel Celeron / Core i3, RAM 4 GB DDR3/DDR4, Monitor Display resolusi minimal 1366x768 piksel, antarmuka jaringan LAN / Wi-Fi | Perangkat operasional utama bagi Petugas dan Supervisor di area kerja pengemasan |
+| 3 | **Barcode Scanner** | Scanner genggam (*Handheld Barcode Reader*) koneksi USB Plug-and-Play (antarmuka HID), mendukung simbologi linear **Code 128** | Membaca barcode Nomor PO pada Kartu Mesin Produksi secara cepat dan akurat |
+| 4 | **Printer Dokumen** | Printer Inkjet / Laser standar kantor dengan ukuran media kertas A4 | Mencetak lembaran fisik laporan hasil produksi harian untuk pengesahan tanda tangan |
+
+*Tabel 3.18: Spesifikasi Lingkungan Perangkat Lunak (Software Environment)*
+| No | Komponen Perangkat Lunak | Nama Paket / Versi Teknologi | Keterangan dan Peranan dalam Aplikasi |
+|---|---|---|---|
+| 1 | **Sistem Operasi** | Windows 11 (64-bit) | Sistem operasi utama pada komputer pengembang dan klien operasional |
+| 2 | **Server Lingkungan Lokal** | Laragon (Local Development Environment) | Mengelola stack server lokal yang terintegrasi (Web Server, PHP runtime, dan database) |
+| 3 | **Basis Data (DBMS)** | MySQL Server | Menyimpan master data SAP, data transaksi laporan harian, akun pengguna, dan riwayat audit |
+| 4 | **Bahasa Pemrograman Backend** | PHP (versi 8.3+) | Bahasa pemrograman server-side utama untuk mengeksekusi logika bisnis aplikasi |
+| 5 | **Backend Framework** | Laravel Framework (versi 13.x) | Kerangka kerja web utama dengan arsitektur MVC dan *Service Layer Pattern* |
+| 6 | **Autentikasi & Keamanan** | Laravel Fortify (versi 1.37+) | Menyediakan backend autentikasi aman berbasis Nomor Pegawai (NP), password hashing, dan rate limiting |
+| 7 | **Arsitektur Frontend Reaktif** | Livewire (versi 4.x) | Membangun komponen antarmuka web dinamis dan reaktif tanpa perpindahan halaman |
+| 8 | **Komponen UI & Optimasi** | Livewire Flux UI (versi 2.13+) & Livewire Blaze (versi 1.0) | Pustaka komponen antarmuka modern dan mesin optimasi perenderan Blade View |
+| 9 | **CSS Framework & Bundler** | Tailwind CSS (versi 4.x) dengan `@tailwindcss/vite` & Vite (versi 8.x) | Desain antarmuka responsif dan alat kompilasi aset frontend cepat |
+| 10 | **Pengelola Paket Dependensi** | Composer (PHP) & pnpm (Node.js) | Manajemen instalasi dan pembaruan dependensi backend PHP dan frontend JavaScript |
+| 11 | **Visualisasi Grafik Analitik** | Chart.js terintegrasi Alpine.js | Merender grafik analitik tren performa hasil kemas 14 hari kerja pada halaman Dashboard |
+| 12 | **Pengujian & Kualitas Kode** | Pest PHP (versi 5.x), Larastan (versi 3.x), Laravel Pint (versi 1.27) | Pengujian otomatis (*automated testing*), analisis statis tipe data, dan standarisasi format kode |
+
+---
+
+#### 2. Implementasi Antarmuka Sistem
+Berikut disajikan rancangan dan implementasi antarmuka visual keseluruhan halaman sistem dari proses awal login hingga penerbitan cetak laporan:
+
+##### a. Tampilan Antarmuka Halaman Login
+Halaman login dirancang dengan tata letak minimalis dan terpusat yang memfasilitasi proses autentikasi cepat bagi pengguna menggunakan Nomor Pegawai (NP) dan password:
 
 ```
 +-----------------------------------------------------------------------+
@@ -495,9 +1009,9 @@ Halaman login dirancang dengan tata letak minimalis dan terpusat yang memfasilit
 +-----------------------------------------------------------------------+
 ```
 [visualisasi_mockup_halaman_login]  
-*Gambar 3.9: Rancangan Antarmuka Halaman Login Sistem*
+*Gambar 3.11: Tampilan Antarmuka Halaman Login Sistem*
 
-##### b. Rancangan Halaman Dashboard (Grafik Performa 14 Hari Kerja)
+##### b. Tampilan Antarmuka Halaman Dashboard Utama dan Grafik Performa 14 Hari Kerja
 Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi cepat modul sistem, serta visualisasi grafik analitik performa produksi 14 hari kerja terakhir yang menyajikan perbandingan output baik dan kuantitas reject:
 
 ```
@@ -524,9 +1038,31 @@ Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi ce
 +-------------+---------------------------------------------------------+
 ```
 [visualisasi_mockup_halaman_dashboard_grafik_14_hari]  
-*Gambar 3.10: Rancangan Antarmuka Halaman Dashboard dan Grafik Performa 14 Hari Kerja*
+*Gambar 3.12: Tampilan Antarmuka Halaman Dashboard dan Grafik Performa 14 Hari Kerja*
 
-##### c. Rancangan Halaman Update Database (Import SAP)
+##### c. Tampilan Antarmuka Halaman Manajemen Data Petugas
+Halaman ini memfasilitasi Supervisor untuk mengelola akun operator pengemasan melalui tabel data terstruktur dan form modal penambahan/pengubahan akun:
+
+```
++-----------------------------------------------------------------------+
+| [PT PDS LOGO]  Unit Pengemasan  | Supervisor Admin             [User] v |
++-------------+---------------------------------------------------------+
+| NAVIGATION  | MANAJEMEN DATA PETUGAS OPERATOR                         |
+| - Dashboard |                                                         |
+| - Up Database| [ + TAMBAH PETUGAS BARU ]       Cari Petugas: [_______] |
+| - Data Petugs+----+---------+---------------------+-----------+-------+ |
+| - Buat Lapor | No | NP      | Nama Petugas        | Peran     | Status| |
+| - Lihat Lapor+----+---------+---------------------+-----------+-------+ |
+|             | 1  | 202401  | Umar Ibnu Zainal M. | Petugas   | Aktif | |
+|             | 2  | 202402  | Hendra Setiawan     | Petugas   | Aktif | |
+|             | 3  | 202001  | Agus Soelistyo      | Supervisor| Aktif | |
+|             | +----+---------+---------------------+-----------+-------+ |
++-------------+---------------------------------------------------------+
+```
+[visualisasi_mockup_halaman_manajemen_petugas]  
+*Gambar 3.13: Tampilan Antarmuka Halaman Manajemen Data Petugas*
+
+##### d. Tampilan Antarmuka Halaman Update Database (Import SAP)
 Halaman ini dirancang khusus bagi Supervisor untuk mengunggah berkas data master pesanan produksi yang diekspor dari sistem SAP, lengkap dengan tabel riwayat berkas impor terakhir:
 
 ```
@@ -552,9 +1088,9 @@ Halaman ini dirancang khusus bagi Supervisor untuk mengunggah berkas data master
 +-------------+---------------------------------------------------------+
 ```
 [visualisasi_mockup_halaman_update_database_sap]  
-*Gambar 3.11: Rancangan Antarmuka Halaman Update Database SAP*
+*Gambar 3.14: Tampilan Antarmuka Halaman Update Database Master SAP*
 
-##### d. Rancangan Halaman Buat Laporan (Scan Barcode & Entri Kemas)
+##### e. Tampilan Antarmuka Halaman Buat Laporan (Scan Barcode & Entri Kemas)
 Halaman ini merupakan antarmuka operasional utama Petugas di meja kerja pengemasan. Formulir dilengkapi area masukan scan barcode otomatis, penampil rincian spesifikasi barang seketika, kolom input jumlah kemas, dan tabel penampungan draf hasil kemas multi-item:
 
 ```
@@ -587,10 +1123,10 @@ Halaman ini merupakan antarmuka operasional utama Petugas di meja kerja pengemas
 +-------------+---------------------------------------------------------+
 ```
 [visualisasi_mockup_halaman_buat_laporan_scan_barcode]  
-*Gambar 3.12: Rancangan Antarmuka Halaman Buat Laporan dengan Scan Barcode*
+*Gambar 3.15: Tampilan Antarmuka Halaman Buat Laporan dengan Scan Barcode*
 
-##### e. Rancangan Halaman Lihat Laporan & Format Lembar Cetak Standar A4
-Rancangan antarmuka peninjauan laporan menampilkan riwayat dokumen hasil kemas yang tersimpan, sedangkan format lembar cetak menyajikan dokumen laporan resmi standar kertas A4 lengkap dengan pengesahan tanda tangan:
+##### f. Tampilan Antarmuka Halaman Lihat Laporan
+Halaman ini menyajikan tabel riwayat seluruh dokumen laporan hasil kemas yang tersimpan, dilengkapi fitur pencarian, filter rentang tanggal, status verifikasi, dan tombol aksi:
 
 ```
 +-----------------------------------------------------------------------+
@@ -607,7 +1143,34 @@ Rancangan antarmuka peninjauan laporan menampilkan riwayat dokumen hasil kemas y
 +-------------+---------------------------------------------------------+
 ```
 [visualisasi_mockup_halaman_lihat_laporan]  
-*Gambar 3.13: Rancangan Antarmuka Halaman Lihat Laporan*
+*Gambar 3.16: Tampilan Antarmuka Halaman Lihat Laporan Produksi Harian*
+
+##### g. Tampilan Antarmuka Halaman Detail dan Verifikasi Laporan
+Halaman ini menampilkan rincian lengkap item kemas pada suatu dokumen laporan, memfasilitasi pengeditan korektif oleh Petugas (jika masih draf), serta menyediakan tombol aksi persetujuan (*verifikasi*) bagi Supervisor:
+
+```
++-----------------------------------------------------------------------+
+| [PT PDS LOGO]  Unit Pengemasan  | Supervisor: Agus S.          [User] v |
++-------------+---------------------------------------------------------+
+| NAVIGATION  | RINCIAN LAPORAN: LAP-20260825-0001                      |
+| - Dashboard | Tanggal: 25/08/2026 | Shift: Shift 1 | Petugas: Umar    |
+| - Up Database| Status : [ BELUM VERIFIKASI / SUBMITTED ]              |
+| - Data Petugs+----+--------------+-------------------+------+-------+ |
+| - Buat Lapor | No | No PO        | Nama Produk       | Baik | Reject| |
+| - Lihat Lapor+----+--------------+-------------------+------+-------+ |
+|             | 1  | PO-2026-8891 | Sertifikat A4     | 5.000| 25    | |
+|             | 2  | PO-2026-8892 | Ijazah B5         | 2.500| 10    | |
+|             | +----+--------------+-------------------+------+-------+ |
+|             | Total Kemas Baik: 7.500 Lembar | Total Reject: 35 Lembar| |
+|             |                                                         |
+|             | [ CETAK LAPORAN ]         [ VERIFIKASI & SETUJUI LAPORAN]|
++-------------+---------------------------------------------------------+
+```
+[visualisasi_mockup_halaman_detail_verifikasi_laporan]  
+*Gambar 3.17: Tampilan Antarmuka Detail dan Verifikasi Laporan Produksi Harian*
+
+##### h. Tampilan Format Lembar Cetak Laporan Standar Kertas A4
+Format cetak lembar dokumen resmi standar A4 yang dihasilkan sistem lengkap dengan kop perusahaan, rincian item, total hasil kemas, dan kolom tanda tangan pengesahan:
 
 ```
 +-----------------------------------------------------------------------+
@@ -632,47 +1195,14 @@ Rancangan antarmuka peninjauan laporan menampilkan riwayat dokumen hasil kemas y
 +-----------------------------------------------------------------------+
 ```
 [visualisasi_mockup_format_cetak_laporan_a4]  
-*Gambar 3.14: Rancangan Format Lembar Cetak Laporan Produksi Harian (Standar A4)*
+*Gambar 3.18: Tampilan Format Lembar Cetak Laporan Produksi Harian (Standar A4)*
 
 ---
 
-### C. Implementasi
+#### 3. Implementasi Modul Program
+Implementasi aplikasi dikelompokkan ke dalam enam modul fungsional utama yang saling terintegrasi sebagaimana dirangkum pada Tabel 3.19:
 
-Tahap implementasi merupakan fase eksekusi rekayasa di mana seluruh spesifikasi kebutuhan, diagram pemodelan UML, skema basis data, dan rancangan antarmuka diterjemahkan ke dalam pembuatan aplikasi yang dapat dieksekusi secara fungsional.
-
-#### 1. Lingkungan Pengembangan Perangkat Lunak
-Pelaksanaan implementasi dan pengoperasian perangkat lunak didukung oleh konfigurasi lingkungan perangkat keras dan perangkat lunak yang disajikan dalam bentuk tabel berikut:
-
-*Tabel 3.7: Spesifikasi Lingkungan Perangkat Keras (Hardware Environment)*
-| No | Komponen Perangkat Keras | Spesifikasi Teknis Lingkungan Kerja | Peruntukan / Fungsi |
-|---|---|---|---|
-| 1 | **Komputer Pengembang** | Prosesor AMD Ryzen 5 / Intel Core i5, RAM 16 GB DDR4, Penyimpanan SSD 512 GB NVMe | Pembuatan program, pengujian unit, kompilasi aset frontend, dan simulasi server |
-| 2 | **Komputer Klien (Unit Pengemasan)** | PC Desktop dengan prosesor Intel Celeron / Core i3, RAM 4 GB DDR3/DDR4, Monitor Display resolusi minimal 1366x768 piksel, antarmuka jaringan LAN / Wi-Fi | Perangkat operasional utama bagi Petugas dan Supervisor di area kerja pengemasan |
-| 3 | **Barcode Scanner** | Scanner genggam (*Handheld Barcode Reader*) koneksi USB Plug-and-Play (antarmuka HID), mendukung simbologi linear **Code 128** | Membaca barcode Nomor PO pada Kartu Mesin Produksi secara cepat dan akurat |
-| 4 | **Printer Dokumen** | Printer Inkjet / Laser standar kantor dengan ukuran media kertas A4 | Mencetak lembaran fisik laporan hasil produksi harian untuk pengesahan tanda tangan |
-
-*Tabel 3.8: Spesifikasi Lingkungan Perangkat Lunak (Software Environment)*
-| No | Komponen Perangkat Lunak | Nama Paket / Versi Teknologi | Keterangan dan Peranan dalam Aplikasi |
-|---|---|---|---|
-| 1 | **Sistem Operasi** | Windows 11 (64-bit) | Sistem operasi utama pada komputer pengembang dan klien operasional |
-| 2 | **Server Lingkungan Lokal** | Laragon (Local Development Environment) | Mengelola stack server lokal yang terintegrasi (Web Server, PHP runtime, dan database) |
-| 3 | **Basis Data (DBMS)** | MySQL Server | Menyimpan master data SAP, data transaksi laporan harian, akun pengguna, dan riwayat audit |
-| 4 | **Bahasa Pemrograman Backend** | PHP (versi 8.3+) | Bahasa pemrograman server-side utama untuk mengeksekusi logika bisnis aplikasi |
-| 5 | **Backend Framework** | Laravel Framework (versi 13.x) | Kerangka kerja web utama dengan arsitektur MVC dan *Service Layer Pattern* |
-| 6 | **Autentikasi & Keamanan** | Laravel Fortify (versi 1.37+) | Menyediakan backend autentikasi aman berbasis Nomor Pegawai (NP), password hashing, dan rate limiting |
-| 7 | **Arsitektur Frontend Reaktif** | Livewire (versi 4.x) | Membangun komponen antarmuka web dinamis dan reaktif tanpa perpindahan halaman |
-| 8 | **Komponen UI & Optimasi** | Livewire Flux UI (versi 2.13+) & Livewire Blaze (versi 1.0) | Pustaka komponen antarmuka modern dan mesin optimasi perenderan Blade View |
-| 9 | **CSS Framework & Bundler** | Tailwind CSS (versi 4.x) dengan `@tailwindcss/vite` & Vite (versi 8.x) | Desain antarmuka responsif dan alat kompilasi aset frontend cepat |
-| 10 | **Pengelola Paket Dependensi** | Composer (PHP) & pnpm (Node.js) | Manajemen instalasi dan pembaruan dependensi backend PHP dan frontend JavaScript |
-| 11 | **Visualisasi Grafik Analitik** | Chart.js terintegrasi Alpine.js | Merender grafik analitik tren performa hasil kemas 14 hari kerja pada halaman Dashboard |
-| 12 | **Pengujian & Kualitas Kode** | Pest PHP (versi 5.x), Larastan (versi 3.x), Laravel Pint (versi 1.27) | Pengujian otomatis (*automated testing*), analisis statis tipe data, dan standarisasi format kode |
-
----
-
-#### 2. Implementasi Modul Program
-Implementasi aplikasi dikelompokkan ke dalam enam modul fungsional utama yang saling terintegrasi sebagaimana dirangkum pada Tabel 3.9:
-
-*Tabel 3.9: Pemetaan dan Implementasi Modul Program*
+*Tabel 3.19: Pemetaan dan Implementasi Modul Program*
 | No | Modul Program | Komponen / Berkas Utama | Penjelasan Implementasi Fungsional |
 |---|---|---|---|
 | 1 | **Skema Basis Data & Model Eloquent** | `database/migrations/`, Model: `User`, `ProductionOrder`, `DailyReport`, `DailyReportItem`, `ImportLog` | Membangun struktur tabel terelasi, foreign key constraints, tipe data kolom, seeder inisialisasi, dan pemodelan relasi Eloquent ORM untuk menjamin integritas transaksi data. |
@@ -692,23 +1222,25 @@ Tahap pengujian sistem bertujuan untuk menguji, memverifikasi, dan memvalidasi b
 Metode pengujian yang diterapkan dalam penelitian ini adalah **Black Box Testing** (pengujian kotak hitam). Metode ini menitikberatkan pengujian pada aspek fungsionalitas eksternal perangkat lunak, yaitu dengan memberikan kombinasi masukan (*input*) data tertentu pada antarmuka pengguna dan memverifikasi apakah keluaran (*output*) serta perilaku sistem yang dihasilkan telah sesuai dengan hasil yang diharapkan, tanpa perlu memeriksa struktur internal kode program.
 
 #### 2. Rencana dan Skenario Pengujian
-Pengujian fungsionalitas dijalankan secara menyeluruh terhadap sepuluh skenario operasional utama sistem sebagaimana dirangkum pada Tabel 3.10:
+Pengujian fungsionalitas dijalankan secara menyeluruh terhadap sepuluh skenario operasional utama sistem sebagaimana dirangkum pada Tabel 3.20:
 
-*Tabel 3.10: Rekapitulasi Hasil Pengujian Fungsionalitas Sistem (Black Box Testing)*
+*Tabel 3.20: Rekapitulasi Hasil Pengujian Fungsionalitas Sistem (Black Box Testing)*
 | No | Modul / Fitur | Skenario Pengujian | Masukan (*Input*) Data | Hasil yang Diharapkan | Status Pengujian |
 |---|---|---|---|---|---|
 | 1 | Autentikasi Pengguna | Pengujian login dengan kredensial yang valid | Memasukkan Nomor Pegawai (NP) dan password yang benar dan terdaftar | Sistem menerima kredensial, membuka sesi kerja, dan mengarahkan pengguna ke halaman Dashboard | Berhasil (Sesuai) |
 | 2 | Autentikasi Pengguna | Pengujian login dengan kata sandi yang salah | Memasukkan Nomor Pegawai (NP) terdaftar dengan password salah | Sistem menolak proses login dan menampilkan pesan peringatan bahwa kredensial tidak cocok | Berhasil (Sesuai) |
-| 3 | Update Database SAP | Pengunggahan berkas master SAP format valid | Memilih berkas spreadsheet `.xlsx` atau `.csv` dengan format kolom sesuai | Sistem mengekstrak seluruh baris pesanan dan memperbarui tabel master produksi | Berhasil (Sesuai) |
-| 4 | Update Database SAP | Pengunggahan berkas dengan format ekstensi tidak valid | Memilih berkas berformat `.pdf` atau `.txt` | Sistem menolak berkas dan menampilkan pesan galat validasi tipe berkas | Berhasil (Sesuai) |
-| 5 | Buat Laporan | Pemindaian barcode Nomor PO yang terdaftar pada master | Memindai barcode Code 128 pada Kartu Mesin Produksi menggunakan scanner | Kolom Nama Produk, Spesifikasi Bahan, dan Nomor Mesin terisi otomatis secara seketika (< 1 detik) | Berhasil (Sesuai) |
-| 6 | Buat Laporan | Pemindaian barcode Nomor PO yang tidak terdaftar | Memindai barcode yang belum diimpor ke master data | Sistem membunyikan peringatan dan menampilkan notifikasi bahwa Nomor PO belum terdaftar | Berhasil (Sesuai) |
-| 7 | Buat Laporan | Penyimpanan laporan hasil kemas harian | Memasukkan jumlah kemas baik dan reject, lalu menekan tombol Simpan | Sistem membangkitkan Nomor Laporan unik otomatis (`LAP-YYYYMMDD-XXXX`) dan menyimpan seluruh data item | Berhasil (Sesuai) |
-| 8 | Manajemen Laporan | Peninjauan rincian detail laporan | Menekan tombol Lihat pada salah satu nomor laporan | Sistem memuat dan menampilkan seluruh daftar item barang hasil kemas pada laporan tersebut | Berhasil (Sesuai) |
-| 9 | Cetak Laporan | Pencetakan fisik lembar laporan harian | Menekan tombol Cetak pada dokumen laporan | Sistem membuka jendela pratinjau cetak standar kertas A4 rapi lengkap dengan kolom tanda tangan | Berhasil (Sesuai) |
-| 10 | Dashboard & Grafik | Perenderan visualisasi grafik performa 14 hari | Membuka halaman Dashboard saat data transaksi harian tersedia | Sistem menampilkan grafik garis/batang yang mencerminkan akumulasi hasil kemas baik dan reject 14 hari terakhir | Berhasil (Sesuai) |
+| 3 | Manajemen Petugas | Penambahan data akun petugas baru | Menginputkan data NP unik, nama, email, peran, dan password | Sistem menyimpan data baru ke tabel `users` dan menampilkannya pada tabel daftar petugas | Berhasil (Sesuai) |
+| 4 | Update Database SAP | Pengunggahan berkas master SAP format valid | Memilih berkas spreadsheet `.xlsx` atau `.csv` dengan format kolom sesuai | Sistem mengekstrak seluruh baris pesanan dan memperbarui tabel master produksi | Berhasil (Sesuai) |
+| 5 | Update Database SAP | Pengunggahan berkas dengan format ekstensi tidak valid | Memilih berkas berformat `.pdf` atau `.txt` | Sistem menolak berkas dan menampilkan pesan galat validasi tipe berkas | Berhasil (Sesuai) |
+| 6 | Buat Laporan | Pemindaian barcode Nomor PO yang terdaftar pada master | Memindai barcode Code 128 pada Kartu Mesin Produksi menggunakan scanner | Kolom Nama Produk, Spesifikasi Bahan, dan Nomor Mesin terisi otomatis secara seketika (< 1 detik) | Berhasil (Sesuai) |
+| 7 | Buat Laporan | Pemindaian barcode Nomor PO yang tidak terdaftar | Memindai barcode yang belum diimpor ke master data | Sistem membunyikan peringatan dan menampilkan notifikasi bahwa Nomor PO belum terdaftar | Berhasil (Sesuai) |
+| 8 | Buat Laporan | Penyimpanan laporan hasil kemas harian | Memasukkan jumlah kemas baik dan reject, lalu menekan tombol Simpan | Sistem membangkitkan Nomor Laporan unik otomatis (`LAP-YYYYMMDD-XXXX`) dan menyimpan seluruh data item | Berhasil (Sesuai) |
+| 9 | Manajemen Laporan | Verifikasi laporan harian oleh Supervisor | Supervisor menekan tombol "Verifikasi & Setujui Laporan" | Sistem memperbarui status laporan menjadi `verified` dan mencatat identitas supervisor pemeriksa | Berhasil (Sesuai) |
+| 10 | Cetak Laporan | Pencetakan fisik lembar laporan harian | Menekan tombol Cetak pada dokumen laporan | Sistem membuka jendela pratinjau cetak standar kertas A4 rapi lengkap dengan kolom tanda tangan | Berhasil (Sesuai) |
+| 11 | Dashboard & Grafik | Perenderan visualisasi grafik performa 14 hari | Membuka halaman Dashboard saat data transaksi harian tersedia | Sistem menampilkan grafik garis/batang yang mencerminkan akumulasi hasil kemas baik dan reject 14 hari terakhir | Berhasil (Sesuai) |
 
-Berdasarkan hasil eksekusi seluruh butir pengujian *Black Box Testing*, seluruh fungsi sistem terbukti beroperasi sesuai dengan spesifikasi rancangan dan siap diimplementasikan untuk mendukung operasional pencatatan harian di Unit Pengemasan PT Percetakan Dokumen Sekuriti.
+#### 3. Kesimpulan Hasil Pengujian
+Berdasarkan hasil eksekusi seluruh butir pengujian *Black Box Testing*, seluruh fungsi sistem terbukti beroperasi sesuai dengan spesifikasi rancangan kebutuhan dan siap diimplementasikan untuk mendukung operasional pencatatan harian di Unit Pengemasan PT Percetakan Dokumen Sekuriti.
 
 ---
 
@@ -716,16 +1248,20 @@ Berdasarkan hasil eksekusi seluruh butir pengujian *Black Box Testing*, seluruh 
 
 Tahap pemeliharaan (*maintenance*) merupakan tahapan pamungkas dalam daur hidup pengembangan perangkat lunak metode Waterfall. Tahap ini bertujuan untuk memastikan sistem perangkat lunak tetap beroperasi secara optimal, andal, aman, dan adaptif terhadap dinamika kebutuhan operasional setelah diterapkan secara penuh di lingkungan kerja Unit Pengemasan.
 
-Aktivitas pemeliharaan perangkat lunak mencakup tiga kategori penanganan utama:
+Aktivitas pemeliharaan perangkat lunak mencakup empat kategori penanganan utama:
 
-1. **Pemeliharaan Basis Data dan Pencadangan (*Database Maintenance & Backup*)**
+1. **Pemeliharaan Korektif (*Corrective Maintenance*)**
    <br>
-   Kegiatan pemeliharaan basis data dilaksanakan melalui penjadwalan pencadangan (*backup*) data secara berkala guna mencegah risiko kehilangan arsip riwayat laporan produksi harian akibat kegagalan perangkat keras komputer klien. Selain itu, dilakukan optimasi indeks tabel secara periodik pada entitas `daily_reports`, `daily_report_items`, dan `production_orders` untuk menjaga kecepatan respon proses pemindaian barcode dan query analitik grafik performa 14 hari kerja seiring bertambahnya volume data transaksi tahunan.
+   Kegiatan pemeliharaan korektif mencakup penanganan cepat terhadap kendala teknis, galat masukan data, atau anomali pembacaan scanner yang berpotensi ditemukan selama penggunaan rutin di area kerja pengemasan. Prosedur penanganan dilakukan dengan meninjau log error aplikasi dan melakukan perbaikan logika program secara terukur tanpa mengganggu integritas data yang telah tersimpan.
 
 2. **Pemeliharaan Adaptif Format Master SAP (*Adaptive Maintenance*)**
    <br>
-   Kegiatan pemeliharaan adaptif difokuskan pada penyesuaian logika pembacaan kolom pada modul *Update Database* apabila di masa mendatang pihak IT PT Percetakan Dokumen Sekuriti melakukan pembaruan struktur kolom pada berkas ekspor sistem SAP.
+   Kegiatan pemeliharaan adaptif difokuskan pada penyesuaian logika pembacaan kolom pada modul *Update Database* apabila di masa mendatang pihak IT PT Percetakan Dokumen Sekuriti melakukan modifikasi atau pembaruan struktur kolom pada berkas ekspor sistem SAP.
 
-3. **Pemeliharaan Korektif dan Penjaminan Keamanan (*Corrective & Perfective Maintenance*)**
+3. **Pemeliharaan Perfektif dan Penjaminan Keamanan (*Perfective & Security Maintenance*)**
    <br>
-   Kegiatan pemeliharaan korektif mencakup penanganan cepat terhadap kendala teknis atau anomali masukan yang berpotensi ditemukan selama penggunaan rutin di area kerja pengemasan. Sementara itu, pemeliharaan perfektif dilakukan melalui pembaruan versi dependensi aplikasi secara berkala guna memastikan sistem terlindung dari kerentanan celah keamanan web terbaru.
+   Kegiatan pemeliharaan perfektif dilakukan melalui pembaruan versi dependensi aplikasi secara berkala guna memastikan sistem terlindung dari celah keamanan web terbaru, serta melakukan optimalisasi perenderan antarmuka untuk meningkatkan kenyamanan kerja operator.
+
+4. **Pemeliharaan Basis Data dan Pencadangan (*Database Backup & Routine Maintenance*)**
+   <br>
+   Kegiatan pemeliharaan basis data dilaksanakan melalui penjadwalan pencadangan (*backup*) data secara berkala guna mencegah risiko kehilangan arsip riwayat laporan produksi harian akibat kegagalan perangkat keras komputer klien. Selain itu, dilakukan optimasi indeks tabel secara periodik pada entitas `daily_reports`, `daily_report_items`, dan `production_orders` untuk menjaga kecepatan respon proses pemindaian barcode dan query analitik grafik performa 14 hari kerja seiring bertambahnya volume data transaksi tahunan.
