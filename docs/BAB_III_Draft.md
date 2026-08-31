@@ -142,7 +142,7 @@ Kebutuhan non-fungsional menetapkan batasan kualitas teknis dan performa sistem:
 Tahap analisis pemodelan bertujuan untuk memvisualisasikan struktur fungsional sistem melalui Use Case Diagram terpisah per peran pengguna, aliran aktivitas proses (Activity Diagram), skema hubungan entitas berbasis notasi Chen (ERD), representasi struktur record logis (LRS), serta spesifikasi detail berkas tabel data sebelum pembuatan aplikasi dilaksanakan.
 
 #### 1. Use Case Diagram
-Use Case Diagram mendeskripsikan interaksi fungsional antara aktor (pengguna sistem) dengan fungsi-fungsi yang disediakan oleh sistem. Pemodelan use case disusun berdasarkan menu navigasi utama aplikasi web yang benar-benar tersedia di antarmuka sistem, yaitu **Dashboard**, **Buat Laporan**, **Lihat Laporan**, **Update Database** (khusus Supervisor), dan **Data Petugas** (khusus Supervisor). Diagram use case dipisahkan menjadi dua diagram utama berdasarkan hak akses masing-masing aktor. Relasi `<<include>>` digunakan untuk use case Login sebagai prasyarat akses menu utama pada peran Operator, sedangkan relasi `<<extend>>` digunakan untuk fitur opsional seperti pilihan seri laporan (PCHT, MMEA, HPTL), ekspor Excel, cetak lembar fisik, serta verifikasi laporan (khusus Supervisor).
+Use Case Diagram mendeskripsikan interaksi fungsional antara aktor (pengguna sistem) dengan fungsi-fungsi yang disediakan oleh sistem. Pemodelan use case disusun berdasarkan menu navigasi utama aplikasi web yang benar-benar tersedia di antarmuka sistem, yaitu **Dashboard**, **Buat Laporan**, **Lihat Laporan**, **Update Database** (khusus Supervisor), dan **Data Petugas** (khusus Supervisor). Diagram use case dipisahkan menjadi dua diagram utama berdasarkan hak akses masing-masing aktor. Relasi `<<include>>` digunakan untuk use case Login sebagai prasyarat akses menu utama pada kedua peran, sedangkan relasi `<<extend>>` digunakan untuk fitur opsional seperti pilihan seri laporan (PCHT, MMEA, HPTL), ekspor Excel, cetak lembar fisik, serta verifikasi laporan (khusus Supervisor).
 
 ##### a. Use Case Diagram Hak Akses Petugas (Operator)
 Diagram use case untuk peran Petugas (Operator Pengemasan) dimodelkan pada Gambar 3.2:
@@ -205,10 +205,10 @@ flowchart LR
     subgraph SYSTEM ["Sistem Informasi Hasil Produksi Harian"]
         direction TB
         UC_LOGIN(["Login"])
-        UC_DASH(["Mengakses Dashboard"])
+        UC_DASH(["Mengakses Halaman Dashboard"])
         UC_UPDATE(["Update Database"])
-        UC_BUAT(["Buat Laporan"])
-        UC_LIHAT(["Lihat Laporan"])
+        UC_BUAT(["Mengakses Menu Buat Laporan"])
+        UC_LIHAT(["Melihat Laporan"])
         UC_PETUGAS(["Mengelola Data Petugas"])
         UC_LOGOUT(["Logout"])
 
@@ -223,13 +223,18 @@ flowchart LR
 
     ACT_SPV((Supervisor))
 
-    ACT_SPV --- UC_LOGIN
     ACT_SPV --- UC_DASH
     ACT_SPV --- UC_UPDATE
     ACT_SPV --- UC_BUAT
     ACT_SPV --- UC_LIHAT
     ACT_SPV --- UC_PETUGAS
     ACT_SPV --- UC_LOGOUT
+
+    UC_DASH -. "<<include>>" .-> UC_LOGIN
+    UC_UPDATE -. "<<include>>" .-> UC_LOGIN
+    UC_BUAT -. "<<include>>" .-> UC_LOGIN
+    UC_LIHAT -. "<<include>>" .-> UC_LOGIN
+    UC_PETUGAS -. "<<include>>" .-> UC_LOGIN
 
     UC_PCHT -. "<<extend>>" .-> UC_BUAT
     UC_MMEA -. "<<extend>>" .-> UC_BUAT
@@ -1235,7 +1240,7 @@ Halaman login dirancang dengan tata letak minimalis dan terpusat yang memfasilit
 |                     +---------------------------+                     |
 |                     |       FORM LOGIN USER     |                     |
 |                     |                           |                     |
-|                     |  Nomor Pegawai (NP):      |                     |
+|                     |  NP / Username / Email:   |                     |
 |                     |  [______________________] |                     |
 |                     |                           |                     |
 |                     |  Password:                |                     |
@@ -1428,10 +1433,10 @@ Format cetak lembar dokumen resmi standar A4 yang dihasilkan sistem lengkap deng
 |----+---------------+---------------------------+-------+------+-------|
 | TOTAL HASIL PENGEMASAN                         |       | 7.500| 35    |
 |-----------------------------------------------------------------------|
-| Mengetahui,                                 Petugas Pelaksana,        |
-| Kepala Unit / Supervisor                                              |
+| Dibuat oleh (Petugas Kemas),               Mengetahui,               |
+|                                            Kepala Unit / Supervisor   |
 |                                                                       |
-| ( Agus Soelistyo )                          ( Umar Ibnu Zainal M. )   |
+| ( Umar Ibnu Zainal M. )                    ( Agus Soelistyo )        |
 +-----------------------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
