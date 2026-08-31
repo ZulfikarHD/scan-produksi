@@ -374,7 +374,7 @@ Guna mendefinisikan secara terperinci mekanisme operasional setiap *use case*, b
 | **Actors** | Kepala Unit (Supervisor) |
 | **Main Flow / Basic Path** | 1. Supervisor mengklik menu "Update Database" pada navigasi utama.<br>2. Sistem menampilkan halaman "Update Database SAP" dengan dua tab: **Impor SAP** dan **Data Order Produksi**.<br>3. (Tab Impor) Supervisor mengunggah berkas ekspor SAP, sistem menampilkan pratinjau validasi baris, lalu Supervisor menekan konfirmasi impor.<br>4. Sistem melakukan *bulk upsert* ke tabel `production_orders` dan mencatat riwayat impor.<br>5. (Tab Data Order) Supervisor dapat menambah order manual, mengubah spesifikasi order, menghapus order, memfilter data, dan mengekspor master data ke Excel. |
 | **Alternate Flow / Invariant A** | A1. Berkas berisi Nomor PO yang sudah ada di basis data dengan revisi target kuantitas.<br>A2. Sistem secara cerdas memperbarui data yang ada (*update*) tanpa menduplikasi rekaman data. |
-| **Invariant B** | B1. Supervisor mengunggah berkas dengan tipe file yang tidak valid (misal: `.pdf` atau `.docx`).<br>B2. Sistem membatalkan proses unggah.<br>B3. Sistem menampilkan pesan error "Format berkas tidak valid! Hanya berkas .xlsx dan .csv yang diizinkan". |
+| **Invariant B** | B1. Supervisor mengunggah berkas dengan tipe file yang tidak valid (misal: `.pdf` atau `.docx`).<br>B2. Sistem membatalkan proses unggah.<br>B3. Sistem menampilkan pesan error "Format berkas tidak didukung. Harap unggah berkas spreadsheet dengan ekstensi .xlsx, .xls, atau .csv." |
 *(Sumber: Hasil Penelitian, 2026)*
 
 *Tabel 3.9: Deskripsi Use Case Mengelola Data Petugas*
@@ -907,7 +907,7 @@ Struktur LRS Sistem Dokumentasi Hasil Produksi Harian disajikan pada Gambar 3.11
 classDiagram
     class USERS {
         *id (PK) : BIGINT
-        nip : VARCHAR(50) [UK]
+        nip : VARCHAR(30) [UK]
         username : VARCHAR(50) [UK]
         name : VARCHAR(100)
         email : VARCHAR(100) [UK]
@@ -921,17 +921,36 @@ classDiagram
 
     class PRODUCTION_ORDERS {
         *id (PK) : BIGINT
-        po_number : VARCHAR(50) [UK]
-        product_code : VARCHAR(50)
-        product_name : VARCHAR(150)
-        customer_name : VARCHAR(150)
+        po_number : VARCHAR(255) [UK]
+        no_obc : VARCHAR(255)
+        perso_type : VARCHAR(50)
+        seri : VARCHAR(50)
+        product_code : VARCHAR(255)
+        product_name : VARCHAR(255)
+        customer_name : VARCHAR(255)
         specification : TEXT
-        paper_type : VARCHAR(100)
-        machine_number : VARCHAR(50)
-        target_quantity : INT
-        unit : VARCHAR(20)
+        paper_type : VARCHAR(255)
+        machine_number : VARCHAR(255)
         order_date : DATE
-        status : ENUM('ready', 'in_progress', 'completed')
+        delivery_deadline : DATE
+        tgl_pakai_bb : DATE
+        tgl_cetak : DATE
+        tgl_verifikasi : DATE
+        packaging_date : DATE
+        target_quantity : INT
+        rencet_quantity : INT
+        jml_bb : INT
+        jml_cd : INT
+        total_bb : INT
+        jml_cetak : INT
+        baik_verifikasi : INT
+        rusak_verifikasi : INT
+        hcts_baik : INT
+        total_hcts : INT
+        kemas_quantity : INT
+        kirim_quantity : INT
+        unit : VARCHAR(30)
+        status : ENUM('ready', 'in_progress', 'completed', 'cancelled')
         #created_by (FK) : BIGINT
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
@@ -1015,7 +1034,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 |---|---|---|---|---|---|
 | 1 | ID Pengguna | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Nama Lengkap | `name` | VARCHAR | 100 | Not Null |
-| 3 | Nomor Pegawai | `nip` | VARCHAR | 50 | Unique, Nullable (Kredensial Login) |
+| 3 | Nomor Pegawai | `nip` | VARCHAR | 30 | Unique, Nullable (Kredensial Login) |
 | 4 | Username | `username` | VARCHAR | 50 | Unique, Nullable (Kredensial Login) |
 | 5 | Alamat Email | `email` | VARCHAR | 100 | Unique, Not Null |
 | 6 | Kata Sandi | `password` | VARCHAR | 255 | Not Null (Terenkripsi Bcrypt) |
@@ -1041,20 +1060,39 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
 | 1 | ID Pesanan | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | Nomor PO / Barcode | `po_number` | VARCHAR | 50 | Unique, Not Null (Simbologi Code 128) |
-| 3 | Kode Produk | `product_code` | VARCHAR | 50 | Index, Not Null |
-| 4 | Nama Produk | `product_name` | VARCHAR | 150 | Not Null |
-| 5 | Nama Instansi Pemesan | `customer_name` | VARCHAR | 150 | Not Null |
-| 6 | Spesifikasi Teknis | `specification` | TEXT | - | Not Null (Bahan Kertas, Pengaman) |
-| 7 | Jenis Kertas | `paper_type` | VARCHAR | 100 | Nullable |
-| 8 | Nomor Mesin Asal | `machine_number` | VARCHAR | 50 | Nullable (Identitas Mesin Cetak) |
-| 9 | Target Kuantitas | `target_quantity` | INT UNSIGNED | 10 | Not Null |
-| 10 | Satuan Hitung | `unit` | VARCHAR | 20 | Default: 'lembar' |
-| 11 | Tanggal Pesanan | `order_date` | DATE | - | Not Null |
-| 12 | Status Pengerjaan | `status` | ENUM | - | Value: 'ready', 'in_progress', 'completed' |
-| 13 | ID Pembuat / Pengimpor | `created_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
-| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 2 | Nomor PO / Barcode | `po_number` | VARCHAR | 255 | Unique, Not Null (Simbologi Code 128) |
+| 3 | Nomor OBC | `no_obc` | VARCHAR | 255 | Index, Nullable |
+| 4 | Tipe Perso | `perso_type` | VARCHAR | 50 | Nullable (Perso / Non Perso) |
+| 5 | Kode Seri | `seri` | VARCHAR | 50 | Nullable |
+| 6 | Kode Produk | `product_code` | VARCHAR | 255 | Index, Nullable |
+| 7 | Nama Produk | `product_name` | VARCHAR | 255 | Index, Not Null |
+| 8 | Nama Instansi Pemesan | `customer_name` | VARCHAR | 255 | Index, Nullable |
+| 9 | Spesifikasi Teknis | `specification` | TEXT | - | Nullable (Bahan Kertas, Pengaman) |
+| 10 | Jenis Kertas | `paper_type` | VARCHAR | 255 | Nullable |
+| 11 | Nomor Mesin Asal | `machine_number` | VARCHAR | 255 | Index, Nullable (Identitas Mesin Cetak) |
+| 12 | Tanggal Pesanan | `order_date` | DATE | - | Not Null (TGL OBC) |
+| 13 | Tanggal Jatuh Tempo | `delivery_deadline` | DATE | - | Nullable (TGL JTempo) |
+| 14 | Tanggal Pakai Bahan Baku | `tgl_pakai_bb` | DATE | - | Nullable |
+| 15 | Tanggal Cetak | `tgl_cetak` | DATE | - | Nullable |
+| 16 | Tanggal Verifikasi | `tgl_verifikasi` | DATE | - | Nullable |
+| 17 | Tanggal Pengemasan | `packaging_date` | DATE | - | Nullable |
+| 18 | Target Kuantitas Pesanan | `target_quantity` | INT UNSIGNED | 10 | Default: 0 (QTY Pesan SAP) |
+| 19 | Kuantitas Rencana Cetak | `rencet_quantity` | INT UNSIGNED | 10 | Default: 0 (RENCET) |
+| 20 | Jumlah Lembar Kerja Bahan Baku | `jml_bb` | INT UNSIGNED | 10 | Default: 0 |
+| 21 | Jumlah Cetakan Dasar | `jml_cd` | INT UNSIGNED | 10 | Default: 0 |
+| 22 | Total Bahan Baku | `total_bb` | INT UNSIGNED | 10 | Default: 0 (JML\_BB + JML\_CD) |
+| 23 | Jumlah Cetak | `jml_cetak` | INT UNSIGNED | 10 | Default: 0 |
+| 24 | Baik Verifikasi | `baik_verifikasi` | INT UNSIGNED | 10 | Default: 0 |
+| 25 | Rusak / Afval Verifikasi | `rusak_verifikasi` | INT UNSIGNED | 10 | Default: 0 |
+| 26 | Hasil HCTS Baik | `hcts_baik` | INT UNSIGNED | 10 | Default: 0 |
+| 27 | Total HCTS | `total_hcts` | INT UNSIGNED | 10 | Default: 0 |
+| 28 | Kuantitas Kemas | `kemas_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 29 | Kuantitas Kirim | `kirim_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 30 | Satuan Hitung | `unit` | VARCHAR | 30 | Default: 'lembar' |
+| 31 | Status Pengerjaan | `status` | VARCHAR | 30 | Default: 'ready', Nilai: 'ready', 'in_progress', 'completed', 'cancelled' |
+| 32 | ID Pembuat / Pengimpor | `created_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 33 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 34 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
 
 ##### c. Spesifikasi File `daily_reports`
@@ -1064,7 +1102,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Tipe File:** File Transaksi
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `id`
-- **Kunci Unik (*Unique Key*):** `report_code`
+- **Kunci Unik (*Unique Key*):** `report_code`, Komposit: (`product_series`, `report_date`, `shift`)
 - **Kunci Tamu (*Foreign Key*):** `user_id`, `supervisor_id` (Relasi ke `users.id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.12
 
@@ -1073,7 +1111,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 |---|---|---|---|---|---|
 | 1 | ID Laporan | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Kode Laporan Sesi | `report_code` | VARCHAR | 30 | Unique, Not Null (Format: `{SERIES}-{YYYY-MM-DD}-S{N}`, contoh: `PCHT-2026-08-26-S1`) |
-| 3 | Seri Produk | `product_series` | VARCHAR | 30 | Index, Not Null (Nilai: 'PCHT', 'MMEA', 'HPTL') |
+| 3 | Seri Produk | `product_series` | VARCHAR | 30 | Index, Not Null (Nilai: 'pcht', 'mmea', 'hptl') |
 | 4 | Tanggal Pengemasan | `report_date` | DATE | - | Index, Not Null |
 | 5 | Giliran Kerja | `shift` | VARCHAR | 30 | Default: 'shift_1' (Nilai: 'shift_1', 'shift_2', 'shift_3') |
 | 6 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
@@ -1133,14 +1171,16 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 |---|---|---|---|---|---|
 | 1 | ID Riwayat Impor | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Nama Berkas Unggahan | `file_name` | VARCHAR | 255 | Not Null |
-| 3 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Default: 0 |
-| 4 | Jumlah Baris Diimpor | `imported_count` | INT UNSIGNED | 8 | Default: 0 |
-| 5 | Jumlah Baris Diperbarui | `updated_count` | INT UNSIGNED | 8 | Default: 0 |
-| 6 | Jumlah Baris Gagal | `failed_count` | INT UNSIGNED | 8 | Default: 0 |
-| 7 | Status Impor | `status` | VARCHAR | 30 | Nilai: 'success', 'partial', 'failed' |
-| 8 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
-| 9 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 10 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 3 | Jalur Penyimpanan Berkas | `file_path` | VARCHAR | 255 | Nullable (Path di server setelah unggah) |
+| 4 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Default: 0 |
+| 5 | Jumlah Baris Diimpor | `imported_count` | INT UNSIGNED | 8 | Default: 0 |
+| 6 | Jumlah Baris Diperbarui | `updated_count` | INT UNSIGNED | 8 | Default: 0 |
+| 7 | Jumlah Baris Gagal | `failed_count` | INT UNSIGNED | 8 | Default: 0 |
+| 8 | Status Impor | `status` | VARCHAR | 30 | Default: 'success', Nilai: 'success', 'partial', 'failed' |
+| 9 | Log Kesalahan Baris | `error_log` | JSON | - | Nullable (Catatan baris yang gagal diproses) |
+| 10 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 11 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 12 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
 
 ---
@@ -1175,7 +1215,7 @@ Pelaksanaan implementasi didukung oleh konfigurasi lingkungan perangkat keras da
 | 9 | **CSS Framework & Bundler** | Tailwind CSS (versi 4.x) dengan `@tailwindcss/vite` & Vite (versi 8.x) | Desain antarmuka responsif dan alat kompilasi aset frontend cepat |
 | 10 | **Pengelola Paket Dependensi** | Composer (PHP) & pnpm (Node.js) | Manajemen instalasi dan pembaruan dependensi backend PHP dan frontend JavaScript |
 | 11 | **Visualisasi Grafik Analitik** | Chart.js terintegrasi Alpine.js | Merender grafik analitik tren performa hasil kemas dengan opsi rentang 7, 14, atau 30 hari aktif pada halaman Dashboard |
-| 12 | **Pengujian & Kualitas Kode** | Pest PHP (versi 5.x), Larastan (versi 3.x), Laravel Pint (versi 1.27) | Pengujian otomatis (*automated testing*), analisis statis tipe data, dan standarisasi format kode |
+| 12 | **Pengujian & Kualitas Kode** | Pest PHP (versi 5.x), Larastan (versi 3.x), Laravel Pint (versi 1.x) | Pengujian otomatis (*automated testing*), analisis statis tipe data, dan standarisasi format kode |
 *(Sumber: Hasil Penelitian, 2026)*
 
 ---
@@ -1407,9 +1447,9 @@ Implementasi aplikasi dikelompokkan ke dalam enam modul fungsional utama yang sa
 |---|---|---|---|
 | 1 | **Skema Basis Data & Model Eloquent** | `database/migrations/`, Model: `User`, `ProductionOrder`, `DailyReport`, `DailyReportItem`, `SapImportLog` | Membangun struktur tabel terelasi, foreign key constraints, tipe data kolom, seeder inisialisasi, dan pemodelan relasi Eloquent ORM untuk menjamin integritas transaksi data. |
 | 2 | **Autentikasi & Kontrol Akses Peran** | `app/Livewire/Auth/Login.php`, `FortifyServiceProvider`, Middleware `EnsureUserRole` | Menerapkan login menggunakan identitas Nomor Pegawai (NP) dan password terenkripsi, manajemen sesi, rate limiting 5 percobaan per menit, serta proteksi halaman berbasis peran Petugas dan Supervisor. |
-| 3 | **Update Database (Master Data SAP)** | `app/Livewire/MasterData/UpdateDatabase.php`, `app/Services/SapImportService.php` | Mengakomodasi pengunggahan berkas ekspor SAP (.xlsx/.csv), validasi struktur kolom, parsing baris pesanan, dan pembaruan massal (*bulk upsert*) data Nomor PO, spesifikasi bahan, dan target kemas. |
+| 3 | **Update Database (Master Data SAP)** | `app/Livewire/MasterData/UpdateDatabase.php`, `app/Services/SapImportService.php` | Mengakomodasi pengunggahan berkas ekspor SAP (.xlsx/.xls/.csv), validasi struktur kolom, parsing baris pesanan, dan pembaruan massal (*bulk upsert*) data Nomor PO, spesifikasi bahan, dan target kemas. |
 | 4 | **Buat Laporan (Scan Barcode & Kemas)** | `app/Livewire/Reports/ReportSessionLauncher.php`, `app/Livewire/Reports/ProductionEntry.php`, Alpine.js Scanner Listener | Menangkap pembacaan scanner barcode Code 128 pada Nomor PO, melakukan pencarian instan (*instant lookup*) data produk, menyediakan input kuantitas kemas, dan menyimpan item langsung ke basis data. |
-| 5 | **Manajemen & Cetak Laporan** | `app/Livewire/Reports/ReportIndex.php`, `ReportDetail.php`, `app/Services/ReportCodeGenerator.php`, `@media print` | Menampilkan riwayat laporan harian, membangkitkan kode laporan unik otomatis dengan format `{SERIES}-{YYYY-MM-DD}-S{N}` (contoh: `PCHT-2026-08-26-S1`), memfasilitasi verifikasi persetujuan oleh Supervisor, serta mencetak dokumen fisik rapi standar kertas A4. |
+| 5 | **Manajemen & Cetak Laporan** | `app/Livewire/Reports/ReportIndex.php`, `ReportDetail.php`, `EditReport.php`, `app/Services/ReportCodeGenerator.php`, `@media print` | Menampilkan riwayat laporan harian, membangkitkan kode laporan unik otomatis dengan format `{SERIES}-{YYYY-MM-DD}-S{N}` (contoh: `PCHT-2026-08-26-S1`), memfasilitasi koreksi laporan oleh Petugas dan Supervisor, verifikasi persetujuan oleh Supervisor, serta mencetak dokumen fisik rapi standar kertas A4. |
 | 6 | **Dashboard & Grafik Tren Produksi** | `app/Livewire/Dashboard/DashboardIndex.php`, `DashboardAnalyticsService.php`, Komponen Chart.js | Mengeksekusi query agregasi SQL untuk menghitung akumulasi kemas baik dan reject pada rentang 7, 14, atau 30 hari aktif terakhir (WIB), merender 5 kartu metrik KPI harian, grafik interaktif tipe Area/Garis/Batang, widget distribusi shift, dan ranking top 5 mesin cetak. |
 *(Sumber: Hasil Penelitian, 2026)*
 
@@ -1434,7 +1474,7 @@ Pengujian fungsionalitas dijalankan secara menyeluruh terhadap seluruh skenario 
 | 4. | Pengguna memasukkan Nomor Pegawai (NP) dan kata sandi yang benar dan terdaftar. | NP: 202401<br>Password: Password123! | Login berhasil dan sistem menginisialisasi sesi kerja serta mengarahkan ke halaman Dashboard. | Sistem membuka sesi dan mengarahkan pengguna ke halaman Dashboard. | Valid |
 | 5. | Supervisor menambahkan akun petugas baru dengan data yang valid. | NP: 202405<br>Nama: Budi Santoso<br>Email: budi@pds.co.id<br>Role: Petugas | Data akun baru tersimpan ke tabel `users` dan muncul di tabel daftar petugas. | Data berhasil tersimpan dan daftar tabel petugas memuat akun baru. | Valid |
 | 6. | Supervisor mengunggah berkas ekspor SAP format spreadsheet valid (.xlsx). | File: `sap_po_august.xlsx`<br>(Kolom No PO, Nama, Qty lengkap) | Sistem mengekstrak seluruh baris pesanan dan memperbarui tabel master `production_orders`. | Sistem melakukan *bulk upsert* dan menampilkan jumlah data terproses. | Valid |
-| 7. | Supervisor mengunggah berkas dengan ekstensi yang tidak diizinkan (.pdf). | File: `dokumen_sap.pdf` | Sistem menolak berkas dan memunculkan pesan "Format berkas tidak valid". | Berkas ditolak sistem dan menampilkan peringatan tipe berkas. | Valid |
+| 7. | Supervisor mengunggah berkas dengan ekstensi yang tidak diizinkan (.pdf). | File: `dokumen_sap.pdf` | Sistem menolak berkas dan memunculkan pesan "Format berkas tidak didukung. Harap unggah berkas spreadsheet dengan ekstensi .xlsx, .xls, atau .csv." | Berkas ditolak sistem dan menampilkan peringatan tipe berkas tidak didukung. | Valid |
 | 8. | Petugas memindai barcode Nomor PO yang terdaftar pada master SAP menggunakan scanner. | Barcode Scanner input:<br>`PO-2026-8891` | Kolom Nama Produk, Spesifikasi Kertas, dan Nomor Mesin terisi otomatis secara seketika (< 1 detik). | Seluruh kolom spesifikasi produk terisi otomatis dari basis data. | Valid |
 | 9. | Petugas memindai barcode Nomor PO yang belum diimpor ke dalam sistem. | Barcode Scanner input:<br>`PO-9999-0000` | Sistem membunyikan peringatan dan menampilkan notifikasi "Nomor PO belum terdaftar". | Sistem membunyikan alarm dan memunculkan alert PO tidak ditemukan. | Valid |
 | 10. | Petugas memasukkan jumlah hasil kemas baik lalu menekan tombol "Selesaikan Laporan" untuk menyelesaikan sesi. | Kemas Baik: 5.000<br>Klik "Selesaikan Laporan" | Sistem mengubah status laporan menjadi `Terkirim (Selesai Scan)` dan membangkitkan kode laporan unik otomatis (contoh: `PCHT-2026-08-26-S1`). | Laporan tersimpan di basis data dengan kode unik dan status Terkirim. | Valid |
