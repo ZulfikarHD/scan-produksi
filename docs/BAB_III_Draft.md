@@ -108,29 +108,24 @@ Kajian pustaka mencakup:
 
 #### 2. Analisa Kebutuhan Sistem Pengguna
 
-Kebutuhan fungsional mendefinisikan kapabilitas, proses kerja, dan layanan interaktif yang wajib disediakan oleh sistem aplikasi untuk memenuhi kebutuhan pengguna, adapun dalam sistem informasi hasil produksi harian unit pengemasan berbasis web yang penulis rancang terbagi menjadi dua hak akses user yaitu operator dan kepala unit yang memiliki masing-masing hak akses menu yang berbeda untuk menunjang operasional sistem informasi, berikut dibawah ini rincian dari hak akses user sistem informasi yang penulis buat:
+Kebutuhan fungsional mendefinisikan kapabilitas dan layanan yang wajib disediakan oleh sistem untuk memenuhi kebutuhan pengguna. Sistem informasi hasil produksi harian ini memiliki dua hak akses pengguna, yaitu Operator dan Kepala Unit (Supervisor), dengan rincian sebagai berikut:
 
-**Kebutuhan Fungsional Hak Akses Operator**
-1) Operator dapat melakukan login ke dalam sistem menggunakan Nomor Pegawai (NP) dan password yang terdaftar.
-2) Operator dapat mengakses halaman Dashboard untuk memantau ringkasan metrik produksi harian dan grafik performa 14 hari kerja terakhir.
-3) Operator dapat membuka sesi laporan harian melalui menu Buat Laporan dengan memilih tanggal, seri produk (PCHT, MMEA, atau HPTL), dan shift kerja.
-4) Operator dapat melakukan pemindaian barcode Nomor PO pada Kartu Mesin Produksi menggunakan barcode scanner berbasis USB (tipe Code 128) dan melihat spesifikasi pesanan otomatis dari master data SAP.
-5) Operator dapat menginputkan kuantitas hasil kemas baik (lembar) per Nomor PO dan menyimpan item langsung ke sesi laporan aktif.
-6) Operator dapat mengoreksi kuantitas item secara inline pada tabel sesi laporan selama status masih Draft, lalu menyelesaikan laporan (status berubah menjadi Terkirim).
-7) Operator dapat melihat arsip laporan harian melalui menu Lihat Laporan, memfilter data, mengekspor rekapitulasi ke Excel, dan mencetak lembar fisik laporan format A4.
-8) Operator dapat melakukan koreksi laporan melalui halaman Edit Laporan terhadap laporan milik sendiri yang belum diverifikasi dan masih dalam batas 24 jam sejak dibuat.
-9) Operator dapat melakukan logout untuk mengakhiri sesi kerja operasional.
+**a. Kebutuhan Sistem Operator**
+1) Operator dapat melakukan *login* ke dalam sistem.
+2) Operator dapat mengakses halaman *Dashboard*.
+3) Operator dapat membuka sesi laporan harian melalui menu **Buat Laporan** (PCHT, MMEA, atau HPTL).
+4) Operator dapat memindai barcode Nomor PO dan menginputkan kuantitas hasil kemas pada konsol pemindaian.
+5) Operator dapat melihat riwayat laporan melalui menu **Lihat Laporan**, mengekspor rekapitulasi ke Excel, dan mencetak lembar fisik laporan.
+6) Operator dapat melakukan *logout* dari sistem.
 
-**Kebutuhan Fungsional Hak Akses Kepala Unit / Supervisor**
-1) Kepala Unit / Supervisor dapat melakukan login ke dalam sistem menggunakan Nomor Pegawai (NP) dan password yang terdaftar.
-2) Kepala Unit / Supervisor dapat mengakses halaman Dashboard untuk memantau metrik KPI harian dan grafik performa 14 hari kerja terakhir.
-3) Kepala Unit / Supervisor dapat mengimpor berkas master data pesanan produksi hasil ekspor SAP (`.xlsx`, `.xls`, atau `.csv`), melihat riwayat impor, serta mengelola data order produksi (tambah, ubah, hapus, dan ekspor master data).
-4) Kepala Unit / Supervisor dapat mengelola data akun petugas (menambah, melihat, mengubah profil, menonaktifkan, menghapus, dan mereset kata sandi).
-5) Kepala Unit / Supervisor dapat membuka sesi laporan dan melakukan pemindaian barcode sama seperti operator apabila diperlukan.
-6) Kepala Unit / Supervisor dapat melihat, mencari, memfilter, mengekspor Excel, dan mencetak lembar fisik seluruh riwayat laporan produksi harian dari seluruh shift kerja.
-7) Kepala Unit / Supervisor dapat memverifikasi dan menyetujui (*verify*) dokumen laporan produksi harian yang telah diserahkan operator, sehingga status berubah menjadi Terverifikasi.
-8) Kepala Unit / Supervisor dapat melakukan koreksi laporan, membuka kembali sesi laporan ke status Draft, serta menghapus laporan jika diperlukan.
-9) Kepala Unit / Supervisor dapat melakukan logout untuk mengakhiri sesi kerja manajerial.
+**b. Kebutuhan Sistem Kepala Unit (Supervisor)**
+1) Kepala Unit dapat melakukan *login* ke dalam sistem.
+2) Kepala Unit dapat mengakses halaman *Dashboard*.
+3) Kepala Unit dapat mengimpor berkas master data pesanan SAP dan mengelola data order melalui menu **Update Database**.
+4) Kepala Unit dapat membuka sesi laporan dan melakukan pemindaian barcode melalui menu **Buat Laporan**.
+5) Kepala Unit dapat melihat, memverifikasi, mengekspor Excel, dan mencetak seluruh riwayat laporan melalui menu **Lihat Laporan**.
+6) Kepala Unit dapat mengelola data akun petugas melalui menu **Data Petugas**.
+7) Kepala Unit dapat melakukan *logout* dari sistem.
 
 ##### Kebutuhan Non-Fungsional (*Non-Functional Requirements*)
 Kebutuhan non-fungsional menetapkan batasan kualitas teknis dan performa sistem:
@@ -147,7 +142,7 @@ Kebutuhan non-fungsional menetapkan batasan kualitas teknis dan performa sistem:
 Tahap analisis pemodelan bertujuan untuk memvisualisasikan struktur fungsional sistem melalui Use Case Diagram terpisah per peran pengguna, aliran aktivitas proses (Activity Diagram), skema hubungan entitas berbasis notasi Chen (ERD), representasi struktur record logis (LRS), serta spesifikasi detail berkas tabel data sebelum pembuatan aplikasi dilaksanakan.
 
 #### 1. Use Case Diagram
-Use Case Diagram mendeskripsikan interaksi fungsional antara aktor (pengguna sistem) dengan fungsi-fungsi yang disediakan oleh sistem. Pemodelan use case disusun berdasarkan menu navigasi utama aplikasi web yang benar-benar tersedia di antarmuka sistem, yaitu **Dashboard**, **Buat Laporan**, **Lihat Laporan**, **Update Database** (khusus Supervisor), dan **Data Petugas** (khusus Supervisor). Diagram use case dipisahkan menjadi dua diagram utama berdasarkan hak akses masing-masing aktor. Relasi `<<include>>` digunakan untuk use case Login sebagai prasyarat akses menu tertentu, sedangkan relasi `<<extend>>` digunakan untuk variasi opsional seperti jenis seri laporan (PCHT, MMEA, HPTL), ekspor Excel, cetak lembar fisik, dan verifikasi laporan (khusus Supervisor).
+Use Case Diagram mendeskripsikan interaksi fungsional antara aktor (pengguna sistem) dengan fungsi-fungsi yang disediakan oleh sistem. Pemodelan use case disusun berdasarkan menu navigasi utama aplikasi web yang benar-benar tersedia di antarmuka sistem, yaitu **Dashboard**, **Buat Laporan**, **Lihat Laporan**, **Update Database** (khusus Supervisor), dan **Data Petugas** (khusus Supervisor). Diagram use case dipisahkan menjadi dua diagram utama berdasarkan hak akses masing-masing aktor. Relasi `<<include>>` digunakan untuk use case Login sebagai prasyarat akses menu utama pada peran Operator, sedangkan relasi `<<extend>>` digunakan untuk fitur opsional seperti pilihan seri laporan (PCHT, MMEA, HPTL), ekspor Excel, cetak lembar fisik, serta verifikasi laporan (khusus Supervisor).
 
 ##### a. Use Case Diagram Hak Akses Petugas (Operator)
 Diagram use case untuk peran Petugas (Operator Pengemasan) dimodelkan pada Gambar 3.2:
@@ -179,6 +174,7 @@ flowchart LR
 
     UC_DASH -. "<<include>>" .-> UC_LOGIN
     UC_BUAT -. "<<include>>" .-> UC_LOGIN
+    UC_LIHAT -. "<<include>>" .-> UC_LOGIN
 
     UC_PCHT -. "<<extend>>" .-> UC_BUAT
     UC_MMEA -. "<<extend>>" .-> UC_BUAT
@@ -347,7 +343,7 @@ Guna mendefinisikan secara terperinci mekanisme operasional setiap *use case*, b
 | **Failed end Condition** | Data laporan gagal dimuat akibat parameter filter yang tidak valid. |
 | **Actors** | Operator, Kepala Unit (Supervisor) |
 | **Main Flow / Basic Path** | 1. Pengguna mengklik menu "Lihat Laporan" pada navigasi utama.<br>2. Sistem menampilkan halaman arsip "Laporan Produksi" dengan statistik ringkasan dan tabel daftar laporan.<br>3. Pengguna memfilter berdasarkan tanggal, seri produk, shift, atau status (Draft / Terkirim / Terverifikasi).<br>4. Pengguna menekan tombol aksi "Lihat" pada nomor laporan tertentu untuk membuka halaman rincian.<br>5. Sistem menampilkan detail item PO, metrik realisasi, dan tombol aksi sesuai peran pengguna. |
-| **Alternate Flow / Invariant A** | A1. Pengguna menekan "Buat Laporan Baru" dari halaman arsip untuk membuka sesi laporan baru.<br>A2. Pengguna menekan "Ekspor Excel" untuk mengunduh rekapitulasi data (lihat Tabel 3.7).<br>A3. Pengguna menekan "Cetak Lembar Fisik" untuk membuka tampilan cetak A4 (`/reports/{kode}/print`).<br>A4. (Khusus Operator) Operator menekan "Koreksi Laporan" untuk membuka halaman Edit Laporan jika laporan milik sendiri, belum diverifikasi, dan masih dalam batas 24 jam.<br>A5. (Khusus Supervisor) Supervisor menekan "Verifikasi Laporan" pada halaman rincian untuk mengubah status menjadi `verified`.<br>A6. (Khusus Supervisor) Supervisor dapat menghapus laporan melalui modal konfirmasi hapus. |
+| **Alternate Flow / Invariant A** | A1. Pengguna menekan "Buat Laporan Baru" dari halaman arsip untuk membuka sesi laporan baru.<br>A2. Pengguna menekan "Ekspor Excel" untuk mengunduh rekapitulasi data (lihat Tabel 3.7).<br>A3. Pengguna menekan "Cetak Lembar Fisik" untuk membuka tampilan cetak A4 (`/reports/{kode}/print`).<br>A4. (Khusus Operator) Operator menekan "Koreksi Laporan" untuk membuka halaman Edit Laporan jika laporan milik sendiri, belum diverifikasi, dan masih dalam batas 24 jam.<br>A5. (Khusus Supervisor) Supervisor menekan "Verifikasi Laporan" pada halaman rincian untuk mengubah status menjadi `verified`.<br>A6. (Khusus Supervisor) Supervisor dapat menghapus laporan melalui modal konfirmasi hapus.<br>A7. (Khusus Supervisor) Supervisor dapat menekan "Buka Kembali Sesi" pada laporan berstatus Terkirim untuk mengembalikan status kembali ke Draft, sehingga item dapat dikoreksi kembali sebelum diverifikasi.<br>A8. (Khusus Supervisor) Supervisor dapat membuka halaman Edit Laporan tanpa batasan waktu dan tanpa syarat kepemilikan laporan. |
 | **Invariant B** | B1. Operator mencoba mengoreksi laporan milik operator lain atau laporan yang sudah lewat 24 jam.<br>B2. Sistem menolak akses edit dan tombol "Koreksi Laporan" tidak ditampilkan.<br>B3. Operator mencoba mengubah laporan berstatus `verified`.<br>B4. Sistem menampilkan peringatan bahwa laporan telah diverifikasi dan terkunci. |
 *(Sumber: Hasil Penelitian, 2026)*
 
@@ -421,6 +417,8 @@ flowchart TD
         S_Val{Kredensial<br/>Valid?}
         S_Aktif{Akun<br/>Aktif?}
         S_Err(Tampilkan Pesan<br/>Kredensial Salah)
+        S_RateCheck{Percobaan<br/>Gagal >= 5?}
+        S_Lockout(Tampilkan Pesan<br/>Terlalu Banyak Percobaan<br/>& Kunci Sementara)
         S_NonAktif(Tampilkan Pesan<br/>Akun Dinonaktifkan)
         S_Auth(Inisialisasi Sesi &<br/>Regenerasi Token)
     end
@@ -430,7 +428,10 @@ flowchart TD
     S_Form --> P_Input
     P_Input --> P_Kirim
     P_Kirim --> S_Val
-    S_Val -- Tidak Valid --> S_Err
+    S_Val -- Tidak Valid --> S_RateCheck
+    S_RateCheck -- Ya --> S_Lockout
+    S_Lockout --> S_Form
+    S_RateCheck -- Belum --> S_Err
     S_Err --> S_Form
     S_Val -- Valid --> S_Aktif
     S_Aktif -- Tidak --> S_NonAktif
@@ -469,6 +470,8 @@ flowchart TD
         SS_Err(Tampilkan Notifikasi<br/>Galat Validasi)
         SS_Save(Simpan / Update<br/>ke Tabel users)
         SS_Status(Update Flag<br/>is_active)
+        SS_SelfCheck{Akun<br/>Milik Sendiri?}
+        SS_SelfErr(Tolak Hapus<br/>Akun Sendiri)
         SS_Del{Akun Sudah<br/>Tercatat di Laporan?}
         SS_DelErr(Tolak Hapus &<br/>Sarankan Nonaktifkan)
         SS_DelOk(Hapus Rekaman<br/>Akun Petugas)
@@ -490,7 +493,10 @@ flowchart TD
     SP_Toggle --> SS_Status
     SS_Status --> SS_Notif
     SP_Pilih -- Hapus --> SP_Hapus
-    SP_Hapus --> SS_Del
+    SP_Hapus --> SS_SelfCheck
+    SS_SelfCheck -- Ya --> SS_SelfErr
+    SS_SelfErr --> SS_Tampil
+    SS_SelfCheck -- Tidak --> SS_Del
     SS_Del -- Ya --> SS_DelErr
     SS_DelErr --> SS_Tampil
     SS_Del -- Tidak --> SS_DelOk
@@ -527,7 +533,8 @@ flowchart TD
         SIS_Upsert(Bulk Upsert ke<br/>production_orders)
         SIS_Log(Catat sap_import_logs<br/>& Notifikasi Sukses)
         SIS_CRUD(Simpan / Update /<br/>Hapus Order Manual)
-        SIS_Export(Ekspor Master Data<br/>ke Excel jika diminta)
+        SIS_Export(Ekspor Master Data<br/>ke Excel)
+        S_AksiOrder{Pilih Aksi<br/>Order?}
     end
 
     S_Start --> S_Buka
@@ -543,8 +550,10 @@ flowchart TD
     SIS_Upsert --> SIS_Log
     SIS_Log --> S_End
     S_Tab -- Data Order --> S_Order
-    S_Order --> SIS_CRUD
-    SIS_CRUD --> SIS_Export
+    S_Order --> S_AksiOrder
+    S_AksiOrder -- Tambah / Edit / Hapus --> SIS_CRUD
+    SIS_CRUD --> S_End
+    S_AksiOrder -- Ekspor Excel --> SIS_Export
     SIS_Export --> S_End
 
     style S_Start fill:#000000,stroke:#000000,stroke-width:2px;
@@ -574,6 +583,7 @@ flowchart TD
 
     subgraph Sistem ["Sistem"]
         S_Form(Tampilkan Form<br/>Inisiasi Sesi)
+        S_AutoShift(Deteksi &<br/>Pra-isi Shift Aktif Saat Ini)
         S_BuatSesi{Buat Sesi Baru<br/>atau Lanjutkan?}
         S_Record(Buat / Buka Record<br/>daily_reports status Draft)
         S_Konsol(Tampilkan Konsol<br/>Pemindaian Barcode)
@@ -587,7 +597,8 @@ flowchart TD
 
     P_Start --> P_Buka
     P_Buka --> S_Form
-    S_Form --> P_Pilih
+    S_Form --> S_AutoShift
+    S_AutoShift --> P_Pilih
     P_Pilih --> P_Launch
     P_Launch --> S_BuatSesi
     S_BuatSesi --> S_Record
@@ -613,8 +624,8 @@ flowchart TD
 *(Sumber: Hasil Penelitian, 2026)*  
 *Gambar 3.7: Activity Diagram Buat Laporan (Inisiasi Sesi & Pemindaian Barcode)*
 
-##### e. Activity Diagram Melihat Laporan (Arsip, Verifikasi & Cetak)
-Diagram ini menggambarkan alur peninjauan arsip laporan, ekspor Excel, koreksi laporan, verifikasi Supervisor, dan cetak lembar fisik A4:
+##### e. Activity Diagram Melihat Laporan (Arsip, Verifikasi, Hapus & Cetak)
+Diagram ini menggambarkan alur peninjauan arsip laporan, ekspor Excel, koreksi laporan, verifikasi Supervisor, hapus laporan, buka kembali sesi, dan cetak lembar fisik A4:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
@@ -630,6 +641,8 @@ flowchart TD
         U_Edit(Buka Halaman<br/>Koreksi Laporan)
         U_Verif(Konfirmasi<br/>Verifikasi Laporan)
         U_Cetak(Buka Cetak<br/>Lembar Fisik A4)
+        U_Hapus(Konfirmasi<br/>Hapus Laporan)
+        U_Reopen(Konfirmasi<br/>Buka Kembali Sesi)
         U_End((( )))
     end
 
@@ -644,6 +657,8 @@ flowchart TD
         S_SaveEdit(Simpan Perubahan<br/>Item & Catatan)
         S_SetVerif(Ubah Status ke<br/>Verified & Catat Supervisor)
         S_Print(Render Tampilan Cetak<br/>Standar A4)
+        S_DeleteReport(Hapus Rekaman<br/>Laporan dari Basis Data)
+        S_ReopenReport(Ubah Status<br/>Submitted ke Draft)
     end
 
     U_Start --> U_Buka
@@ -671,15 +686,21 @@ flowchart TD
     U_Aksi2 -- Cetak --> U_Cetak
     U_Cetak --> S_Print
     S_Print --> U_End
+    U_Aksi2 -- "Hapus (Supervisor)" --> U_Hapus
+    U_Hapus --> S_DeleteReport
+    S_DeleteReport --> U_End
+    U_Aksi2 -- "Buka Kembali (Supervisor)" --> U_Reopen
+    U_Reopen --> S_ReopenReport
+    S_ReopenReport --> S_Rincian
 
     style U_Start fill:#000000,stroke:#000000,stroke-width:2px;
     style U_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.8: Activity Diagram Melihat Laporan (Arsip, Verifikasi & Cetak)*
+*Gambar 3.8: Activity Diagram Melihat Laporan (Arsip, Verifikasi, Hapus & Cetak)*
 
 ##### f. Activity Diagram Dashboard dan Visualisasi Grafik Performa
-Diagram ini menjelaskan alur pemrosesan data saat pengguna mengakses halaman Dashboard, termasuk metrik harian, grafik tren produksi, distribusi shift, dan daftar laporan terbaru:
+Diagram ini menjelaskan alur pemrosesan data saat pengguna mengakses halaman Dashboard, termasuk metrik harian, grafik tren produksi, distribusi shift, ranking top 5 mesin cetak, dan daftar 5 laporan terbaru:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
@@ -699,7 +720,8 @@ flowchart TD
         S_Query(Query Agregasi Tren<br/>Kemas Baik & Reject)
         S_Shift(Hitung Distribusi<br/>Output per Shift)
         S_Mesin(Ranking Top 5<br/>Mesin Cetak)
-        S_Render(Render Kartu KPI,<br/>Grafik Chart.js, & Tabel)
+        S_Recent(Ambil 5 Laporan<br/>Terbaru)
+        S_Render(Render Kartu KPI,<br/>Grafik Chart.js, Laporan Terbaru & Tabel)
     end
 
     U_Start --> U_Buka
@@ -708,7 +730,8 @@ flowchart TD
     S_Rentang --> S_Query
     S_Query --> S_Shift
     S_Shift --> S_Mesin
-    S_Mesin --> S_Render
+    S_Mesin --> S_Recent
+    S_Recent --> S_Render
     S_Render --> U_Lihat
     U_Lihat --> U_Opsi
     U_Opsi -- Ya --> U_Pilih
