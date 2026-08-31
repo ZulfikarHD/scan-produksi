@@ -21,7 +21,7 @@ Kedua, prosedur operasional standar (SOP) di area kerja pengemasan memiliki alur
 
 Ketiga, keterbatasan waktu pengerjaan dan sumber daya penelitian memerlukan manajemen proyek yang teratur dengan batas pencapaian (*milestones*) yang terukur. Dengan membagi pengembangan ke dalam tahapan sekuensial yang berurutan, evaluasi terhadap keberhasilan setiap fase, mulai dari analisis alur data, pemodelan basis data, hingga pengujian scanner, dapat dilakukan secara terstruktur tanpa menimbulkan tumpang tindih aktivitas.
 
-Keempat, skala sistem yang terfokus pada digitalisasi pencatatan dokumen kemas dan pemantauan analitik 14 hari kerja memungkinkan seluruh spesifikasi dirancang secara komprehensif di awal. Pendekatan terstruktur ini meminimalkan risiko terjadinya pembengkakan ruang lingkup (*scope creep*) dan memastikan konsentrasi rekayasa tertuju pada stabilitas pembacaan scanner dan keakuratan kalkulasi data grafik.
+Keempat, skala sistem yang terfokus pada digitalisasi pencatatan dokumen kemas dan pemantauan analitik 7, 14, atau 30 hari aktif memungkinkan seluruh spesifikasi dirancang secara komprehensif di awal. Pendekatan terstruktur ini meminimalkan risiko terjadinya pembengkakan ruang lingkup (*scope creep*) dan memastikan konsentrasi rekayasa tertuju pada stabilitas pembacaan scanner dan keakuratan kalkulasi data grafik.
 
 ### 3.1.3 Deskripsi Singkat Tahapan Metode Waterfall
 Secara umum, metode Waterfall yang diterapkan dalam penelitian ini terdiri atas lima tahapan utama yang dilaksanakan secara berurutan:
@@ -36,7 +36,7 @@ Secara umum, metode Waterfall yang diterapkan dalam penelitian ini terdiri atas 
 
 3. **Implementasi (*Implementation*)**
    <br>
-   Tahap penerjemahan seluruh dokumen perancangan ke dalam pembuatan aplikasi fungsional. Pada tahap ini, basis data dikonfigurasikan, logika backend dibangun menggunakan Laravel dengan arsitektur MVC, antarmuka reaktif diwujudkan melalui Livewire dan Flux UI, integrasi pembacaan barcode Code 128 dikonfigurasikan, dan modul kalkulasi analitik grafik 14 hari kerja diaktifkan.
+   Tahap penerjemahan seluruh dokumen perancangan ke dalam pembuatan aplikasi fungsional. Pada tahap ini, basis data dikonfigurasikan, logika backend dibangun menggunakan Laravel dengan arsitektur MVC, antarmuka reaktif diwujudkan melalui Livewire dan Flux UI, integrasi pembacaan barcode Code 128 dikonfigurasikan, dan modul kalkulasi analitik grafik performa produksi (7, 14, atau 30 hari aktif) diaktifkan.
 
 4. **Pengujian Sistem (*Testing*)**
    <br>
@@ -47,7 +47,7 @@ Secara umum, metode Waterfall yang diterapkan dalam penelitian ini terdiri atas 
    Tahap pemeliharaan sistem setelah aplikasi diterapkan di lingkungan kerja. Kegiatan ini mencakup pencadangan basis data berkala, penanganan kendala teknis yang timbul, pembaruan keamanan, serta penyesuaian logika sistem terhadap perubahan format data ekspor SAP.
 
 ### 3.1.4 Kesesuaian Metode dengan Penelitian
-Penerapan metode Waterfall memberikan kepastian alur kerja yang mendukung tujuan penelitian. Dengan menetapkan analisis dan desain arsitektur secara matang sebelum pembuatan aplikasi dimulai, pengembang dapat mengantisipasi kendala integrasi antara data hasil scanner dan basis data master SAP. Setiap fungsi yang dikembangkan, mulai dari pembacaan barcode cepat hingga penyajian grafik performa 14 hari kerja, memiliki acuan pengujian yang jelas, sehingga aplikasi yang dihasilkan dapat berfungsi dengan stabil, akurat, dan mudah digunakan oleh petugas di Unit Pengemasan.
+Penerapan metode Waterfall memberikan kepastian alur kerja yang mendukung tujuan penelitian. Dengan menetapkan analisis dan desain arsitektur secara matang sebelum pembuatan aplikasi dimulai, pengembang dapat mengantisipasi kendala integrasi antara data hasil scanner dan basis data master SAP. Setiap fungsi yang dikembangkan, mulai dari pembacaan barcode cepat hingga penyajian grafik performa produksi (7/14/30 hari aktif), memiliki acuan pengujian yang jelas, sehingga aplikasi yang dihasilkan dapat berfungsi dengan stabil, akurat, dan mudah digunakan oleh petugas di Unit Pengemasan.
 
 ### 3.1.5 Ilustrasi Alur Metode Waterfall
 Alur tahapan pengembangan perangkat lunak menggunakan model Waterfall diilustrasikan secara runtut pada Gambar 3.1 berikut:
@@ -115,7 +115,7 @@ Kebutuhan fungsional mendefinisikan kapabilitas dan layanan yang wajib disediaka
 2) Operator dapat mengakses halaman *Dashboard*.
 3) Operator dapat membuka sesi laporan harian melalui menu **Buat Laporan** (PCHT, MMEA, atau HPTL).
 4) Operator dapat memindai barcode Nomor PO dan menginputkan kuantitas hasil kemas pada konsol pemindaian.
-5) Operator dapat melihat riwayat laporan melalui menu **Lihat Laporan**, mengekspor rekapitulasi ke Excel, dan mencetak lembar fisik laporan.
+5) Operator dapat melihat riwayat laporan melalui menu **Lihat Laporan**, mengoreksi laporan milik sendiri (dalam batas 24 jam dan belum diverifikasi), mengekspor rekapitulasi ke Excel, dan mencetak lembar fisik laporan.
 6) Operator dapat melakukan *logout* dari sistem.
 
 **b. Kebutuhan Sistem Kepala Unit (Supervisor)**
@@ -123,13 +123,13 @@ Kebutuhan fungsional mendefinisikan kapabilitas dan layanan yang wajib disediaka
 2) Kepala Unit dapat mengakses halaman *Dashboard*.
 3) Kepala Unit dapat mengimpor berkas master data pesanan SAP dan mengelola data order melalui menu **Update Database**.
 4) Kepala Unit dapat membuka sesi laporan dan melakukan pemindaian barcode melalui menu **Buat Laporan**.
-5) Kepala Unit dapat melihat, memverifikasi, mengekspor Excel, dan mencetak seluruh riwayat laporan melalui menu **Lihat Laporan**.
+5) Kepala Unit dapat melihat, memverifikasi, mengoreksi, menghapus, membuka kembali sesi, mengekspor Excel, dan mencetak seluruh riwayat laporan melalui menu **Lihat Laporan**.
 6) Kepala Unit dapat mengelola data akun petugas melalui menu **Data Petugas**.
 7) Kepala Unit dapat melakukan *logout* dari sistem.
 
 ##### Kebutuhan Non-Fungsional (*Non-Functional Requirements*)
 Kebutuhan non-fungsional menetapkan batasan kualitas teknis dan performa sistem:
-1. **Performa dan Kecepatan Respon:** Sistem memberikan respon pencarian data produk pada saat barcode Nomor PO dipindai dalam waktu kurang dari 1 detik, serta merender kalkulasi grafik analitik 14 hari kerja dalam waktu di bawah 2 detik pada jaringan lokal.
+1. **Performa dan Kecepatan Respon:** Sistem memberikan respon pencarian data produk pada saat barcode Nomor PO dipindai dalam waktu kurang dari 1 detik, serta merender kalkulasi grafik analitik 7, 14, atau 30 hari aktif dalam waktu di bawah 2 detik pada jaringan lokal.
 2. **Keandalan dan Integritas Transaksi Data:** Sistem menerapkan validasi pencegahan duplikasi entri barcode Nomor PO dalam satu sesi laporan harian dan membungkus proses penyimpanan dalam mekanisme transaksi basis data (*database transaction*).
 3. **Kompatibilitas Perangkat Keras dan Perangkat Lunak:** Sistem kompatibel secara langsung (*Plug-and-Play*) dengan perangkat *barcode scanner* USB yang membaca format Code 128, dapat diakses melalui peramban web modern (*Google Chrome, Mozilla Firefox, Microsoft Edge*), dan format cetak disesuaikan untuk kertas standar A4.
 4. **Kemudahan Penggunaan (*Usability*):** Tata letak antarmuka dirancang bersih, intuitif, dan kontras tinggi untuk mempermudah operasional di meja kerja pengemasan.
@@ -756,7 +756,8 @@ flowchart TD
     subgraph USR_GRP ["Entitas User"]
         E_USER["User"]
         A_U1(["<u>id (PK)</u>"])
-        A_U2(["np (UK)"])
+        A_U2(["nip (UK)"])
+        A_U2b(["username (UK)"])
         A_U3(["name"])
         A_U4(["email (UK)"])
         A_U5(["password"])
@@ -765,6 +766,7 @@ flowchart TD
         A_U8(["last_login_at"])
         E_USER --- A_U1
         E_USER --- A_U2
+        E_USER --- A_U2b
         E_USER --- A_U3
         E_USER --- A_U4
         E_USER --- A_U5
@@ -805,6 +807,7 @@ flowchart TD
         E_DR["Daily_Report"]
         A_D1(["<u>id (PK)</u>"])
         A_D2(["report_code (UK)"])
+        A_D2b(["product_series"])
         A_D3(["report_date"])
         A_D4(["shift"])
         A_D5(["total_items_count"])
@@ -812,8 +815,10 @@ flowchart TD
         A_D7(["total_reject_quantity"])
         A_D8(["notes"])
         A_D9(["status"])
+        A_D10(["verified_at"])
         E_DR --- A_D1
         E_DR --- A_D2
+        E_DR --- A_D2b
         E_DR --- A_D3
         E_DR --- A_D4
         E_DR --- A_D5
@@ -821,6 +826,7 @@ flowchart TD
         E_DR --- A_D7
         E_DR --- A_D8
         E_DR --- A_D9
+        E_DR --- A_D10
     end
 
     subgraph DRI_GRP ["Entitas Daily Report Item"]
@@ -830,10 +836,12 @@ flowchart TD
         A_I3(["product_name"])
         A_I4(["specification"])
         A_I5(["machine_number"])
-        A_I6(["good_quantity"])
-        A_I7(["reject_quantity"])
-        A_I8(["unit"])
-        A_I9(["item_notes"])
+        A_I6(["target_quantity"])
+        A_I7(["good_quantity"])
+        A_I8(["reject_quantity"])
+        A_I9(["unit"])
+        A_I10(["notes"])
+        A_I11(["scanned_at"])
         E_DRI --- A_I1
         E_DRI --- A_I2
         E_DRI --- A_I3
@@ -843,14 +851,16 @@ flowchart TD
         E_DRI --- A_I7
         E_DRI --- A_I8
         E_DRI --- A_I9
+        E_DRI --- A_I10
+        E_DRI --- A_I11
     end
 
-    subgraph LOG_GRP ["Entitas Import Log"]
-        E_LOG["Import_Log"]
+    subgraph LOG_GRP ["Entitas SAP Import Log"]
+        E_LOG["SAP_Import_Log"]
         A_L1(["<u>id (PK)</u>"])
         A_L2(["file_name"])
         A_L3(["total_rows"])
-        A_L4(["imported_rows"])
+        A_L4(["imported_count"])
         E_LOG --- A_L1
         E_LOG --- A_L2
         E_LOG --- A_L3
@@ -878,7 +888,7 @@ Kardinalitas dan hubungan relasional dalam ERD dijelaskan sebagai berikut:
 1. **Relasi `User` ke `Production_Order` (mengimpor):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat mengimpor banyak berkas rekaman pesanan produksi SAP.
 2. **Relasi `User` ke `Daily_Report` (mencatat):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Petugas dapat mencatat banyak laporan hasil kemas harian.
 3. **Relasi `User` ke `Daily_Report` (memverifikasi):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat memverifikasi banyak dokumen laporan harian.
-4. **Relasi `User` ke `Import_Log` (merekam log):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat memiliki banyak catatan log riwayat unggahan berkas SAP.
+4. **Relasi `User` ke `SAP_Import_Log` (merekam log):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat memiliki banyak catatan log riwayat unggahan berkas SAP.
 5. **Relasi `Daily_Report` ke `Daily_Report_Item` (memuat):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu dokumen laporan harian memuat satu atau banyak rincian item hasil kemas.
 6. **Relasi `Production_Order` ke `Daily_Report_Item` (menjadi acuan):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu rekaman pesanan produksi SAP menjadi acuan data bagi satu atau banyak rincian item laporan harian.
 
@@ -897,7 +907,8 @@ Struktur LRS Sistem Dokumentasi Hasil Produksi Harian disajikan pada Gambar 3.11
 classDiagram
     class USERS {
         *id (PK) : BIGINT
-        np : VARCHAR(50) [UK]
+        nip : VARCHAR(50) [UK]
+        username : VARCHAR(50) [UK]
         name : VARCHAR(100)
         email : VARCHAR(100) [UK]
         password : VARCHAR(255)
@@ -921,7 +932,7 @@ classDiagram
         unit : VARCHAR(20)
         order_date : DATE
         status : ENUM('ready', 'in_progress', 'completed')
-        #imported_by (FK) : BIGINT
+        #created_by (FK) : BIGINT
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
     }
@@ -929,10 +940,12 @@ classDiagram
     class DAILY_REPORTS {
         *id (PK) : BIGINT
         report_code : VARCHAR(30) [UK]
+        product_series : VARCHAR(30)
         report_date : DATE
         shift : ENUM('shift_1', 'shift_2', 'shift_3')
         #user_id (FK) : BIGINT
         #supervisor_id (FK) : BIGINT
+        verified_at : TIMESTAMP
         total_items_count : INT
         total_good_quantity : INT
         total_reject_quantity : INT
@@ -950,27 +963,32 @@ classDiagram
         product_name : VARCHAR(150)
         specification : TEXT
         machine_number : VARCHAR(50)
+        target_quantity : INT
         good_quantity : INT
         reject_quantity : INT
         unit : VARCHAR(20)
-        item_notes : VARCHAR(255)
+        notes : VARCHAR(255)
+        scanned_at : DATETIME
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
     }
 
-    class IMPORT_LOGS {
+    class SAP_IMPORT_LOGS {
         *id (PK) : BIGINT
         file_name : VARCHAR(255)
         total_rows : INT
-        imported_rows : INT
+        imported_count : INT
+        updated_count : INT
+        failed_count : INT
+        status : VARCHAR(30)
         #user_id (FK) : BIGINT
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
     }
 
-    USERS "1" --> "0..*" PRODUCTION_ORDERS : imported_by
+    USERS "1" --> "0..*" PRODUCTION_ORDERS : created_by
     USERS "1" --> "0..*" DAILY_REPORTS : user_id / supervisor_id
-    USERS "1" --> "0..*" IMPORT_LOGS : user_id
+    USERS "1" --> "0..*" SAP_IMPORT_LOGS : user_id
     DAILY_REPORTS "1" --> "1..*" DAILY_REPORT_ITEMS : daily_report_id
     PRODUCTION_ORDERS "1" --> "0..*" DAILY_REPORT_ITEMS : production_order_id
 ```
@@ -989,7 +1007,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Tipe File:** File Master
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `id`
-- **Kunci Unik (*Unique Key*):** `np`, `email`
+- **Kunci Unik (*Unique Key*):** `nip`, `username`, `email`
 - **Struktur Tabel:** Disajikan pada Tabel 3.10
 
 *Tabel 3.10: Spesifikasi File Tabel `users`*
@@ -997,14 +1015,15 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 |---|---|---|---|---|---|
 | 1 | ID Pengguna | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Nama Lengkap | `name` | VARCHAR | 100 | Not Null |
-| 3 | Nomor Pegawai | `np` | VARCHAR | 50 | Unique, Not Null (Kredensial Login) |
-| 4 | Alamat Email | `email` | VARCHAR | 100 | Unique, Not Null |
-| 5 | Kata Sandi | `password` | VARCHAR | 255 | Not Null (Terenkripsi Bcrypt) |
-| 6 | Peran Akun | `role` | ENUM | - | Value: 'supervisor', 'petugas' |
-| 7 | Status Keaktifan | `is_active` | BOOLEAN | 1 | Default: true (1) |
-| 8 | Login Terakhir | `last_login_at` | TIMESTAMP | - | Nullable |
-| 9 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 10 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 3 | Nomor Pegawai | `nip` | VARCHAR | 50 | Unique, Nullable (Kredensial Login) |
+| 4 | Username | `username` | VARCHAR | 50 | Unique, Nullable (Kredensial Login) |
+| 5 | Alamat Email | `email` | VARCHAR | 100 | Unique, Not Null |
+| 6 | Kata Sandi | `password` | VARCHAR | 255 | Not Null (Terenkripsi Bcrypt) |
+| 7 | Peran Akun | `role` | ENUM | - | Value: 'supervisor', 'petugas' |
+| 8 | Status Keaktifan | `is_active` | BOOLEAN | 1 | Default: true (1) |
+| 9 | Login Terakhir | `last_login_at` | TIMESTAMP | - | Nullable |
+| 10 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 11 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
 
 ##### b. Spesifikasi File `production_orders`
@@ -1015,7 +1034,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `id`
 - **Kunci Unik (*Unique Key*):** `po_number`
-- **Kunci Tamu (*Foreign Key*):** `imported_by` (Relasi ke `users.id`)
+- **Kunci Tamu (*Foreign Key*):** `created_by` (Relasi ke `users.id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.11
 
 *Tabel 3.11: Spesifikasi File Tabel `production_orders`*
@@ -1033,7 +1052,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 | 10 | Satuan Hitung | `unit` | VARCHAR | 20 | Default: 'lembar' |
 | 11 | Tanggal Pesanan | `order_date` | DATE | - | Not Null |
 | 12 | Status Pengerjaan | `status` | ENUM | - | Value: 'ready', 'in_progress', 'completed' |
-| 13 | ID Pengimpor | `imported_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
+| 13 | ID Pembuat / Pengimpor | `created_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
 | 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
 | 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
@@ -1054,17 +1073,19 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 |---|---|---|---|---|---|
 | 1 | ID Laporan | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Kode Laporan Sesi | `report_code` | VARCHAR | 30 | Unique, Not Null (Format: `{SERIES}-{YYYY-MM-DD}-S{N}`, contoh: `PCHT-2026-08-26-S1`) |
-| 3 | Tanggal Pengemasan | `report_date` | DATE | - | Index, Not Null |
-| 4 | Giliran Kerja | `shift` | ENUM | - | Value: 'shift_1', 'shift_2', 'shift_3' |
-| 5 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
-| 6 | ID Supervisor Pemeriksa | `supervisor_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
-| 7 | Total Jenis Order | `total_items_count` | INT UNSIGNED | 5 | Default: 0 |
-| 8 | Total Hasil Kemas Baik | `total_good_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 9 | Total Kuantitas Reject | `total_reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 10 | Catatan Operasional | `notes` | TEXT | - | Nullable |
-| 11 | Status Verifikasi | `status` | ENUM | - | Value: 'draft', 'submitted', 'verified' |
-| 12 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 13 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 3 | Seri Produk | `product_series` | VARCHAR | 30 | Index, Not Null (Nilai: 'PCHT', 'MMEA', 'HPTL') |
+| 4 | Tanggal Pengemasan | `report_date` | DATE | - | Index, Not Null |
+| 5 | Giliran Kerja | `shift` | VARCHAR | 30 | Default: 'shift_1' (Nilai: 'shift_1', 'shift_2', 'shift_3') |
+| 6 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
+| 7 | ID Supervisor Pemeriksa | `supervisor_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 8 | Waktu Verifikasi | `verified_at` | TIMESTAMP | - | Nullable (Terisi saat status `verified`) |
+| 9 | Total Jenis Order | `total_items_count` | INT UNSIGNED | 5 | Default: 0 |
+| 10 | Total Hasil Kemas Baik | `total_good_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 11 | Total Kuantitas Reject | `total_reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 12 | Catatan Operasional | `notes` | TEXT | - | Nullable |
+| 13 | Status Verifikasi | `status` | VARCHAR | 30 | Default: 'draft' (Nilai: 'draft', 'submitted', 'verified') |
+| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
 
 ##### d. Spesifikasi File `daily_report_items`
@@ -1082,21 +1103,23 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 |---|---|---|---|---|---|
 | 1 | ID Rincian Item | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | ID Header Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `daily_reports.id` (Cascade) |
-| 3 | ID Pesanan SAP | `production_order_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `production_orders.id` |
+| 3 | ID Pesanan SAP | `production_order_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `production_orders.id`, Nullable |
 | 4 | Nomor PO Snapshot | `po_number` | VARCHAR | 50 | Index, Not Null |
 | 5 | Nama Produk Snapshot | `product_name` | VARCHAR | 150 | Not Null |
-| 6 | Spesifikasi Snapshot | `specification` | TEXT | - | Not Null |
+| 6 | Spesifikasi Snapshot | `specification` | TEXT | - | Nullable |
 | 7 | Nomor Mesin Snapshot | `machine_number` | VARCHAR | 50 | Nullable |
-| 8 | Jumlah Kemas Baik | `good_quantity` | INT UNSIGNED | 10 | Not Null |
-| 9 | Jumlah Kemas Reject | `reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 10 | Satuan Hitung | `unit` | VARCHAR | 20 | Default: 'lembar' |
-| 11 | Catatan Khusus Item | `item_notes` | VARCHAR | 255 | Nullable |
-| 12 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 13 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 8 | Target Kuantitas SAP | `target_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 9 | Jumlah Kemas Baik | `good_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 10 | Jumlah Kemas Reject | `reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
+| 11 | Satuan Hitung | `unit` | VARCHAR | 20 | Default: 'lembar' |
+| 12 | Catatan Khusus Item | `notes` | VARCHAR | 255 | Nullable |
+| 13 | Waktu Pemindaian | `scanned_at` | DATETIME | - | Nullable |
+| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
 
-##### e. Spesifikasi File `import_logs`
-- **Nama File / Tabel:** `import_logs`
+##### e. Spesifikasi File `sap_import_logs`
+- **Nama File / Tabel:** `sap_import_logs`
 - **Akronim File:** IMPL
 - **Fungsi File:** Menyimpan catatan riwayat aktivitas pengunggahan berkas ekspor master SAP
 - **Tipe File:** File Log Riwayat
@@ -1105,16 +1128,19 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Kunci Tamu (*Foreign Key*):** `user_id` (Relasi ke `users.id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.14
 
-*Tabel 3.14: Spesifikasi File Tabel `import_logs`*
+*Tabel 3.14: Spesifikasi File Tabel `sap_import_logs`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
 | 1 | ID Riwayat Impor | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Nama Berkas Unggahan | `file_name` | VARCHAR | 255 | Not Null |
-| 3 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Not Null |
-| 4 | Jumlah Baris Berhasil | `imported_rows` | INT UNSIGNED | 8 | Not Null |
-| 5 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
-| 6 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 7 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 3 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Default: 0 |
+| 4 | Jumlah Baris Diimpor | `imported_count` | INT UNSIGNED | 8 | Default: 0 |
+| 5 | Jumlah Baris Diperbarui | `updated_count` | INT UNSIGNED | 8 | Default: 0 |
+| 6 | Jumlah Baris Gagal | `failed_count` | INT UNSIGNED | 8 | Default: 0 |
+| 7 | Status Impor | `status` | VARCHAR | 30 | Nilai: 'success', 'partial', 'failed' |
+| 8 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 9 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
+| 10 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
 
 ---
@@ -1148,7 +1174,7 @@ Pelaksanaan implementasi didukung oleh konfigurasi lingkungan perangkat keras da
 | 8 | **Komponen UI & Optimasi** | Livewire Flux UI (versi 2.13+) & Livewire Blaze (versi 1.0) | Pustaka komponen antarmuka modern dan mesin optimasi perenderan Blade View |
 | 9 | **CSS Framework & Bundler** | Tailwind CSS (versi 4.x) dengan `@tailwindcss/vite` & Vite (versi 8.x) | Desain antarmuka responsif dan alat kompilasi aset frontend cepat |
 | 10 | **Pengelola Paket Dependensi** | Composer (PHP) & pnpm (Node.js) | Manajemen instalasi dan pembaruan dependensi backend PHP dan frontend JavaScript |
-| 11 | **Visualisasi Grafik Analitik** | Chart.js terintegrasi Alpine.js | Merender grafik analitik tren performa hasil kemas 14 hari kerja pada halaman Dashboard |
+| 11 | **Visualisasi Grafik Analitik** | Chart.js terintegrasi Alpine.js | Merender grafik analitik tren performa hasil kemas dengan opsi rentang 7, 14, atau 30 hari aktif pada halaman Dashboard |
 | 12 | **Pengujian & Kualitas Kode** | Pest PHP (versi 5.x), Larastan (versi 3.x), Laravel Pint (versi 1.27) | Pengujian otomatis (*automated testing*), analisis statis tipe data, dan standarisasi format kode |
 *(Sumber: Hasil Penelitian, 2026)*
 
@@ -1177,7 +1203,7 @@ Halaman login dirancang dengan tata letak minimalis dan terpusat yang memfasilit
 |                     |                           |                     |
 |                     |  [x] Ingat Saya           |                     |
 |                     |                           |                     |
-|                     |     [   MASUK SISTEM   ]  |                     |
+|                     |   [ MASUK KE SISTEM ]    |                     |
 |                     |                           |                     |
 |                     +---------------------------+                     |
 |                                                                       |
@@ -1186,8 +1212,8 @@ Halaman login dirancang dengan tata letak minimalis dan terpusat yang memfasilit
 *(Sumber: Hasil Penelitian, 2026)*  
 *Gambar 3.12: Tampilan Antarmuka Halaman Login Sistem*
 
-##### b. Tampilan Antarmuka Halaman Dashboard Utama dan Grafik Performa 14 Hari Kerja
-Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi cepat modul sistem, serta visualisasi grafik analitik performa produksi 14 hari kerja terakhir yang menyajikan perbandingan output baik dan kuantitas reject:
+##### b. Tampilan Antarmuka Halaman Dashboard Utama dan Grafik Performa Produksi
+Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi cepat modul sistem, serta visualisasi grafik analitik performa produksi (7, 14, atau 30 hari aktif) yang menyajikan perbandingan output baik dan kuantitas reject:
 
 ```
 +-----------------------------------------------------------------------+
@@ -1200,7 +1226,7 @@ Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi ce
 | - Buat Lapor | | 48.500 lbr  | | 320 lbr     | | 12 Order    | |Draft:2| |
 | - Lihat Lapor| +-------------+ +-------------+ +-------------+ +-------+ |
 |             |                                                         |
-|             | GRAFIK ANALITIK HASIL PRODUKSI 14 HARI KERJA TERAKHIR   |
+|             | GRAFIK ANALITIK HASIL PRODUKSI [7 Hari|14 Hari|30 Hari] |
 |             | +-----------------------------------------------------+ |
 |             | | (Kuantitas)                                         | |
 |             | |  60k |       _/\_        /\_                        | |
@@ -1209,11 +1235,11 @@ Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi ce
 |             | |    0 +---------------------------------             | |
 |             | |       H-14 H-13 ... H-3  H-2  H-1 Hari Ini          | |
 |             | +-----------------------------------------------------+ |
-|             | * Rata-rata 14 Hari: 45.200 Lembar | Puncak: 56.000 lbr |
+|             | * Rata-rata (14 Hari): 45.200 Lembar | Puncak: 56.000 lbr |
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.13: Tampilan Antarmuka Halaman Dashboard dan Grafik Performa 14 Hari Kerja*
+*Gambar 3.13: Tampilan Antarmuka Halaman Dashboard dan Grafik Performa Produksi (7/14/30 Hari)*
 
 ##### c. Tampilan Antarmuka Halaman Manajemen Data Petugas
 Halaman ini memfasilitasi Supervisor untuk mengelola akun operator pengemasan melalui tabel data terstruktur dan form modal penambahan/pengubahan akun:
@@ -1275,15 +1301,14 @@ Halaman ini merupakan antarmuka operasional utama Petugas di meja kerja pengemas
 | NAVIGATION  | BUAT LAPORAN PRODUKSI HARIAN (SCAN BARCODE)             |
 | - Dashboard | Tanggal: 25/08/2026 | Shift: [Shift 1 v] | Petugas: Umar|
 | - Up Database+-------------------------------------------------------+ |
-| - Data Petugs| [|||||||||||||||||] SCAN BARCODE NO PO (KARTU MESIN)   | |
-| - Buat Lapor | [ PO-2026-8891                                    ]   | |
+| - Data Petugs| [||||] 1. Scan / Masukkan No PO Barcode                 | |
+| - Buat Lapor | [ PO-2026-8891                    ]  [Simpan Item(Enter)]| |
 | - Lihat Lapor|                                                       | |
 |             | Nama Produk: Sertifikat Sekuriti Hologram A4            | |
 |             | Spesifikasi: Kertas Watermark 120gsm, 2 Spot UV         | |
 |             | Mesin Asal : MESIN-02  | Target: 5.000 Lembar           | |
 |             |                                                         | |
-|             | Jml Kemas Baik: [ 5.000 ]  Jml Reject: [ 25 ]           | |
-|             | [ + TAMBAH KE DAFTAR LAPORAN ]                          | |
+|             | 2. Jumlah Kemas (Lembar): [ 5.000 ]                     | |
 |             +---------------------------------------------------------+ |
 |             | TABEL RINCIAN HASIL KEMAS HARIAN (DRAFT)                |
 |             | +----+--------------+-------------------+------+-------+| |
@@ -1294,7 +1319,7 @@ Halaman ini merupakan antarmuka operasional utama Petugas di meja kerja pengemas
 |             | +----+--------------+-------------------+------+-------+| |
 |             | Total: 2 PO | Total Kemas: 7.500 | Total Reject: 35     | |
 |             |                                                         | |
-|             | [ SIMPAN SEBAGAI DRAFT ]     [ FINALISASI & SIMPAN ]    | |
+|             |            [ SELESAIKAN LAPORAN ]                       | |
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
@@ -1310,10 +1335,10 @@ Halaman ini menyajikan tabel riwayat seluruh dokumen laporan hasil kemas yang te
 | NAVIGATION  | DAFTAR LAPORAN HASIL PRODUKSI HARIAN                    |
 | - Dashboard | Filter Tanggal: [ 2026-08-01 ] s/d [ 2026-08-25 ]       |
 | - Up Database+----+-------------------+------------+-------+---------+| |
-| - Data Petugs| No | Nomor Laporan     | Tanggal    | Shift | Aksi    || |
-| - Buat Lapor +----+-------------------+------------+-------+---------+| |
-| - Lihat Lapor| 1  | LAP-20260825-0001 | 25/08/2026 | 1     |[Lihat]  || |
-|             | 2  | LAP-20260824-0002 | 24/08/2026 | 2     |[Lihat]  || |
+| - Data Petugs| No | Kode Laporan        | Tanggal    | Shift |   Aksi       || |
+| - Buat Lapor +----+---------------------+------------+-------+--------------+| |
+| - Lihat Lapor| 1  | PCHT-2026-08-25-S1  | 25/08/2026 | 1     |[Lihat Rincian]| |
+|             | 2  | PCHT-2026-08-24-S2  | 24/08/2026 | 2     |[Lihat Rincian]| |
 |             | +----+-------------------+------------+-------+---------+| |
 +-------------+---------------------------------------------------------+
 ```
@@ -1327,9 +1352,9 @@ Halaman ini menampilkan rincian lengkap item kemas pada suatu dokumen laporan, m
 +-----------------------------------------------------------------------+
 | [PT PDS LOGO]  Unit Pengemasan  | Supervisor: Agus S.          [User] v |
 +-------------+---------------------------------------------------------+
-| NAVIGATION  | RINCIAN LAPORAN: LAP-20260825-0001                      |
+| NAVIGATION  | RINCIAN LAPORAN: PCHT-2026-08-25-S1                     |
 | - Dashboard | Tanggal: 25/08/2026 | Shift: Shift 1 | Petugas: Umar    |
-| - Up Database| Status : [ BELUM VERIFIKASI / SUBMITTED ]              |
+| - Up Database| Status : [ TERKIRIM (SELESAI SCAN) ]                   |
 | - Data Petugs+----+--------------+-------------------+------+-------+ |
 | - Buat Lapor | No | No PO        | Nama Produk       | Baik | Reject| |
 | - Lihat Lapor+----+--------------+-------------------+------+-------+ |
@@ -1338,7 +1363,7 @@ Halaman ini menampilkan rincian lengkap item kemas pada suatu dokumen laporan, m
 |             | +----+--------------+-------------------+------+-------+ |
 |             | Total Kemas Baik: 7.500 Lembar | Total Reject: 35 Lembar| |
 |             |                                                         |
-|             | [ CETAK LAPORAN ]         [ VERIFIKASI & SETUJUI LAPORAN]|
+|             | [ Cetak Lembar Fisik ]      [ Verifikasi Laporan ]       |
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
@@ -1352,7 +1377,7 @@ Format cetak lembar dokumen resmi standar A4 yang dihasilkan sistem lengkap deng
 |                     PT PERCETAKAN DOKUMEN SEKURITI                    |
 |                LAPORAN HASIL PRODUKSI HARIAN PENGEMASAN               |
 |                                                                       |
-| No. Laporan : LAP-20260825-0001           Tanggal : 25 Agustus 2026   |
+| No. Laporan : PCHT-2026-08-25-S1          Tanggal : 25 Agustus 2026   |
 | Petugas     : Umar Ibnu Zainal M.         Shift   : Shift 1 (Pagi)    |
 | Status      : TERVERIFIKASI                                           |
 |-----------------------------------------------------------------------|
@@ -1380,10 +1405,10 @@ Implementasi aplikasi dikelompokkan ke dalam enam modul fungsional utama yang sa
 *Tabel 3.17: Pemetaan dan Implementasi Modul Program*
 | No | Modul Program | Komponen / Berkas Utama | Penjelasan Implementasi Fungsional |
 |---|---|---|---|
-| 1 | **Skema Basis Data & Model Eloquent** | `database/migrations/`, Model: `User`, `ProductionOrder`, `DailyReport`, `DailyReportItem`, `ImportLog` | Membangun struktur tabel terelasi, foreign key constraints, tipe data kolom, seeder inisialisasi, dan pemodelan relasi Eloquent ORM untuk menjamin integritas transaksi data. |
+| 1 | **Skema Basis Data & Model Eloquent** | `database/migrations/`, Model: `User`, `ProductionOrder`, `DailyReport`, `DailyReportItem`, `SapImportLog` | Membangun struktur tabel terelasi, foreign key constraints, tipe data kolom, seeder inisialisasi, dan pemodelan relasi Eloquent ORM untuk menjamin integritas transaksi data. |
 | 2 | **Autentikasi & Kontrol Akses Peran** | `app/Livewire/Auth/Login.php`, `FortifyServiceProvider`, Middleware `EnsureUserRole` | Menerapkan login menggunakan identitas Nomor Pegawai (NP) dan password terenkripsi, manajemen sesi, rate limiting 5 percobaan per menit, serta proteksi halaman berbasis peran Petugas dan Supervisor. |
 | 3 | **Update Database (Master Data SAP)** | `app/Livewire/MasterData/UpdateDatabase.php`, `app/Services/SapImportService.php` | Mengakomodasi pengunggahan berkas ekspor SAP (.xlsx/.csv), validasi struktur kolom, parsing baris pesanan, dan pembaruan massal (*bulk upsert*) data Nomor PO, spesifikasi bahan, dan target kemas. |
-| 4 | **Buat Laporan (Scan Barcode & Kemas)** | `app/Livewire/Reports/CreateDailyReport.php`, Alpine.js Scanner Listener | Menangkap pembacaan scanner barcode Code 128 pada Nomor PO, melakukan pencarian instan (*instant lookup*) data produk, menyediakan input kuantitas baik/reject, dan menampung item pada tabel sementara (*staging table*). |
+| 4 | **Buat Laporan (Scan Barcode & Kemas)** | `app/Livewire/Reports/ReportSessionLauncher.php`, `app/Livewire/Reports/ProductionEntry.php`, Alpine.js Scanner Listener | Menangkap pembacaan scanner barcode Code 128 pada Nomor PO, melakukan pencarian instan (*instant lookup*) data produk, menyediakan input kuantitas kemas, dan menyimpan item langsung ke basis data. |
 | 5 | **Manajemen & Cetak Laporan** | `app/Livewire/Reports/ReportIndex.php`, `ReportDetail.php`, `app/Services/ReportCodeGenerator.php`, `@media print` | Menampilkan riwayat laporan harian, membangkitkan kode laporan unik otomatis dengan format `{SERIES}-{YYYY-MM-DD}-S{N}` (contoh: `PCHT-2026-08-26-S1`), memfasilitasi verifikasi persetujuan oleh Supervisor, serta mencetak dokumen fisik rapi standar kertas A4. |
 | 6 | **Dashboard & Grafik Tren Produksi** | `app/Livewire/Dashboard/DashboardIndex.php`, `DashboardAnalyticsService.php`, Komponen Chart.js | Mengeksekusi query agregasi SQL untuk menghitung akumulasi kemas baik dan reject pada rentang 7, 14, atau 30 hari aktif terakhir (WIB), merender 5 kartu metrik KPI harian, grafik interaktif tipe Area/Garis/Batang, widget distribusi shift, dan ranking top 5 mesin cetak. |
 *(Sumber: Hasil Penelitian, 2026)*
@@ -1416,7 +1441,7 @@ Pengujian fungsionalitas dijalankan secara menyeluruh terhadap seluruh skenario 
 | 11. | Petugas mengedit angka kemas pada laporan yang masih berstatus draf. | Kemas Baik diubah dari 5.000 menjadi 5.200 | Sistem memperbarui rekaman jumlah kemas pada tabel rincian laporan. | Angka kuantitas kemas berhasil diperbarui di database. | Valid |
 | 12. | Supervisor meninjau dan menyetujui laporan harian yang diserahkan petugas. | Klik tombol "Verifikasi Laporan" → konfirmasi "Ya, Verifikasi Laporan" | Status laporan berubah menjadi `Terverifikasi (Disetujui Ka. Unit)` dan data terkunci dari perubahan. | Status laporan terverifikasi dan identitas Supervisor tercatat di basis data. | Valid |
 | 13. | Pengguna menekan tombol Cetak Lembar Fisik pada dokumen laporan. | Klik tombol "Cetak Lembar Fisik" | Sistem merender tampilan cetak standar kertas A4 rapi lengkap dengan kolom tanda tangan. | Lembar cetak berformat standar A4 muncul pada jendela pratinjau cetak. | Valid |
-| 14. | Pengguna mengakses halaman Dashboard saat terdapat transaksi 14 hari terakhir. | Buka halaman Dashboard | Sistem menampilkan kartu KPI harian dan visualisasi grafik tren performa 14 hari kerja. | Kartu metrik KPI dan grafik Chart.js 14 hari kerja ter-render interaktif. | Valid |
+| 14. | Pengguna mengakses halaman Dashboard saat terdapat transaksi pada rentang waktu aktif. | Buka halaman Dashboard | Sistem menampilkan kartu KPI harian dan visualisasi grafik tren performa (default 14 hari, dengan opsi toggle 7 / 14 / 30 hari). | Kartu metrik KPI dan grafik Chart.js ter-render interaktif dengan opsi rentang waktu. | Valid |
 *(Sumber: Hasil Penelitian, 2026)*
 
 #### 3. Kesimpulan Hasil Pengujian
@@ -1444,4 +1469,4 @@ Aktivitas pemeliharaan perangkat lunak mencakup empat kategori penanganan utama:
 
 4. **Pemeliharaan Basis Data dan Pencadangan (*Database Backup & Routine Maintenance*)**
    <br>
-   Kegiatan pemeliharaan basis data dilaksanakan melalui penjadwalan pencadangan (*backup*) data secara berkala guna mencegah risiko kehilangan arsip riwayat laporan produksi harian akibat kegagalan perangkat keras komputer klien. Selain itu, dilakukan optimasi indeks tabel secara periodik pada entitas `daily_reports`, `daily_report_items`, dan `production_orders` untuk menjaga kecepatan respon proses pemindaian barcode dan query analitik grafik performa 14 hari kerja seiring bertambahnya volume data transaksi tahunan.
+   Kegiatan pemeliharaan basis data dilaksanakan melalui penjadwalan pencadangan (*backup*) data secara berkala guna mencegah risiko kehilangan arsip riwayat laporan produksi harian akibat kegagalan perangkat keras komputer klien. Selain itu, dilakukan optimasi indeks tabel secara periodik pada entitas `daily_reports`, `daily_report_items`, dan `production_orders` untuk menjaga kecepatan respon proses pemindaian barcode dan query analitik grafik performa produksi seiring bertambahnya volume data transaksi tahunan.
