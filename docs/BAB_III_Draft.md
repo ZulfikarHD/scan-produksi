@@ -400,7 +400,7 @@ Guna mendefinisikan secara terperinci mekanisme operasional setiap *use case*, b
 ---
 
 #### 2. Activity Diagram
-Activity Diagram memodelkan aliran aktivitas operasional dan logika transisi sistem pada masing-masing fitur utama dengan membagi peran ke dalam partisi jalur aktivitas (*swimlanes*). Setiap diagram disusun berdasarkan alur halaman dan aksi yang benar-benar diimplementasikan pada aplikasi web (menu navigasi, tombol aksi, status laporan, dan validasi sistem).
+Activity Diagram memodelkan aliran aktivitas operasional dan logika transisi sistem pada masing-masing fitur utama dengan membagi peran ke dalam partisi jalur aktivitas (*swimlanes*). Setiap diagram disusun berdasarkan alur halaman dan aksi yang benar-benar diimplementasikan pada aplikasi web (menu navigasi, tombol aksi, status laporan, dan validasi sistem). Untuk fitur yang memiliki beberapa operasi berbeda (seperti CRUD), setiap operasi dimodelkan dalam diagram terpisah guna meningkatkan keterbacaan dan ketepatan pemodelan alur.
 
 ##### a. Activity Diagram Login Sistem
 Diagram ini menggambarkan alur kerja saat pengguna (Operator atau Supervisor) melakukan autentikasi ke dalam sistem melalui halaman login Fortify/Livewire:
@@ -451,8 +451,8 @@ flowchart TD
 *(Sumber: Hasil Penelitian, 2026)*  
 *Gambar 3.4: Activity Diagram Login Sistem*
 
-##### b. Activity Diagram Mengelola Data Petugas
-Diagram ini memodelkan aktivitas pengelolaan data akun petugas oleh Supervisor melalui menu Data Petugas, termasuk tambah, edit, nonaktifkan, dan hapus akun:
+##### b. Activity Diagram Tambah Data Petugas
+Diagram ini memodelkan alur penambahan akun petugas baru oleh Supervisor melalui form modal pada menu Data Petugas. Supervisor mengisi data akun lengkap (nama, NP, username, email, peran, dan kata sandi), kemudian sistem memvalidasi keunikan sebelum menyimpan ke tabel `users`:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
@@ -460,115 +460,302 @@ flowchart TD
     subgraph Supervisor ["Supervisor (Kepala Unit)"]
         SP_Start(( ))
         SP_Buka(Buka Menu<br/>Data Petugas)
-        SP_Pilih{Pilih Aksi<br/>Pengelolaan?}
-        SP_Input(Isi Form Modal<br/>Tambah / Edit Petugas)
+        SP_TambahBtn(Klik Tombol<br/>+ Tambah Petugas Baru)
+        SP_IsiForm(Isi Form: Nama, NP,<br/>Username, Email, Peran, Password)
         SP_Simpan(Klik Simpan Data)
-        SP_Toggle(Toggle Status<br/>Aktif / Nonaktif)
-        SP_Hapus(Konfirmasi<br/>Hapus Akun)
         SP_End((( )))
     end
 
     subgraph Sistem ["Sistem"]
-        SS_Tampil(Tampilkan Tabel Petugas<br/>dengan Filter)
-        SS_Modal(Tampilkan Modal<br/>Form Petugas)
-        SS_Val{Validasi<br/>NP / Email Unik?}
-        SS_Err(Tampilkan Notifikasi<br/>Galat Validasi)
-        SS_Save(Simpan / Update<br/>ke Tabel users)
-        SS_Status(Update Flag<br/>is_active)
-        SS_SelfCheck{Akun<br/>Milik Sendiri?}
-        SS_SelfErr(Tolak Hapus<br/>Akun Sendiri)
-        SS_Del{Akun Sudah<br/>Tercatat di Laporan?}
-        SS_DelErr(Tolak Hapus &<br/>Sarankan Nonaktifkan)
-        SS_DelOk(Hapus Rekaman<br/>Akun Petugas)
-        SS_Notif(Kirim Notifikasi<br/>Sukses)
+        SS_Tampil(Tampilkan Tabel<br/>Daftar Petugas)
+        SS_Modal["Tampilkan Modal Form<br/>Tambah Petugas - Kosong"]
+        SS_Val{Validasi: NP, Email,<br/>Username Unik &<br/>Password Min 8 Karakter?}
+        SS_Err(Tampilkan Pesan<br/>Galat Validasi)
+        SS_Simpan(Simpan Rekaman Akun<br/>Baru ke Tabel users)
+        SS_Notif(Tutup Modal &<br/>Tampilkan Notifikasi Sukses)
     end
 
     SP_Start --> SP_Buka
     SP_Buka --> SS_Tampil
-    SS_Tampil --> SP_Pilih
-    SP_Pilih -- Tambah / Edit --> SS_Modal
-    SS_Modal --> SP_Input
-    SP_Input --> SP_Simpan
+    SS_Tampil --> SP_TambahBtn
+    SP_TambahBtn --> SS_Modal
+    SS_Modal --> SP_IsiForm
+    SP_IsiForm --> SP_Simpan
     SP_Simpan --> SS_Val
     SS_Val -- Tidak Valid --> SS_Err
     SS_Err --> SS_Modal
-    SS_Val -- Valid --> SS_Save
-    SS_Save --> SS_Notif
-    SP_Pilih -- Nonaktifkan --> SP_Toggle
-    SP_Toggle --> SS_Status
-    SS_Status --> SS_Notif
-    SP_Pilih -- Hapus --> SP_Hapus
-    SP_Hapus --> SS_SelfCheck
-    SS_SelfCheck -- Ya --> SS_SelfErr
-    SS_SelfErr --> SS_Tampil
-    SS_SelfCheck -- Tidak --> SS_Del
-    SS_Del -- Ya --> SS_DelErr
-    SS_DelErr --> SS_Tampil
-    SS_Del -- Tidak --> SS_DelOk
-    SS_DelOk --> SS_Notif
+    SS_Val -- Valid --> SS_Simpan
+    SS_Simpan --> SS_Notif
     SS_Notif --> SP_End
 
     style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
     style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.5: Activity Diagram Mengelola Data Petugas*
+*Gambar 3.5: Activity Diagram Tambah Data Petugas*
 
-##### c. Activity Diagram Update Database
-Diagram ini menggambarkan alur kerja Supervisor pada halaman Update Database SAP, yang terdiri atas dua tab: Impor Berkas SAP dan Master Data Order Produksi:
+##### c. Activity Diagram Edit Data Petugas
+Diagram ini memodelkan alur pengubahan data akun petugas yang sudah ada. Supervisor memilih baris petugas yang ingin diubah, sistem memuat data ke form modal (*pre-filled*), Supervisor memodifikasi data, lalu sistem memvalidasi sebelum memperbarui rekaman di tabel `users`. Kolom kata sandi bersifat opsional — jika dikosongkan, kata sandi lama tidak berubah:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
 flowchart TD
     subgraph Supervisor ["Supervisor (Kepala Unit)"]
-        S_Start(( ))
-        S_Buka(Buka Menu<br/>Update Database)
-        S_Tab{Pilih Tab<br/>Menu?}
-        S_Upload(Pilih & Unggah<br/>Berkas SAP)
-        S_Konfirm(Konfirmasi Impor<br/>di Modal Pratinjau)
-        S_Order(Kelola Order:<br/>Tambah / Edit / Hapus)
-        S_End((( )))
+        SP_Start(( ))
+        SP_Buka(Buka Menu<br/>Data Petugas)
+        SP_EditBtn(Klik Ikon Edit<br/>pada Baris Petugas)
+        SP_UbahForm["Ubah Data Form:<br/>Nama, NP, Username, Email,<br/>Peran, Password - Opsional"]
+        SP_Simpan(Klik Simpan Perubahan)
+        SP_End((( )))
     end
 
     subgraph Sistem ["Sistem"]
-        SIS_Tampil(Tampilkan Halaman<br/>Update Database SAP)
-        SIS_Preview(Parsing Berkas &<br/>Tampilkan Modal Pratinjau)
-        SIS_Val{Validasi Format<br/>& Baris Data?}
-        SIS_Err(Tampilkan Pesan<br/>Format Tidak Sesuai)
-        SIS_Upsert(Bulk Upsert ke<br/>production_orders)
-        SIS_Log(Catat sap_import_logs<br/>& Notifikasi Sukses)
-        SIS_CRUD(Simpan / Update /<br/>Hapus Order Manual)
-        SIS_Export(Ekspor Master Data<br/>ke Excel)
-        S_AksiOrder{Pilih Aksi<br/>Order?}
+        SS_Tampil(Tampilkan Tabel<br/>Daftar Petugas)
+        SS_Load(Muat Data Petugas &<br/>Tampilkan Modal Form Pre-Filled)
+        SS_Val{"Validasi: NP, Email,<br/>Username Unik<br/>kecuali Milik Sendiri?"}
+        SS_Err(Tampilkan Pesan<br/>Galat Validasi)
+        SS_Update(Perbarui Rekaman Akun<br/>di Tabel users)
+        SS_Notif(Tutup Modal &<br/>Tampilkan Notifikasi Sukses)
     end
 
-    S_Start --> S_Buka
-    S_Buka --> SIS_Tampil
-    SIS_Tampil --> S_Tab
-    S_Tab -- Impor SAP --> S_Upload
-    S_Upload --> SIS_Preview
-    SIS_Preview --> SIS_Val
-    SIS_Val -- Tidak Valid --> SIS_Err
-    SIS_Err --> SIS_Tampil
-    SIS_Val -- Valid --> S_Konfirm
-    S_Konfirm --> SIS_Upsert
-    SIS_Upsert --> SIS_Log
-    SIS_Log --> S_End
-    S_Tab -- Data Order --> S_Order
-    S_Order --> S_AksiOrder
-    S_AksiOrder -- Tambah / Edit / Hapus --> SIS_CRUD
-    SIS_CRUD --> S_End
-    S_AksiOrder -- Ekspor Excel --> SIS_Export
-    SIS_Export --> S_End
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Tampil
+    SS_Tampil --> SP_EditBtn
+    SP_EditBtn --> SS_Load
+    SS_Load --> SP_UbahForm
+    SP_UbahForm --> SP_Simpan
+    SP_Simpan --> SS_Val
+    SS_Val -- Tidak Valid --> SS_Err
+    SS_Err --> SS_Load
+    SS_Val -- Valid --> SS_Update
+    SS_Update --> SS_Notif
+    SS_Notif --> SP_End
 
-    style S_Start fill:#000000,stroke:#000000,stroke-width:2px;
-    style S_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.6: Activity Diagram Update Database*
+*Gambar 3.6: Activity Diagram Edit Data Petugas*
 
-##### d. Activity Diagram Buat Laporan (Inisiasi Sesi & Pemindaian Barcode)
-Diagram ini memodelkan alur dua tahap pembuatan laporan: (1) inisiasi sesi laporan di menu Buat Laporan, dan (2) konsol pemindaian barcode serta penyelesaian laporan:
+##### d. Activity Diagram Nonaktifkan / Aktifkan Status Petugas
+Diagram ini memodelkan alur pengubahan status aktif akun petugas melalui toggle langsung di tabel Data Petugas. Sistem membaca kondisi flag `is_active` saat ini dan membaliknya (aktif ↔ nonaktif) tanpa memerlukan konfirmasi modal:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Menu<br/>Data Petugas)
+        SP_Toggle(Klik Toggle Status<br/>pada Baris Petugas)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        SS_Tampil(Tampilkan Tabel Daftar Petugas<br/>dengan Kolom Status)
+        SS_Cek{Status is_active<br/>Saat Ini?}
+        SS_Nonaktif(Set is_active = false<br/>Nonaktifkan Akun Petugas)
+        SS_Aktif(Set is_active = true<br/>Aktifkan Kembali Akun)
+        SS_Notif(Perbarui Tampilan Tabel &<br/>Tampilkan Notifikasi Sukses)
+    end
+
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Tampil
+    SS_Tampil --> SP_Toggle
+    SP_Toggle --> SS_Cek
+    SS_Cek -- "Aktif - true" --> SS_Nonaktif
+    SS_Cek -- "Nonaktif - false" --> SS_Aktif
+    SS_Nonaktif --> SS_Notif
+    SS_Aktif --> SS_Notif
+    SS_Notif --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.7: Activity Diagram Nonaktifkan / Aktifkan Status Petugas*
+
+##### e. Activity Diagram Hapus Data Petugas
+Diagram ini memodelkan alur penghapusan akun petugas oleh Supervisor. Terdapat dua lapisan perlindungan: sistem menolak penghapusan akun milik Supervisor sendiri, dan menolak penghapusan akun yang sudah terkait dengan data laporan produksi (menyarankan nonaktifkan saja):
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Menu<br/>Data Petugas)
+        SP_HapusBtn(Klik Ikon Hapus<br/>pada Baris Petugas)
+        SP_Konfirm(Konfirmasi Hapus<br/>di Modal)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        SS_Tampil(Tampilkan Tabel<br/>Daftar Petugas)
+        SS_ModalKonfirm(Tampilkan Modal<br/>Konfirmasi Hapus)
+        SS_SelfCheck{Akun yang Dipilih<br/>Milik Sendiri?}
+        SS_SelfErr(Tolak Hapus &<br/>Tampilkan Pesan Error)
+        SS_LaporanCheck{Akun Terkait<br/>Data Laporan?}
+        SS_LaporanErr(Tolak Hapus &<br/>Sarankan Nonaktifkan Saja)
+        SS_Hapus(Hapus Rekaman Akun<br/>dari Tabel users)
+        SS_Notif(Tampilkan Notifikasi<br/>Hapus Berhasil)
+    end
+
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Tampil
+    SS_Tampil --> SP_HapusBtn
+    SP_HapusBtn --> SS_ModalKonfirm
+    SS_ModalKonfirm --> SP_Konfirm
+    SP_Konfirm --> SS_SelfCheck
+    SS_SelfCheck -- Ya --> SS_SelfErr
+    SS_SelfErr --> SS_Tampil
+    SS_SelfCheck -- Tidak --> SS_LaporanCheck
+    SS_LaporanCheck -- Ya --> SS_LaporanErr
+    SS_LaporanErr --> SS_Tampil
+    SS_LaporanCheck -- Tidak --> SS_Hapus
+    SS_Hapus --> SS_Notif
+    SS_Notif --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.8: Activity Diagram Hapus Data Petugas*
+
+##### f. Activity Diagram Impor Data Master SAP
+Diagram ini menggambarkan alur kerja Supervisor mengunggah berkas ekspor SAP ke dalam sistem melalui tab Impor SAP pada menu Update Database. Sistem memvalidasi format berkas, melakukan *parsing* dan pratinjau baris data, lalu mengeksekusi operasi *bulk upsert* ke tabel `production_orders`:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Menu Update Database,<br/>Pilih Tab Impor SAP)
+        SP_Pilih["Pilih & Unggah Berkas SAP<br/>.xlsx / .xls / .csv, Maks. 10 MB"]
+        SP_Konfirm(Konfirmasi Impor Data<br/>di Modal Pratinjau)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        SS_Tampil(Tampilkan Halaman<br/>Update Database)
+        SS_ValFile{Validasi Format &<br/>Ukuran Berkas?}
+        SS_FileErr(Tampilkan Pesan<br/>Format Berkas Tidak Sesuai)
+        SS_Parse(Parsing Berkas & Validasi<br/>Baris Data per Kolom SAP)
+        SS_Preview(Tampilkan Modal Pratinjau:<br/>Jumlah Baris Valid & Error)
+        SS_Upsert["Bulk Upsert ke Tabel<br/>production_orders - status ready"]
+        SS_Log(Catat ke sap_import_logs &<br/>Tampilkan Notifikasi Sukses)
+    end
+
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Tampil
+    SS_Tampil --> SP_Pilih
+    SP_Pilih --> SS_ValFile
+    SS_ValFile -- Tidak Valid --> SS_FileErr
+    SS_FileErr --> SS_Tampil
+    SS_ValFile -- Valid --> SS_Parse
+    SS_Parse --> SS_Preview
+    SS_Preview --> SP_Konfirm
+    SP_Konfirm --> SS_Upsert
+    SS_Upsert --> SS_Log
+    SS_Log --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.9: Activity Diagram Impor Data Master SAP*
+
+##### g. Activity Diagram Tambah & Edit Order Produksi Manual
+Diagram ini memodelkan alur penambahan dan pengeditan data order produksi secara manual oleh Supervisor melalui tab Master Data Orders. Kedua operasi menggunakan form modal yang sama — tambah membuka form kosong, sedangkan edit memuat data order yang dipilih (*pre-filled*):
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Menu Update Database,<br/>Pilih Tab Master Data Orders)
+        SP_Pilih{Pilih Aksi?}
+        SP_TambahBtn(Klik Tombol<br/>+ Tambah Order Baru)
+        SP_EditBtn(Klik Ikon Edit<br/>pada Baris Order)
+        SP_IsiForm(Isi / Ubah Data Form Order:<br/>No PO, Produk, Target Qty, dll.)
+        SP_Simpan(Klik Simpan Data)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        SS_Tampil(Tampilkan Tabel Order Produksi<br/>dengan Filter)
+        SS_ModalKosong["Tampilkan Modal Form<br/>Tambah Order - Kosong"]
+        SS_ModalIsi(Muat Data Order &<br/>Tampilkan Modal Form Pre-Filled)
+        SS_Val{Validasi: No PO Unik<br/>& Target Qty > 0?}
+        SS_Err(Tampilkan Pesan<br/>Galat Validasi)
+        SS_Save(Simpan / Perbarui Record<br/>di production_orders)
+        SS_Notif(Tutup Modal &<br/>Tampilkan Notifikasi Sukses)
+    end
+
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Tampil
+    SS_Tampil --> SP_Pilih
+    SP_Pilih -- Tambah --> SP_TambahBtn
+    SP_TambahBtn --> SS_ModalKosong
+    SS_ModalKosong --> SP_IsiForm
+    SP_Pilih -- Edit --> SP_EditBtn
+    SP_EditBtn --> SS_ModalIsi
+    SS_ModalIsi --> SP_IsiForm
+    SP_IsiForm --> SP_Simpan
+    SP_Simpan --> SS_Val
+    SS_Val -- Tidak Valid --> SS_Err
+    SS_Err --> SS_ModalKosong
+    SS_Val -- Valid --> SS_Save
+    SS_Save --> SS_Notif
+    SS_Notif --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.10: Activity Diagram Tambah & Edit Order Produksi Manual*
+
+##### h. Activity Diagram Hapus Order Produksi
+Diagram ini memodelkan alur penghapusan rekaman order produksi dari master data. Sistem menerapkan perlindungan: order yang sedang berstatus `in_progress` tidak dapat dihapus untuk menjaga integritas data laporan yang sedang aktif:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Menu Update Database,<br/>Pilih Tab Master Data Orders)
+        SP_HapusBtn(Klik Ikon Hapus<br/>pada Baris Order)
+        SP_Konfirm(Konfirmasi Hapus<br/>di Modal)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        SS_Tampil(Tampilkan Tabel<br/>Order Produksi)
+        SS_ModalKonfirm(Tampilkan Modal<br/>Konfirmasi Hapus)
+        SS_StatusCheck{Status Order<br/>= in_progress?}
+        SS_StatusErr(Tolak Hapus & Tampilkan Pesan:<br/>Order Sedang Berjalan)
+        SS_Hapus(Hapus Record Order<br/>dari production_orders)
+        SS_Notif(Tampilkan Notifikasi<br/>Hapus Berhasil)
+    end
+
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Tampil
+    SS_Tampil --> SP_HapusBtn
+    SP_HapusBtn --> SS_ModalKonfirm
+    SS_ModalKonfirm --> SP_Konfirm
+    SP_Konfirm --> SS_StatusCheck
+    SS_StatusCheck -- Ya --> SS_StatusErr
+    SS_StatusErr --> SS_Tampil
+    SS_StatusCheck -- Tidak --> SS_Hapus
+    SS_Hapus --> SS_Notif
+    SS_Notif --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.11: Activity Diagram Hapus Order Produksi*
+
+##### i. Activity Diagram Inisiasi Sesi Laporan Harian
+Diagram ini memodelkan alur pembuatan sesi laporan harian melalui menu Buat Laporan. Sistem mendeteksi dan pra-mengisi shift aktif secara otomatis. Jika sesi dengan kombinasi seri produk, tanggal, dan shift yang sama sudah ada di basis data, sistem membuka sesi tersebut secara langsung tanpa membuat duplikat:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
@@ -576,28 +763,21 @@ flowchart TD
     subgraph Operator ["Operator / Supervisor"]
         P_Start(( ))
         P_Buka(Buka Menu<br/>Buat Laporan)
-        P_Pilih(Pilih Tanggal, Seri<br/>PCHT/MMEA/HPTL, & Shift)
-        P_Launch(Klik Buka / Lanjutkan<br/>Sesi Pemindaian PO)
-        P_Scan(Scan / Input<br/>No PO Barcode)
-        P_Qty(Input Jumlah Kemas<br/>Lembar)
-        P_SimpanItem(Klik Simpan Item)
-        P_Cek{Masih Ada<br/>Kartu Mesin?}
-        P_Selesai(Klik Selesaikan<br/>Laporan)
+        P_Pilih["Pilih Tanggal, Seri Produk<br/>PCHT / MMEA / HPTL, & Shift"]
+        P_Launch(Klik Tombol<br/>Buka / Lanjutkan Sesi)
         P_End((( )))
     end
 
     subgraph Sistem ["Sistem"]
         S_Form(Tampilkan Form<br/>Inisiasi Sesi)
-        S_AutoShift(Deteksi &<br/>Pra-isi Shift Aktif Saat Ini)
-        S_BuatSesi{Buat Sesi Baru<br/>atau Lanjutkan?}
-        S_Record(Buat / Buka Record<br/>daily_reports status Draft)
-        S_Konsol(Tampilkan Konsol<br/>Pemindaian Barcode)
-        S_Cari{Cari No PO di<br/>Master SAP?}
-        S_Err(Peringatan PO<br/>Tidak Ditemukan)
-        S_Info(Tampilkan Spesifikasi<br/>Produk Otomatis)
-        S_Item(Simpan Item Langsung<br/>ke daily_report_items)
-        S_Final(Ubah Status<br/>Draft ke Submitted)
-        S_Notif(Notifikasi Laporan<br/>Berhasil Diselesaikan)
+        S_AutoShift["Deteksi & Pra-isi Shift<br/>Aktif Saat Ini - ShiftHelper WIB"]
+        S_Val{Validasi<br/>Form Input?}
+        S_ValErr(Tampilkan Pesan<br/>Galat Validasi)
+        S_CekSesi{"Sesi Seri, Tanggal,<br/>Shift Sudah Ada<br/>di Basis Data?"}
+        S_BukaSesi(Buka Sesi Existing &<br/>Redirect ke Konsol Scan)
+        S_BuatKode(Generate Kode Laporan:<br/>format SERI-YYYY-MM-DD-SN)
+        S_BuatSesi(Buat Record DailyReport Baru<br/>dengan Status: draft)
+        S_Redirect(Redirect ke<br/>Konsol Pemindaian Barcode)
     end
 
     P_Start --> P_Buka
@@ -605,32 +785,99 @@ flowchart TD
     S_Form --> S_AutoShift
     S_AutoShift --> P_Pilih
     P_Pilih --> P_Launch
-    P_Launch --> S_BuatSesi
-    S_BuatSesi --> S_Record
-    S_Record --> S_Konsol
-    S_Konsol --> P_Scan
-    P_Scan --> S_Cari
-    S_Cari -- Tidak Ditemukan --> S_Err
-    S_Err --> S_Konsol
-    S_Cari -- Ditemukan --> S_Info
-    S_Info --> P_Qty
-    P_Qty --> P_SimpanItem
-    P_SimpanItem --> S_Item
-    S_Item --> P_Cek
-    P_Cek -- Ya --> P_Scan
-    P_Cek -- Tidak --> P_Selesai
-    P_Selesai --> S_Final
-    S_Final --> S_Notif
+    P_Launch --> S_Val
+    S_Val -- Tidak Valid --> S_ValErr
+    S_ValErr --> S_Form
+    S_Val -- Valid --> S_CekSesi
+    S_CekSesi -- Sudah Ada --> S_BukaSesi
+    S_BukaSesi --> P_End
+    S_CekSesi -- Belum Ada --> S_BuatKode
+    S_BuatKode --> S_BuatSesi
+    S_BuatSesi --> S_Redirect
+    S_Redirect --> P_End
+
+    style P_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style P_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.12: Activity Diagram Inisiasi Sesi Laporan Harian*
+
+##### j. Activity Diagram Scan Barcode, Kelola Item & Finalisasi Laporan
+Diagram ini memodelkan alur utama pada konsol pemindaian barcode setelah sesi laporan dibuka. Alur mencakup pencarian Nomor PO, peringatan duplikat (tidak memblokir), penambahan item, pengeditan kuantitas *inline*, penghapusan item, dan finalisasi laporan:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Operator ["Operator / Supervisor"]
+        P_Start(( ))
+        P_Konsol(Berada di Konsol<br/>Pemindaian Barcode)
+        P_Scan(Scan / Input<br/>No. PO Barcode)
+        P_Qty["Input Jumlah Kemas<br/>Lembar"]
+        P_Simpan(Klik Simpan Item<br/>atau Tekan Enter)
+        P_AksiTabel{Pilih Aksi<br/>pada Item di Tabel?}
+        P_EditQty(Edit Kuantitas<br/>Inline di Tabel)
+        P_HapusItem(Klik Hapus Item<br/>di Tabel)
+        P_CekLanjut{Masih Ada<br/>Kartu Mesin Lain?}
+        P_Selesai(Klik Selesaikan<br/>Laporan)
+        P_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        S_Tampil(Tampilkan Konsol Scan &<br/>Tabel Item Draft)
+        S_CariPO{Cari No. PO di<br/>production_orders?}
+        S_POErr(Tampilkan Peringatan:<br/>PO Tidak Ditemukan)
+        S_CekDuplikat{PO Sudah Discan<br/>di Sesi Ini?}
+        S_DuplikatWarn["Tampilkan Peringatan<br/>Duplikat PO - Dapat Dilanjutkan"]
+        S_InfoPO(Tampilkan Spesifikasi Produk<br/>Otomatis dari Master SAP)
+        S_SimpanItem(Simpan Item ke<br/>daily_report_items)
+        S_RefreshTotal(Refresh Total<br/>Laporan)
+        S_UpdateQty(Perbarui Kuantitas Item<br/>di Basis Data)
+        S_HapusItem(Hapus Baris Item<br/>dari Basis Data)
+        S_CekItem{Minimal 1 Item<br/>Sudah Tersimpan?}
+        S_ItemErr(Tampilkan Peringatan:<br/>Laporan Masih Kosong)
+        S_Finalisasi(Ubah Status DailyReport:<br/>draft → submitted)
+        S_Notif(Tampilkan Notifikasi<br/>Laporan Berhasil Diselesaikan)
+    end
+
+    P_Start --> P_Konsol
+    P_Konsol --> S_Tampil
+    S_Tampil --> P_Scan
+    P_Scan --> S_CariPO
+    S_CariPO -- Tidak Ditemukan --> S_POErr
+    S_POErr --> S_Tampil
+    S_CariPO -- Ditemukan --> S_CekDuplikat
+    S_CekDuplikat -- Ya --> S_DuplikatWarn
+    S_DuplikatWarn --> S_InfoPO
+    S_CekDuplikat -- Tidak --> S_InfoPO
+    S_InfoPO --> P_Qty
+    P_Qty --> P_Simpan
+    P_Simpan --> S_SimpanItem
+    S_SimpanItem --> S_RefreshTotal
+    S_RefreshTotal --> P_AksiTabel
+    P_AksiTabel -- Edit Qty Inline --> P_EditQty
+    P_EditQty --> S_UpdateQty
+    S_UpdateQty --> S_RefreshTotal
+    P_AksiTabel -- Hapus Item --> P_HapusItem
+    P_HapusItem --> S_HapusItem
+    S_HapusItem --> S_RefreshTotal
+    P_AksiTabel -- Scan PO Berikutnya --> P_CekLanjut
+    P_CekLanjut -- Ya --> P_Scan
+    P_CekLanjut -- Tidak --> P_Selesai
+    P_Selesai --> S_CekItem
+    S_CekItem -- Belum Ada Item --> S_ItemErr
+    S_ItemErr --> S_Tampil
+    S_CekItem -- Ada Item --> S_Finalisasi
+    S_Finalisasi --> S_Notif
     S_Notif --> P_End
 
     style P_Start fill:#000000,stroke:#000000,stroke-width:2px;
     style P_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.7: Activity Diagram Buat Laporan (Inisiasi Sesi & Pemindaian Barcode)*
+*Gambar 3.13: Activity Diagram Scan Barcode, Kelola Item & Finalisasi Laporan*
 
-##### e. Activity Diagram Melihat Laporan (Arsip, Verifikasi, Hapus & Cetak)
-Diagram ini menggambarkan alur peninjauan arsip laporan, ekspor Excel, koreksi laporan, verifikasi Supervisor, hapus laporan, buka kembali sesi, dan cetak lembar fisik A4:
+##### k. Activity Diagram Melihat Arsip & Filter Laporan
+Diagram ini memodelkan alur penelusuran riwayat laporan pada halaman Lihat Laporan, termasuk penerapan filter multi-kriteria (tanggal, seri produk, shift, status, petugas) dan navigasi menuju halaman detail laporan:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
@@ -638,74 +885,234 @@ flowchart TD
     subgraph Pengguna ["Operator / Supervisor"]
         U_Start(( ))
         U_Buka(Buka Menu<br/>Lihat Laporan)
-        U_Aksi{Pilih Aksi<br/>di Halaman Arsip?}
-        U_Filter(Set Filter Tanggal /<br/>Seri / Shift / Status)
-        U_Detail(Buka Rincian<br/>Laporan)
-        U_Aksi2{Pilih Aksi<br/>di Halaman Detail?}
-        U_Excel(Set Filter & Unduh<br/>Excel)
-        U_Edit(Buka Halaman<br/>Koreksi Laporan)
-        U_Verif(Konfirmasi<br/>Verifikasi Laporan)
-        U_Cetak(Buka Cetak<br/>Lembar Fisik A4)
-        U_Hapus(Konfirmasi<br/>Hapus Laporan)
-        U_Reopen(Konfirmasi<br/>Buka Kembali Sesi)
+        U_AksiArsip{Pilih Aksi<br/>di Halaman Arsip?}
+        U_Filter(Set Filter: Tanggal,<br/>Seri, Shift, Status, Petugas)
+        U_Reset(Klik Tombol<br/>Reset Filter)
+        U_Detail(Klik Laporan untuk<br/>Membuka Halaman Detail)
         U_End((( )))
     end
 
     subgraph Sistem ["Sistem"]
-        S_Arsip(Tampilkan Arsip Laporan<br/>& Statistik Ringkasan)
-        S_Filter(Terapkan Filter<br/>Multi-Kriteria)
-        S_Modal(Tampilkan Modal<br/>Ekspor Excel)
-        S_Export(Generate & Unduh<br/>Berkas .xlsx)
-        S_Rincian(Tampilkan Detail Item<br/>& Metrik Realisasi)
-        S_IzinEdit{Pengguna Berhak<br/>Edit Laporan?}
-        S_FormEdit(Tampilkan Form<br/>Koreksi Laporan)
-        S_SaveEdit(Simpan Perubahan<br/>Item & Catatan)
-        S_SetVerif(Ubah Status ke<br/>Verified & Catat Supervisor)
-        S_Print(Render Tampilan Cetak<br/>Standar A4)
-        S_DeleteReport(Hapus Rekaman<br/>Laporan dari Basis Data)
-        S_ReopenReport(Ubah Status<br/>Submitted ke Draft)
+        S_Arsip(Tampilkan Arsip Laporan<br/>dengan Statistik Ringkasan<br/>& Pagination)
+        S_Filter(Terapkan Filter<br/>Multi-Kriteria ke Query)
+        S_Perbarui(Perbarui Tabel<br/>Arsip Laporan)
+        S_ResetFilter(Reset Semua Filter<br/>ke Kondisi Awal)
+        S_Detail(Load Halaman<br/>Detail Laporan)
     end
 
     U_Start --> U_Buka
     U_Buka --> S_Arsip
-    S_Arsip --> U_Aksi
-    U_Aksi -- Filter --> U_Filter
+    S_Arsip --> U_AksiArsip
+    U_AksiArsip -- Terapkan Filter --> U_Filter
     U_Filter --> S_Filter
-    S_Filter --> S_Arsip
-    U_Aksi -- Ekspor Excel --> U_Excel
-    U_Excel --> S_Modal
-    S_Modal --> S_Export
-    S_Export --> U_End
-    U_Aksi -- Lihat Detail --> U_Detail
-    U_Detail --> S_Rincian
-    S_Rincian --> U_Aksi2
-    U_Aksi2 -- Koreksi --> S_IzinEdit
-    S_IzinEdit -- Tidak --> S_Rincian
-    S_IzinEdit -- Ya --> U_Edit
-    U_Edit --> S_FormEdit
-    S_FormEdit --> S_SaveEdit
-    S_SaveEdit --> S_Rincian
-    U_Aksi2 -- Verifikasi --> U_Verif
-    U_Verif --> S_SetVerif
-    S_SetVerif --> S_Rincian
-    U_Aksi2 -- Cetak --> U_Cetak
-    U_Cetak --> S_Print
-    S_Print --> U_End
-    U_Aksi2 -- "Hapus (Supervisor)" --> U_Hapus
-    U_Hapus --> S_DeleteReport
-    S_DeleteReport --> U_End
-    U_Aksi2 -- "Buka Kembali (Supervisor)" --> U_Reopen
-    U_Reopen --> S_ReopenReport
-    S_ReopenReport --> S_Rincian
+    S_Filter --> S_Perbarui
+    S_Perbarui --> S_Arsip
+    U_AksiArsip -- Reset Filter --> U_Reset
+    U_Reset --> S_ResetFilter
+    S_ResetFilter --> S_Arsip
+    U_AksiArsip -- Lihat Detail --> U_Detail
+    U_Detail --> S_Detail
+    S_Detail --> U_End
 
     style U_Start fill:#000000,stroke:#000000,stroke-width:2px;
     style U_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.8: Activity Diagram Melihat Laporan (Arsip, Verifikasi, Hapus & Cetak)*
+*Gambar 3.14: Activity Diagram Melihat Arsip & Filter Laporan*
 
-##### f. Activity Diagram Dashboard dan Visualisasi Grafik Performa
-Diagram ini menjelaskan alur pemrosesan data saat pengguna mengakses halaman Dashboard, termasuk metrik harian, grafik tren produksi, distribusi shift, ranking top 5 mesin cetak, dan daftar 5 laporan terbaru:
+##### l. Activity Diagram Ekspor & Cetak Laporan
+Diagram ini menggambarkan dua jalur output laporan: ekspor rekapitulasi ke berkas Excel (.xlsx) menggunakan OpenSpout dari halaman arsip, dan cetak lembar fisik standar A4 / unduh PDF dari halaman detail laporan:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Pengguna ["Operator / Supervisor"]
+        U_Start(( ))
+        U_Pilih{Pilih Metode<br/>Output Laporan?}
+        U_FilterExcel(Set Filter Ekspor:<br/>Tanggal, Seri, Shift, Status)
+        U_EksporBtn(Klik Tombol<br/>Ekspor di Modal)
+        U_CetakBtn(Klik Tombol Cetak Lembar Fisik<br/>/ Unduh PDF di Halaman Detail)
+        U_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        S_ModalEkspor(Tampilkan Modal<br/>Filter Ekspor Excel)
+        S_GenerateXlsx(Generate Berkas .xlsx<br/>via ReportExportController)
+        S_DownloadXlsx["Kirim Berkas .xlsx<br/>ke Browser - Download"]
+        S_RenderPrint["Render Tampilan Cetak<br/>Standar A4 - Blade Print View"]
+        S_PrintDialog(Buka Dialog Cetak Browser<br/>atau Unduh PDF)
+    end
+
+    U_Start --> U_Pilih
+    U_Pilih -- "Ekspor Excel dari Arsip" --> S_ModalEkspor
+    S_ModalEkspor --> U_FilterExcel
+    U_FilterExcel --> U_EksporBtn
+    U_EksporBtn --> S_GenerateXlsx
+    S_GenerateXlsx --> S_DownloadXlsx
+    S_DownloadXlsx --> U_End
+    U_Pilih -- "Cetak / PDF dari Detail" --> U_CetakBtn
+    U_CetakBtn --> S_RenderPrint
+    S_RenderPrint --> S_PrintDialog
+    S_PrintDialog --> U_End
+
+    style U_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style U_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.15: Activity Diagram Ekspor & Cetak Laporan*
+
+##### m. Activity Diagram Koreksi Laporan Produksi
+Diagram ini memodelkan alur pengeditan laporan yang sudah ada melalui halaman Koreksi Laporan (`EditReport`). Akses diatur oleh kebijakan `DailyReportPolicy@update`: Supervisor selalu diizinkan; Petugas hanya untuk laporan milik sendiri yang belum diverifikasi dan dibuat dalam 24 jam terakhir. Operasi koreksi mencakup pengeditan kuantitas item, penambahan PO susulan, dan penghapusan item:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Pengguna ["Operator / Supervisor"]
+        U_Start(( ))
+        U_Buka(Buka Halaman<br/>Detail Laporan)
+        U_KoreksiBtn(Klik Tombol<br/>Koreksi Laporan)
+        U_AksiEdit{Pilih Aksi<br/>Koreksi?}
+        U_EditItem(Edit Kuantitas Baik /<br/>Reject pada Item)
+        U_TambahPO(Input No. PO Susulan<br/>& Kuantitas Tambahan)
+        U_HapusItem(Tandai Item<br/>untuk Dihapus)
+        U_Simpan(Klik Simpan<br/>Perubahan)
+        U_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        S_CekPolicy{"Cek Kebijakan Akses:<br/>Supervisor selalu atau<br/>Petugas milik sendiri, belum<br/>verified, dalam 24 jam?"}
+        S_PolicyErr(Tolak Akses &<br/>Tampilkan Pesan Tidak Berhak)
+        S_FormEdit(Tampilkan Halaman<br/>Form Koreksi Laporan)
+        S_LookupPO{Cari No. PO Susulan<br/>di production_orders?}
+        S_POErr(Tampilkan Pesan<br/>PO Tidak Ditemukan)
+        S_TambahRow(Tambah Baris PO Susulan<br/>ke Form Sementara)
+        S_Persist(Persist: Update / Create /<br/>Delete Item di Basis Data)
+        S_UpdateTotal(Update Total Laporan<br/>& Simpan Catatan)
+        S_Notif(Redirect ke Detail &<br/>Tampilkan Notifikasi Sukses)
+    end
+
+    U_Start --> U_Buka
+    U_Buka --> S_CekPolicy
+    S_CekPolicy -- Tidak Berhak --> S_PolicyErr
+    S_PolicyErr --> U_End
+    S_CekPolicy -- Berhak --> U_KoreksiBtn
+    U_KoreksiBtn --> S_FormEdit
+    S_FormEdit --> U_AksiEdit
+    U_AksiEdit -- Edit Item --> U_EditItem
+    U_EditItem --> U_Simpan
+    U_AksiEdit -- Tambah PO Susulan --> U_TambahPO
+    U_TambahPO --> S_LookupPO
+    S_LookupPO -- Tidak Ditemukan --> S_POErr
+    S_POErr --> S_FormEdit
+    S_LookupPO -- Ditemukan --> S_TambahRow
+    S_TambahRow --> U_AksiEdit
+    U_AksiEdit -- Hapus Item --> U_HapusItem
+    U_HapusItem --> U_Simpan
+    U_Simpan --> S_Persist
+    S_Persist --> S_UpdateTotal
+    S_UpdateTotal --> S_Notif
+    S_Notif --> U_End
+
+    style U_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style U_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.16: Activity Diagram Koreksi Laporan Produksi*
+
+##### n. Activity Diagram Verifikasi & Buka Kembali Laporan (Supervisor)
+Diagram ini menggambarkan dua aksi khusus Supervisor pada halaman Detail Laporan: (1) memverifikasi laporan berstatus *submitted* (mengunci laporan dan mencatat identitas verifikator), dan (2) membuka kembali laporan berstatus *submitted* atau *verified* ke status *draft* untuk dilanjutkan pemindaian:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Buka(Buka Halaman<br/>Detail Laporan)
+        SP_Pilih{Pilih Aksi<br/>Supervisor?}
+        SP_VerifBtn(Klik Tombol<br/>Verifikasi Laporan)
+        SP_VerifKonfirm(Konfirmasi di<br/>Modal Verifikasi)
+        SP_ReopenBtn(Klik Tombol<br/>Buka Kembali Sesi)
+        SP_ReopenKonfirm(Konfirmasi di<br/>Modal Buka Kembali)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        SS_Detail(Tampilkan Halaman<br/>Detail Laporan)
+        SS_ModalVerif(Tampilkan Modal<br/>Konfirmasi Verifikasi)
+        SS_SetVerif(Ubah Status → verified<br/>Catat supervisor_id & verified_at)
+        SS_NotifVerif(Tampilkan Notifikasi<br/>Laporan Terverifikasi)
+        SS_ModalReopen(Tampilkan Modal<br/>Konfirmasi Buka Kembali)
+        SS_SetDraft(Ubah Status<br/>→ draft)
+        SS_NotifReopen(Tampilkan Notifikasi<br/>Sesi Dibuka Kembali)
+    end
+
+    SP_Start --> SP_Buka
+    SP_Buka --> SS_Detail
+    SS_Detail --> SP_Pilih
+    SP_Pilih -- "Verifikasi (Status: submitted)" --> SP_VerifBtn
+    SP_VerifBtn --> SS_ModalVerif
+    SS_ModalVerif --> SP_VerifKonfirm
+    SP_VerifKonfirm --> SS_SetVerif
+    SS_SetVerif --> SS_NotifVerif
+    SS_NotifVerif --> SP_End
+    SP_Pilih -- "Buka Kembali (Status: submitted / verified)" --> SP_ReopenBtn
+    SP_ReopenBtn --> SS_ModalReopen
+    SS_ModalReopen --> SP_ReopenKonfirm
+    SP_ReopenKonfirm --> SS_SetDraft
+    SS_SetDraft --> SS_NotifReopen
+    SS_NotifReopen --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.17: Activity Diagram Verifikasi & Buka Kembali Laporan (Supervisor)*
+
+##### o. Activity Diagram Hapus Laporan (Supervisor)
+Diagram ini memodelkan alur penghapusan laporan produksi yang dapat dilakukan Supervisor dari dua titik: halaman Arsip Laporan atau halaman Detail Laporan. Setelah penghapusan, data laporan beserta seluruh item terkait dihapus dari basis data:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
+flowchart TD
+    subgraph Supervisor ["Supervisor (Kepala Unit)"]
+        SP_Start(( ))
+        SP_Sumber{Akses Hapus<br/>dari Mana?}
+        SP_Arsip(Buka Menu<br/>Lihat Laporan)
+        SP_Detail(Buka Halaman<br/>Detail Laporan)
+        SP_HapusBtn(Klik Ikon / Tombol<br/>Hapus Laporan)
+        SP_Konfirm(Konfirmasi Hapus<br/>di Modal)
+        SP_End((( )))
+    end
+
+    subgraph Sistem ["Sistem"]
+        SS_Tampil(Tampilkan Arsip<br/>atau Detail Laporan)
+        SS_ModalKonfirm(Tampilkan Modal<br/>Konfirmasi Hapus)
+        SS_Hapus(Hapus Record DailyReport<br/>& Seluruh DailyReportItem Terkait)
+        SS_Redirect(Redirect ke Halaman<br/>Arsip Laporan)
+        SS_Notif(Tampilkan Notifikasi<br/>Laporan Berhasil Dihapus)
+    end
+
+    SP_Start --> SP_Sumber
+    SP_Sumber -- dari Arsip --> SP_Arsip
+    SP_Sumber -- dari Detail --> SP_Detail
+    SP_Arsip --> SS_Tampil
+    SP_Detail --> SS_Tampil
+    SS_Tampil --> SP_HapusBtn
+    SP_HapusBtn --> SS_ModalKonfirm
+    SS_ModalKonfirm --> SP_Konfirm
+    SP_Konfirm --> SS_Hapus
+    SS_Hapus --> SS_Redirect
+    SS_Redirect --> SS_Notif
+    SS_Notif --> SP_End
+
+    style SP_Start fill:#000000,stroke:#000000,stroke-width:2px;
+    style SP_End fill:#ffffff,stroke:#000000,stroke-width:2px;
+```
+*(Sumber: Hasil Penelitian, 2026)*  
+*Gambar 3.18: Activity Diagram Hapus Laporan (Supervisor)*
+
+##### p. Activity Diagram Dashboard dan Visualisasi Grafik Performa
+Diagram ini menjelaskan alur pemrosesan data saat pengguna mengakses halaman Dashboard, termasuk metrik harian, grafik tren produksi, distribusi shift, ranking top 5 mesin cetak, dan daftar 5 laporan terbaru. Hasil agregasi di-*cache* selama 5 menit oleh `DashboardAnalyticsService` untuk menjaga responsivitas halaman:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'primaryTextColor': '#000000', 'lineColor': '#000000', 'textColor': '#000000', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'edgeLabelBackground':'#ffffff' }}}%%
@@ -713,8 +1120,8 @@ flowchart TD
     subgraph Pengguna ["Operator / Supervisor"]
         U_Start(( ))
         U_Buka(Mengakses Menu<br/>Dashboard)
-        U_Opsi{Ubah Rentang<br/>Grafik?}
-        U_Pilih(Pilih 7 / 14 / 30 Hari<br/>atau Tipe Grafik)
+        U_Opsi{Ubah Rentang<br/>atau Tipe Grafik?}
+        U_Pilih["Pilih 7 / 14 / 30 Hari<br/>atau Tipe Grafik Area/Garis/Batang"]
         U_Lihat(Meninjau KPI Harian,<br/>Grafik, & Laporan Terbaru)
         U_End((( )))
     end
@@ -722,11 +1129,11 @@ flowchart TD
     subgraph Sistem ["Sistem"]
         S_Metrik(Hitung Metrik<br/>Produksi Hari Ini)
         S_Rentang(Set Rentang Waktu<br/>Filter Grafik)
-        S_Query(Query Agregasi Tren<br/>Kemas Baik & Reject)
+        S_Query["Query Agregasi Tren<br/>Kemas Baik & Reject - WIB"]
         S_Shift(Hitung Distribusi<br/>Output per Shift)
         S_Mesin(Ranking Top 5<br/>Mesin Cetak)
         S_Recent(Ambil 5 Laporan<br/>Terbaru)
-        S_Render(Render Kartu KPI,<br/>Grafik Chart.js, Laporan Terbaru & Tabel)
+        S_Render(Render Kartu KPI, Grafik Chart.js,<br/>Distribusi Shift & Tabel Laporan Terbaru)
     end
 
     U_Start --> U_Buka
@@ -747,14 +1154,14 @@ flowchart TD
     style U_End fill:#ffffff,stroke:#000000,stroke-width:2px;
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.9: Activity Diagram Dashboard dan Visualisasi Grafik Performa*
+*Gambar 3.19: Activity Diagram Dashboard dan Visualisasi Grafik Performa*
 
 ---
 
 #### 3. Entity Relationship Diagram (ERD)
 Entity Relationship Diagram (ERD) memodelkan keterhubungan konseptual antar-entitas data dalam sistem dokumentasi hasil produksi harian. Pemodelan ERD dirancang menggunakan **Notasi Chen** yang merepresentasikan entitas dalam bentuk persegi panjang (*rectangles*), relasi antar-entitas dalam bentuk belah ketupat (*diamonds*), serta atribut data dalam bentuk elips (*ovals*) dengan garis bawah penanda kunci utama (*Primary Key*).
 
-Diagram ERD notasi Chen disajikan pada Gambar 3.10:
+Diagram ERD notasi Chen disajikan pada Gambar 3.20:
 
 ```mermaid
 flowchart TD
@@ -887,7 +1294,7 @@ flowchart TD
     E_PO ---|1| R_ACUAN ---|M| E_DRI
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.10: Entity Relationship Diagram (ERD) Notasi Chen Sistem Dokumentasi Produksi Harian*
+*Gambar 3.20: Entity Relationship Diagram (ERD) Notasi Chen Sistem Dokumentasi Produksi Harian*
 
 Kardinalitas dan hubungan relasional dalam ERD dijelaskan sebagai berikut:
 1. **Relasi `User` ke `Production_Order` (mengimpor):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat mengimpor banyak berkas rekaman pesanan produksi SAP.
@@ -906,7 +1313,7 @@ Aturan transformasi ERD ke LRS yang diterapkan meliputi:
 1. Hubungan kardinalitas *One-to-Many* (1:M) ditransformasikan dengan menempatkan atribut *Primary Key* dari entitas di sisi "1" (One) menjadi atribut *Foreign Key* pada entitas di sisi "M" (Many).
 2. Seluruh atribut dari entitas diubah menjadi elemen data (*fields*) yang memiliki tipe data dan panjang presisi pada tingkat basis data fisik.
 
-Struktur LRS Sistem Dokumentasi Hasil Produksi Harian disajikan pada Gambar 3.11:
+Struktur LRS Sistem Dokumentasi Hasil Produksi Harian disajikan pada Gambar 3.21:
 
 ```mermaid
 classDiagram
@@ -1017,7 +1424,7 @@ classDiagram
     PRODUCTION_ORDERS "1" --> "0..*" DAILY_REPORT_ITEMS : production_order_id
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.11: Logical Record Structure (LRS) Sistem Dokumentasi Produksi Harian*
+*Gambar 3.21: Logical Record Structure (LRS) Sistem Dokumentasi Produksi Harian*
 
 ---
 
@@ -1255,7 +1662,7 @@ Halaman login dirancang dengan tata letak minimalis dan terpusat yang memfasilit
 +-----------------------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.12: Tampilan Antarmuka Halaman Login Sistem*
+*Gambar 3.22: Tampilan Antarmuka Halaman Login Sistem*
 
 ##### b. Tampilan Antarmuka Halaman Dashboard Utama dan Grafik Performa Produksi
 Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi cepat modul sistem, serta visualisasi grafik analitik performa produksi (7, 14, atau 30 hari aktif) yang menyajikan perbandingan output baik dan kuantitas reject:
@@ -1284,7 +1691,7 @@ Halaman dashboard menampilkan ringkasan kartu metrik capaian harian, navigasi ce
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.13: Tampilan Antarmuka Halaman Dashboard dan Grafik Performa Produksi (7/14/30 Hari)*
+*Gambar 3.23: Tampilan Antarmuka Halaman Dashboard dan Grafik Performa Produksi (7/14/30 Hari)*
 
 ##### c. Tampilan Antarmuka Halaman Manajemen Data Petugas
 Halaman ini memfasilitasi Supervisor untuk mengelola akun operator pengemasan melalui tabel data terstruktur dan form modal penambahan/pengubahan akun:
@@ -1306,7 +1713,7 @@ Halaman ini memfasilitasi Supervisor untuk mengelola akun operator pengemasan me
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.14: Tampilan Antarmuka Halaman Manajemen Data Petugas*
+*Gambar 3.24: Tampilan Antarmuka Halaman Manajemen Data Petugas*
 
 ##### d. Tampilan Antarmuka Halaman Update Database (Import SAP)
 Halaman ini dirancang khusus bagi Supervisor untuk mengunggah berkas data master pesanan produksi yang diekspor dari sistem SAP, lengkap dengan tabel riwayat berkas impor terakhir:
@@ -1334,7 +1741,7 @@ Halaman ini dirancang khusus bagi Supervisor untuk mengunggah berkas data master
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.15: Tampilan Antarmuka Halaman Update Database Master SAP*
+*Gambar 3.25: Tampilan Antarmuka Halaman Update Database Master SAP*
 
 ##### e. Tampilan Antarmuka Halaman Buat Laporan (Scan Barcode & Entri Kemas)
 Halaman ini merupakan antarmuka operasional utama Petugas di meja kerja pengemasan. Formulir dilengkapi area masukan scan barcode otomatis, penampil rincian spesifikasi barang seketika, kolom input jumlah kemas, dan tabel penampungan draf hasil kemas multi-item:
@@ -1368,7 +1775,7 @@ Halaman ini merupakan antarmuka operasional utama Petugas di meja kerja pengemas
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.16: Tampilan Antarmuka Halaman Buat Laporan dengan Scan Barcode*
+*Gambar 3.26: Tampilan Antarmuka Halaman Buat Laporan dengan Scan Barcode*
 
 ##### f. Tampilan Antarmuka Halaman Lihat Laporan
 Halaman ini menyajikan tabel riwayat seluruh dokumen laporan hasil kemas yang tersimpan, dilengkapi fitur pencarian, filter rentang tanggal, status verifikasi, dan tombol aksi:
@@ -1388,7 +1795,7 @@ Halaman ini menyajikan tabel riwayat seluruh dokumen laporan hasil kemas yang te
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.17: Tampilan Antarmuka Halaman Lihat Laporan Produksi Harian*
+*Gambar 3.27: Tampilan Antarmuka Halaman Lihat Laporan Produksi Harian*
 
 ##### g. Tampilan Antarmuka Halaman Detail dan Verifikasi Laporan
 Halaman ini menampilkan rincian lengkap item kemas pada suatu dokumen laporan, memfasilitasi pengeditan korektif oleh Petugas (jika masih draf), serta menyediakan tombol aksi persetujuan (*verifikasi*) bagi Supervisor:
@@ -1412,7 +1819,7 @@ Halaman ini menampilkan rincian lengkap item kemas pada suatu dokumen laporan, m
 +-------------+---------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.18: Tampilan Antarmuka Detail dan Verifikasi Laporan Produksi Harian*
+*Gambar 3.28: Tampilan Antarmuka Detail dan Verifikasi Laporan Produksi Harian*
 
 ##### h. Tampilan Format Lembar Cetak Laporan Standar Kertas A4
 Format cetak lembar dokumen resmi standar A4 yang dihasilkan sistem lengkap dengan kop perusahaan, rincian item, total hasil kemas, dan kolom tanda tangan pengesahan:
@@ -1440,7 +1847,7 @@ Format cetak lembar dokumen resmi standar A4 yang dihasilkan sistem lengkap deng
 +-----------------------------------------------------------------------+
 ```
 *(Sumber: Hasil Penelitian, 2026)*  
-*Gambar 3.19: Tampilan Format Lembar Cetak Laporan Produksi Harian (Standar A4)*
+*Gambar 3.29: Tampilan Format Lembar Cetak Laporan Produksi Harian (Standar A4)*
 
 ---
 
