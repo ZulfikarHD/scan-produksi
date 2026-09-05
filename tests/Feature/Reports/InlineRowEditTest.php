@@ -76,8 +76,8 @@ test('petugas can delete an item row from daily report with total recalculation'
         ->test(ProductionEntry::class, ['report' => $report])
         ->call('deleteItem', $item1->id);
 
-    $this->assertDatabaseMissing('daily_report_items', ['id' => $item1->id]);
-    $this->assertDatabaseHas('daily_report_items', ['id' => $item2->id]);
+    $this->assertDatabaseMissing('daily_report_items', ['daily_report_item_id' => $item1->id]);
+    $this->assertDatabaseHas('daily_report_items', ['daily_report_item_id' => $item2->id]);
 
     expect($report->fresh()->total_items_count)->toBe(1);
     expect($report->fresh()->total_good_quantity)->toBe(15000);
@@ -101,5 +101,5 @@ test('operator cannot inline edit or delete items on a submitted report', functi
         ->call('deleteItem', $item->id);
 
     expect($item->fresh()->good_quantity)->toBe(10000);
-    $this->assertDatabaseHas('daily_report_items', ['id' => $item->id]);
+    $this->assertDatabaseHas('daily_report_items', ['daily_report_item_id' => $item->id]);
 });

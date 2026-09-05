@@ -11,7 +11,8 @@ use Illuminate\Support\Carbon;
 /**
  * Model data baris item PO yang dipindai dalam laporan harian.
  *
- * @property int $id
+ * @property int $daily_report_item_id
+ * @property-read int $id
  * @property int $daily_report_id
  * @property int|null $production_order_id
  * @property string $po_number
@@ -33,6 +34,13 @@ class DailyReportItem extends Model
 {
     /** @use HasFactory<DailyReportItemFactory> */
     use HasFactory;
+
+    /**
+     * Primary Key fisik sesuai konvensi akademis (US-6.1 Pathway 2).
+     *
+     * @var string
+     */
+    protected $primaryKey = 'daily_report_item_id';
 
     protected $fillable = [
         'daily_report_id',
@@ -60,13 +68,21 @@ class DailyReportItem extends Model
     }
 
     /**
+     * Alias backward-compatible: $item->id mengembalikan nilai primary key fisik.
+     */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
      * Induk laporan harian.
      *
      * @return BelongsTo<DailyReport, $this>
      */
     public function dailyReport(): BelongsTo
     {
-        return $this->belongsTo(DailyReport::class, 'daily_report_id');
+        return $this->belongsTo(DailyReport::class, 'daily_report_id', 'daily_report_id');
     }
 
     /**
@@ -76,6 +92,6 @@ class DailyReportItem extends Model
      */
     public function productionOrder(): BelongsTo
     {
-        return $this->belongsTo(ProductionOrder::class, 'production_order_id');
+        return $this->belongsTo(ProductionOrder::class, 'production_order_id', 'production_order_id');
     }
 }

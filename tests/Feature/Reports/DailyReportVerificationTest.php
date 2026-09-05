@@ -76,8 +76,8 @@ test('supervisor can delete report from detail view with cascading items', funct
         ->call('deleteReport')
         ->assertRedirect(route('reports.index'));
 
-    expect(DailyReport::where('id', $report->id)->exists())->toBeFalse();
-    expect(DailyReportItem::where('id', $item->id)->exists())->toBeFalse();
+    expect(DailyReport::where('daily_report_id', $report->id)->exists())->toBeFalse();
+    expect(DailyReportItem::where('daily_report_item_id', $item->id)->exists())->toBeFalse();
 
     $order->refresh();
     expect($order->kemas_quantity)->toBe(0);
@@ -95,8 +95,8 @@ test('supervisor can delete report from index view', function () {
         ->call('deleteReport')
         ->assertDispatched('close-modal', 'delete-report-confirm');
 
-    expect(DailyReport::where('id', $report->id)->exists())->toBeFalse();
-    expect(DailyReportItem::where('id', $item->id)->exists())->toBeFalse();
+    expect(DailyReport::where('daily_report_id', $report->id)->exists())->toBeFalse();
+    expect(DailyReportItem::where('daily_report_item_id', $item->id)->exists())->toBeFalse();
 });
 
 test('petugas is unauthorized to delete report', function () {
@@ -108,5 +108,5 @@ test('petugas is unauthorized to delete report', function () {
         ->call('deleteReport')
         ->assertForbidden();
 
-    expect(DailyReport::where('id', $report->id)->exists())->toBeTrue();
+    expect(DailyReport::where('daily_report_id', $report->id)->exists())->toBeTrue();
 });

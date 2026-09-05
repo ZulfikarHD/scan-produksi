@@ -27,7 +27,7 @@ class ReportDetail extends Component
     public function render(): View
     {
         $items = DailyReportItem::where('daily_report_id', $this->report->id)
-            ->oldest('id')
+            ->oldest('daily_report_item_id')
             ->get();
 
         $totalTarget = (int) $items->sum('target_quantity');
@@ -82,7 +82,7 @@ class ReportDetail extends Component
         $this->authorize('verify', $this->report);
 
         // Update atomik dengan precondition status SUBMITTED (mencegah race / double-verify)
-        $updated = DailyReport::where('id', $this->report->id)
+        $updated = DailyReport::where('daily_report_id', $this->report->id)
             ->where('status', ReportStatus::SUBMITTED)
             ->update([
                 'status' => ReportStatus::VERIFIED,

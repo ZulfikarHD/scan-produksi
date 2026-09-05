@@ -34,7 +34,7 @@ class DashboardIndex extends Component
         $topMachines = $analyticsService->getTopMachines($this->dateRange, 5);
         $recentReports = DailyReport::with(['user', 'supervisor'])
             ->latest('report_date')
-            ->latest('id')
+            ->latest('daily_report_id')
             ->take(5)
             ->get();
 

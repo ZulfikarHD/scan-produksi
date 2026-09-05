@@ -20,7 +20,7 @@ class ReportExportController extends Controller
      */
     public function pdf(DailyReport $report): Response
     {
-        $report->load(['user', 'supervisor', 'items' => fn ($q) => $q->oldest('id')]);
+        $report->load(['user', 'supervisor', 'items' => fn ($q) => $q->oldest('daily_report_item_id')]);
 
         return response()->view('reports.print', [
             'report' => $report,
@@ -34,9 +34,9 @@ class ReportExportController extends Controller
     public function export(Request $request): BinaryFileResponse
     {
         $query = DailyReport::query()
-            ->with(['user', 'supervisor', 'items' => fn ($q) => $q->oldest('id')])
+            ->with(['user', 'supervisor', 'items' => fn ($q) => $q->oldest('daily_report_item_id')])
             ->orderBy('report_date', 'desc')
-            ->orderBy('id', 'desc');
+            ->orderBy('daily_report_id', 'desc');
 
         // Filter rentang tanggal
         $from = $request->input('from') ?: $request->input('start_date');

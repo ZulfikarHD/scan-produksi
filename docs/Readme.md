@@ -21,6 +21,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [High-Speed Continuous Barcode Scanning & Inline Production Entry](dev-docs/features/continuous-barcode-scan-and-inline-production-entry.md)
   - [Transactional Hardening & Concurrency Protection](dev-docs/features/transactional-hardening-and-concurrency-protection.md)
   - [Schema Decluttering, String Bounds & Data Dictionary](dev-docs/features/schema-decluttering-and-data-dictionary.md)
+  - [Dual-Path Primary Key & Model Architecture Alignment](dev-docs/features/dual-path-primary-key-and-model-alignment.md)
   - [Daily Production Report Management, Verification & Export](dev-docs/features/report-management-verification-and-export.md)
   - [Dashboard Analytics & 14-Day Production Visualization](dev-docs/features/dashboard-analytics-and-14-day-chart.md)
 - **Architecture Decision Records (ADRs)**:

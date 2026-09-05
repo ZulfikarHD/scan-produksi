@@ -36,7 +36,7 @@ class ProductionEntry extends Component
     public function render(): View
     {
         $items = DailyReportItem::where('daily_report_id', $this->report->id)
-            ->latest('id')
+            ->latest('daily_report_item_id')
             ->get();
 
         return view('livewire.reports.production-entry', [
@@ -203,7 +203,7 @@ class ProductionEntry extends Component
         }
 
         DB::transaction(function () use ($itemId) {
-            DailyReportItem::where('daily_report_id', $this->report->id)->where('id', $itemId)->delete();
+            DailyReportItem::where('daily_report_id', $this->report->id)->where('daily_report_item_id', $itemId)->delete();
             $this->refreshTotals();
         });
 

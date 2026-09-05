@@ -66,7 +66,7 @@ class DashboardAnalyticsService
 
             // Hitung jumlah PO unik yang diproses hari ini
             $poCountToday = (int) DB::table('daily_reports')
-                ->join('daily_report_items', 'daily_reports.id', '=', 'daily_report_items.daily_report_id')
+                ->join('daily_report_items', 'daily_reports.daily_report_id', '=', 'daily_report_items.daily_report_id')
                 ->whereDate('daily_reports.report_date', $today)
                 ->distinct('daily_report_items.po_number')
                 ->count('daily_report_items.po_number');
@@ -127,12 +127,12 @@ class DashboardAnalyticsService
 
             // Kueri agregasi berbasis tanggal laporan
             $productionData = DB::table('daily_reports')
-                ->join('daily_report_items', 'daily_reports.id', '=', 'daily_report_items.daily_report_id')
+                ->join('daily_report_items', 'daily_reports.daily_report_id', '=', 'daily_report_items.daily_report_id')
                 ->whereDate('daily_reports.report_date', '>=', $startDate->toDateString())
                 ->whereDate('daily_reports.report_date', '<=', $endDate->toDateString())
                 ->select([
                     'daily_reports.report_date',
-                    'daily_reports.id as report_id',
+                    'daily_reports.daily_report_id as report_id',
                     'daily_report_items.good_quantity',
                     'daily_report_items.reject_quantity',
                     'daily_report_items.po_number',
@@ -246,7 +246,7 @@ class DashboardAnalyticsService
             $startDate = $endDate->copy()->subDays($days - 1);
 
             $shiftData = DB::table('daily_reports')
-                ->join('daily_report_items', 'daily_reports.id', '=', 'daily_report_items.daily_report_id')
+                ->join('daily_report_items', 'daily_reports.daily_report_id', '=', 'daily_report_items.daily_report_id')
                 ->whereDate('daily_reports.report_date', '>=', $startDate->toDateString())
                 ->whereDate('daily_reports.report_date', '<=', $endDate->toDateString())
                 ->select([
@@ -305,7 +305,7 @@ class DashboardAnalyticsService
             $startDate = $endDate->copy()->subDays($days - 1);
 
             $machines = DB::table('daily_reports')
-                ->join('daily_report_items', 'daily_reports.id', '=', 'daily_report_items.daily_report_id')
+                ->join('daily_report_items', 'daily_reports.daily_report_id', '=', 'daily_report_items.daily_report_id')
                 ->whereDate('daily_reports.report_date', '>=', $startDate->toDateString())
                 ->whereDate('daily_reports.report_date', '<=', $endDate->toDateString())
                 ->whereNotNull('daily_report_items.machine_number')
@@ -330,7 +330,7 @@ class DashboardAnalyticsService
                 ->take($limit);
 
             $totalAllMachinesGood = (int) DB::table('daily_reports')
-                ->join('daily_report_items', 'daily_reports.id', '=', 'daily_report_items.daily_report_id')
+                ->join('daily_report_items', 'daily_reports.daily_report_id', '=', 'daily_report_items.daily_report_id')
                 ->whereDate('daily_reports.report_date', '>=', $startDate->toDateString())
                 ->whereDate('daily_reports.report_date', '<=', $endDate->toDateString())
                 ->sum('daily_report_items.good_quantity');

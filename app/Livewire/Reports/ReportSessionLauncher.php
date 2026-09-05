@@ -47,7 +47,7 @@ class ReportSessionLauncher extends Component
         // Daftar riwayat sesi laporan hari ini untuk akses cepat
         $todayReports = DailyReport::with('user')
             ->whereDate('report_date', $currentDate)
-            ->latest('id')
+            ->latest('daily_report_id')
             ->get();
 
         return view('livewire.reports.session-launcher', [

@@ -16,7 +16,8 @@ use Illuminate\Support\Carbon;
 /**
  * Model data laporan produksi harian per sesi pita cukai & shift.
  *
- * @property int $id
+ * @property int $daily_report_id
+ * @property-read int $id
  * @property string $report_code
  * @property ProductSeries $product_series
  * @property Carbon $report_date
@@ -39,6 +40,13 @@ class DailyReport extends Model
 {
     /** @use HasFactory<DailyReportFactory> */
     use HasFactory;
+
+    /**
+     * Primary Key fisik sesuai konvensi akademis (US-6.1 Pathway 2).
+     *
+     * @var string
+     */
+    protected $primaryKey = 'daily_report_id';
 
     protected $fillable = [
         'report_code',
@@ -70,13 +78,21 @@ class DailyReport extends Model
     }
 
     /**
+     * Alias backward-compatible: $report->id mengembalikan nilai primary key fisik.
+     */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
      * Petugas pembuat laporan.
      *
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     /**
@@ -86,7 +102,7 @@ class DailyReport extends Model
      */
     public function supervisor(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'supervisor_id');
+        return $this->belongsTo(User::class, 'supervisor_id', 'user_id');
     }
 
     /**
@@ -96,6 +112,6 @@ class DailyReport extends Model
      */
     public function items(): HasMany
     {
-        return $this->hasMany(DailyReportItem::class, 'daily_report_id');
+        return $this->hasMany(DailyReportItem::class, 'daily_report_id', 'daily_report_id');
     }
 }

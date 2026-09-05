@@ -107,7 +107,7 @@ test('refreshTotals recalculates reject quantity after inline edit and delete', 
         ->and($report->total_good_quantity)->toBe(7500)
         ->and($report->total_reject_quantity)->toBe(200);
 
-    expect(DailyReportItem::where('id', $itemDelete->id)->exists())->toBeFalse();
+    expect(DailyReportItem::where('daily_report_item_id', $itemDelete->id)->exists())->toBeFalse();
 });
 
 test('saveEntry rolls back item insert when aggregate update fails inside transaction', function () {

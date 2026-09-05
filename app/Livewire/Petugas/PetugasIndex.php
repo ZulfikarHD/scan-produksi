@@ -76,7 +76,7 @@ class PetugasIndex extends Component
             $query->where('is_active', $this->status === '1');
         }
 
-        $users = $query->latest('id')->paginate(10);
+        $users = $query->latest('user_id')->paginate(10);
 
         return view('livewire.petugas.index', [
             'users' => $users,
@@ -158,9 +158,9 @@ class PetugasIndex extends Component
     {
         $this->validate([
             'name' => ['required', 'string', 'max:100'],
-            'nip' => ['required', 'string', 'max:30', 'unique:users,nip,'.($this->editingUserId ?? 'NULL')],
-            'username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,username,'.($this->editingUserId ?? 'NULL')],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.($this->editingUserId ?? 'NULL')],
+            'nip' => ['required', 'string', 'max:30', 'unique:users,nip,'.($this->editingUserId ?? 'NULL').',user_id'],
+            'username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,username,'.($this->editingUserId ?? 'NULL').',user_id'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.($this->editingUserId ?? 'NULL').',user_id'],
             'userRole' => ['required', 'in:supervisor,petugas'],
             'password' => [$this->editingUserId ? 'nullable' : 'required', 'string', 'min:8'],
         ], [

@@ -154,7 +154,7 @@ test('adding supplemental item and removing existing item in edit form', functio
         ->call('saveChanges')
         ->assertRedirect(route('reports.show', ['report' => $report->report_code]));
 
-    expect(DailyReportItem::where('id', $itemOld->id)->exists())->toBeFalse();
+    expect(DailyReportItem::where('daily_report_item_id', $itemOld->id)->exists())->toBeFalse();
 
     $this->assertDatabaseHas('daily_report_items', [
         'daily_report_id' => $report->id,

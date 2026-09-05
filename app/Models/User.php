@@ -15,7 +15,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * @property int $id
+ * @property int $user_id
+ * @property-read int $id
  * @property string $name
  * @property string|null $nip
  * @property string|null $username
@@ -38,6 +39,13 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Primary Key fisik sesuai konvensi akademis (US-6.1 Pathway 2).
+     *
+     * @var string
+     */
+    protected $primaryKey = 'user_id';
 
     /**
      * The attributes that are mass assignable.
@@ -72,13 +80,21 @@ class User extends Authenticatable
     }
 
     /**
+     * Alias backward-compatible: $user->id mengembalikan nilai primary key fisik.
+     */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
      * Get the production orders created by this user.
      *
      * @return HasMany<ProductionOrder, $this>
      */
     public function productionOrders(): HasMany
     {
-        return $this->hasMany(ProductionOrder::class, 'created_by');
+        return $this->hasMany(ProductionOrder::class, 'created_by', 'user_id');
     }
 
     /**
@@ -88,7 +104,7 @@ class User extends Authenticatable
      */
     public function dailyReports(): HasMany
     {
-        return $this->hasMany(DailyReport::class, 'user_id');
+        return $this->hasMany(DailyReport::class, 'user_id', 'user_id');
     }
 
     /**

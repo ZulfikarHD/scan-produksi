@@ -21,7 +21,8 @@ use Illuminate\Support\Carbon;
  *   baik_verifikasi, rusak_verifikasi, hcts_baik, total_hcts, kemas_quantity, kirim_quantity —
  *   disimpan apa adanya untuk fidelitas impor/audit tanpa mutasi di area kerja.
  *
- * @property int $id
+ * @property int $production_order_id
+ * @property-read int $id
  * @property string $po_number
  * @property string|null $no_obc
  * @property string|null $perso_type
@@ -62,6 +63,13 @@ class ProductionOrder extends Model
 {
     /** @use HasFactory<ProductionOrderFactory> */
     use HasFactory;
+
+    /**
+     * Primary Key fisik sesuai konvensi akademis (US-6.1 Pathway 2).
+     *
+     * @var string
+     */
+    protected $primaryKey = 'production_order_id';
 
     protected $fillable = [
         'po_number',
@@ -124,11 +132,19 @@ class ProductionOrder extends Model
     }
 
     /**
+     * Alias backward-compatible: $order->id mengembalikan nilai primary key fisik.
+     */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by', 'user_id');
     }
 
     /**

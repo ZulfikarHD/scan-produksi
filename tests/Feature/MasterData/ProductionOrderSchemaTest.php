@@ -10,7 +10,7 @@ test('production_orders table has all 24 sap columns and required system attribu
     expect(Schema::hasTable('production_orders'))->toBeTrue();
 
     $expectedColumns = [
-        'id',
+        'production_order_id',
         // 24 Kolom Header SAP
         'po_number', // NO PO
         'no_obc', // No OBC

@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('daily_reports', function (Blueprint $table) {
-            $table->id();
+            $table->id('daily_report_id');
             // unique() already creates a B-Tree index; do not chain ->index() (US-6.2)
             $table->string('report_code', 50)->unique();
             $table->string('product_series', 30)->index();
             $table->date('report_date')->index();
             $table->string('shift', 30)->default('shift_1')->index();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('supervisor_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('user_id')->constrained('users', 'user_id')->cascadeOnDelete();
+            $table->foreignId('supervisor_id')->nullable()->constrained('users', 'user_id')->nullOnDelete();
             $table->unsignedInteger('total_items_count')->default(0);
             $table->unsignedInteger('total_good_quantity')->default(0);
             $table->text('notes')->nullable();
@@ -32,9 +32,9 @@ return new class extends Migration
         });
 
         Schema::create('daily_report_items', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('daily_report_id')->constrained('daily_reports')->cascadeOnDelete();
-            $table->foreignId('production_order_id')->nullable()->constrained('production_orders')->nullOnDelete();
+            $table->id('daily_report_item_id');
+            $table->foreignId('daily_report_id')->constrained('daily_reports', 'daily_report_id')->cascadeOnDelete();
+            $table->foreignId('production_order_id')->nullable()->constrained('production_orders', 'production_order_id')->nullOnDelete();
             $table->string('po_number', 50)->index();
             $table->string('product_name');
             $table->text('specification')->nullable();

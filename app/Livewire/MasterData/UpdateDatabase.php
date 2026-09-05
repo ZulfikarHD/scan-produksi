@@ -133,7 +133,7 @@ class UpdateDatabase extends Component
     public function render(SapImportService $importService): View
     {
         $importLogs = SapImportLog::with('user')
-            ->latest('id')
+            ->latest('sap_import_log_id')
             ->paginate(10, ['*'], 'logsPage');
 
         $ordersQuery = ProductionOrder::query()->with('creator');
@@ -177,9 +177,9 @@ class UpdateDatabase extends Component
             ->pluck('machine_number')
             ->toArray();
 
-        $orders = $ordersQuery->latest('id')->paginate(15, ['*'], 'ordersPage');
+        $orders = $ordersQuery->latest('production_order_id')->paginate(15, ['*'], 'ordersPage');
 
-        $latestLog = SapImportLog::latest('id')->first();
+        $latestLog = SapImportLog::latest('sap_import_log_id')->first();
         $totalOrdersCount = ProductionOrder::count();
 
         return view('livewire.master-data.update-database', [
@@ -544,7 +544,7 @@ class UpdateDatabase extends Component
                 'required',
                 'string',
                 'max:50',
-                'unique:production_orders,po_number,'.($this->editingOrderId ?? 'NULL'),
+                'unique:production_orders,po_number,'.($this->editingOrderId ?? 'NULL').',production_order_id',
             ],
             'order_product_name' => ['required', 'string', 'max:255'],
             'order_target_quantity' => ['required', 'integer', 'min:1'],
@@ -722,7 +722,7 @@ class UpdateDatabase extends Component
             $ordersQuery->where('order_date', '<=', $this->endDateFilter);
         }
 
-        $orders = $ordersQuery->latest('id')->get();
+        $orders = $ordersQuery->latest('production_order_id')->get();
 
         $tempFile = tempnam(sys_get_temp_dir(), 'sap_export_orders_').'.xlsx';
         $importService->exportOrdersToXlsx($orders, $tempFile);

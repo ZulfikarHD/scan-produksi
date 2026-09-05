@@ -21,7 +21,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('production_orders', function (Blueprint $table) {
-            $table->id();
+            $table->id('production_order_id');
 
             // Operational Packaging Attributes — identitas order & barcode SAP (Code 128)
             $table->string('po_number', 50)->unique(); // NO PO (Primary Barcode Lookup)
@@ -60,7 +60,7 @@ return new class extends Migration
             // Operational Packaging Attributes — status, satuan & audit trail
             $table->string('unit', 30)->default('lembar'); // Satuan kemas (lembar/rim/buku)
             $table->string('status', 30)->default('ready')->index();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users', 'user_id')->nullOnDelete();
             $table->timestamps();
 
             // Composite indexes untuk akselerasi query Master Data Explorer & Dashboard

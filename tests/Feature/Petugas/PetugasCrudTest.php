@@ -144,7 +144,7 @@ test('supervisor can delete another petugas account', function () {
         ->assertSet('confirmingUserId', $petugas->id)
         ->call('deleteUser');
 
-    $this->assertDatabaseMissing('users', ['id' => $petugas->id]);
+    $this->assertDatabaseMissing('users', ['user_id' => $petugas->id]);
 });
 
 test('supervisor cannot delete their own logged in account', function () {
@@ -155,7 +155,7 @@ test('supervisor cannot delete their own logged in account', function () {
         ->call('confirmDelete', $supervisor->id)
         ->call('deleteUser');
 
-    $this->assertDatabaseHas('users', ['id' => $supervisor->id]);
+    $this->assertDatabaseHas('users', ['user_id' => $supervisor->id]);
 });
 
 test('supervisor cannot delete petugas who has authored production reports', function () {
@@ -171,7 +171,7 @@ test('supervisor cannot delete petugas who has authored production reports', fun
         ->call('confirmDelete', $petugas->id)
         ->call('deleteUser');
 
-    $this->assertDatabaseHas('users', ['id' => $petugas->id]);
+    $this->assertDatabaseHas('users', ['user_id' => $petugas->id]);
 });
 
 test('opening create modal resets validation errors and form state', function () {

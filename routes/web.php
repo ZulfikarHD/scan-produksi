@@ -34,7 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reports/{report:report_code}/edit', EditReport::class)->name('reports.edit');
     Route::get('reports/{report:report_code}/pdf', [ReportExportController::class, 'pdf'])->name('reports.pdf');
     Route::get('reports/{report:report_code}/print', function (DailyReport $report) {
-        $report->load(['user', 'supervisor', 'items' => fn ($q) => $q->oldest('id')]);
+        $report->load(['user', 'supervisor', 'items' => fn ($q) => $q->oldest('daily_report_item_id')]);
 
         return view('reports.print', compact('report'));
     })->name('reports.print');

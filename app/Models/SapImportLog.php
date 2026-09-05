@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * @property int $id
+ * @property int $sap_import_log_id
+ * @property-read int $id
  * @property int|null $user_id
  * @property string $file_name
  * @property string|null $file_path
@@ -27,6 +28,13 @@ class SapImportLog extends Model
 {
     /** @use HasFactory<SapImportLogFactory> */
     use HasFactory;
+
+    /**
+     * Primary Key fisik sesuai konvensi akademis (US-6.1 Pathway 2).
+     *
+     * @var string
+     */
+    protected $primaryKey = 'sap_import_log_id';
 
     protected $fillable = [
         'user_id',
@@ -52,10 +60,18 @@ class SapImportLog extends Model
     }
 
     /**
+     * Alias backward-compatible: $log->id mengembalikan nilai primary key fisik.
+     */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

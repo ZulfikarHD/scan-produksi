@@ -34,11 +34,11 @@ Dari hasil audit menyeluruh terhadap arsitektur basis data `scan-produksi`, dite
 **So that** the thesis defense (sidang skripsi) passes academic evaluation with perfect marks without causing breaking changes or maintenance friction in the application codebase  
 
 **Acceptance Criteria:**
-- [ ] **Pathway 1 (Recommended Academic Bridge):**
-  - Physical database retains standard `id` surrogate primary keys for Laravel ecosystem harmony.
-  - Model Eloquent classes expose virtual accessor or alias methods (e.g., `getUserIdAttribute()`, `getProductionOrderIdAttribute()`) where needed for transparency.
+- [x] **Pathway 1 (Recommended Academic Bridge):** Documented historically; superseded by Pathway 2 for sidang demonstrability.
+  - Physical database retains standard `id` surrogate primary keys for Laravel ecosystem harmony. *(Not used — Pathway 2 activated.)*
+  - Model Eloquent classes expose virtual accessor or alias methods (e.g., `getUserIdAttribute()`, `getProductionOrderIdAttribute()`) where needed for transparency. *(Implemented as `$model->id` → `getKey()` alias on Pathway 2.)*
   - Naskah Bab III Skripsi (ERD Chen, diagram LRS, dan tabel spesifikasi file) mendokumentasikan PK sebagai `user_id (PK)`, `production_order_id (PK)`, `daily_report_id (PK)`, `daily_report_item_id (PK)`, dan `sap_import_log_id (PK)`.
-- [ ] **Pathway 2 (Full Physical Database Refactoring — Contingency Plan):**
+- [x] **Pathway 2 (Full Physical Database Refactoring — Activated):**
   - Migration schemas updated to define primary keys explicitly:
     - `users`: `$table->id('user_id');`
     - `production_orders`: `$table->id('production_order_id');`
@@ -53,12 +53,12 @@ Dari hasil audit menyeluruh terhadap arsitektur basis data `scan-produksi`, dite
     - `daily_report_items.daily_report_id` $\rightarrow$ `daily_reports.daily_report_id`
     - `daily_report_items.production_order_id` $\rightarrow$ `production_orders.production_order_id`
     - `sap_import_logs.user_id` $\rightarrow$ `users.user_id`
-  - Route model binding updated where route keys are involved.
+  - Route model binding updated where route keys are involved. *(Reports continue to bind on `report_code`; numeric PK call sites use `$model->id` accessor.)*
   - Full test suite (`php artisan test --compact`) passes 100% without regression.
 
 **Technical Specs:**
 ```php
-// In Pathway 2 (if physical rename is activated):
+// Pathway 2 (activated):
 class DailyReport extends Model
 {
     protected $primaryKey = 'daily_report_id';
@@ -76,11 +76,11 @@ class DailyReport extends Model
 ```
 
 **Tasks:**
-1. Document the dual-path strategy in [docs/architecture.md](../architecture.md) and [docs/dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md](../dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md).
-2. Validate whether Pathway 1 or Pathway 2 is preferred for immediate physical execution.
-3. If Pathway 2 is triggered, update migration definitions and run fresh migration rollback/up tests.
-4. Update Model `$primaryKey` properties, relationship definitions, factories, and seeders.
-5. Execute Pest test suite to guarantee zero regression across all existing endpoints.
+1. [x] Document the dual-path strategy in [docs/architecture.md](../architecture.md) and [docs/dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md](../dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md).
+2. [x] Validate whether Pathway 1 or Pathway 2 is preferred for immediate physical execution. *(Pathway 2 selected.)*
+3. [x] If Pathway 2 is triggered, update migration definitions and run fresh migration rollback/up tests.
+4. [x] Update Model `$primaryKey` properties, relationship definitions, factories, and seeders.
+5. [x] Execute Pest test suite to guarantee zero regression across all existing endpoints.
 
 ---
 

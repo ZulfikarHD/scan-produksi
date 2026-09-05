@@ -271,7 +271,7 @@ class ReportIndex extends Component
         $query = DailyReport::query()
             ->with(['user', 'supervisor', 'items'])
             ->latest('report_date')
-            ->latest('id');
+            ->latest('daily_report_id');
 
         // Filter pencarian teks bebas (Kode Laporan, No PO, atau Nama Produk)
         if (trim($this->search) !== '') {

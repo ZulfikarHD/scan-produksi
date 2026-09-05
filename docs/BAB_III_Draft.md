@@ -1167,7 +1167,7 @@ Diagram ERD notasi Chen disajikan pada Gambar 3.20:
 flowchart TD
     subgraph USR_GRP ["Entitas User"]
         E_USER["User"]
-        A_U1(["<u>id (PK)</u>"])
+        A_U1(["<u>user_id (PK)</u>"])
         A_U2(["nip (UK)"])
         A_U2b(["username (UK)"])
         A_U3(["name"])
@@ -1189,7 +1189,7 @@ flowchart TD
 
     subgraph PO_GRP ["Entitas Production Order"]
         E_PO["Production_Order"]
-        A_P1(["<u>id (PK)</u>"])
+        A_P1(["<u>production_order_id (PK)</u>"])
         A_P2(["po_number (UK)"])
         A_P3(["product_code"])
         A_P4(["product_name"])
@@ -1217,7 +1217,7 @@ flowchart TD
 
     subgraph DR_GRP ["Entitas Daily Report"]
         E_DR["Daily_Report"]
-        A_D1(["<u>id (PK)</u>"])
+        A_D1(["<u>daily_report_id (PK)</u>"])
         A_D2(["report_code (UK)"])
         A_D2b(["product_series"])
         A_D3(["report_date"])
@@ -1243,7 +1243,7 @@ flowchart TD
 
     subgraph DRI_GRP ["Entitas Daily Report Item"]
         E_DRI["Daily_Report_Item"]
-        A_I1(["<u>id (PK)</u>"])
+        A_I1(["<u>daily_report_item_id (PK)</u>"])
         A_I2(["po_number"])
         A_I3(["product_name"])
         A_I4(["specification"])
@@ -1269,7 +1269,7 @@ flowchart TD
 
     subgraph LOG_GRP ["Entitas SAP Import Log"]
         E_LOG["SAP_Import_Log"]
-        A_L1(["<u>id (PK)</u>"])
+        A_L1(["<u>sap_import_log_id (PK)</u>"])
         A_L2(["file_name"])
         A_L3(["total_rows"])
         A_L4(["imported_count"])
@@ -1318,7 +1318,7 @@ Struktur LRS Sistem Dokumentasi Hasil Produksi Harian disajikan pada Gambar 3.21
 ```mermaid
 classDiagram
     class USERS {
-        *id (PK) : BIGINT
+        *user_id (PK) : BIGINT
         nip : VARCHAR(30) [UK]
         username : VARCHAR(50) [UK]
         name : VARCHAR(100)
@@ -1332,17 +1332,17 @@ classDiagram
     }
 
     class PRODUCTION_ORDERS {
-        *id (PK) : BIGINT
-        po_number : VARCHAR(255) [UK]
-        no_obc : VARCHAR(255)
+        *production_order_id (PK) : BIGINT
+        po_number : VARCHAR(50) [UK]
+        no_obc : VARCHAR(50)
         perso_type : VARCHAR(50)
         seri : VARCHAR(50)
-        product_code : VARCHAR(255)
+        product_code : VARCHAR(50)
         product_name : VARCHAR(255)
         customer_name : VARCHAR(255)
         specification : TEXT
         paper_type : VARCHAR(255)
-        machine_number : VARCHAR(255)
+        machine_number : VARCHAR(50)
         order_date : DATE
         delivery_deadline : DATE
         tgl_pakai_bb : DATE
@@ -1369,8 +1369,8 @@ classDiagram
     }
 
     class DAILY_REPORTS {
-        *id (PK) : BIGINT
-        report_code : VARCHAR(30) [UK]
+        *daily_report_id (PK) : BIGINT
+        report_code : VARCHAR(50) [UK]
         product_series : VARCHAR(30)
         report_date : DATE
         shift : ENUM('shift_1', 'shift_2', 'shift_3')
@@ -1387,25 +1387,25 @@ classDiagram
     }
 
     class DAILY_REPORT_ITEMS {
-        *id (PK) : BIGINT
+        *daily_report_item_id (PK) : BIGINT
         #daily_report_id (FK) : BIGINT
         #production_order_id (FK) : BIGINT
         po_number : VARCHAR(50)
-        product_name : VARCHAR(150)
+        product_name : VARCHAR(255)
         specification : TEXT
         machine_number : VARCHAR(50)
         target_quantity : INT
         good_quantity : INT
         reject_quantity : INT
-        unit : VARCHAR(20)
-        notes : VARCHAR(255)
+        unit : VARCHAR(30)
+        notes : TEXT
         scanned_at : DATETIME
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
     }
 
     class SAP_IMPORT_LOGS {
-        *id (PK) : BIGINT
+        *sap_import_log_id (PK) : BIGINT
         file_name : VARCHAR(255)
         total_rows : INT
         imported_count : INT
@@ -1437,14 +1437,14 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Fungsi File:** Menyimpan data akun pengguna, peran hak akses, dan kredensial login
 - **Tipe File:** File Master
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
-- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Utama (*Primary Key*):** `user_id`
 - **Kunci Unik (*Unique Key*):** `nip`, `username`, `email`
 - **Struktur Tabel:** Disajikan pada Tabel 3.10
 
 *Tabel 3.10: Spesifikasi File Tabel `users`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
-| 1 | ID Pengguna | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 1 | ID Pengguna | `user_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Nama Lengkap | `name` | VARCHAR | 100 | Not Null |
 | 3 | Nomor Pegawai | `nip` | VARCHAR | 30 | Unique, Nullable (Kredensial Login) |
 | 4 | Username | `username` | VARCHAR | 50 | Unique, Nullable (Kredensial Login) |
@@ -1463,25 +1463,25 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Fungsi File:** Menyimpan data master pesanan produksi hasil ekspor dari sistem SAP
 - **Tipe File:** File Master
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
-- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Utama (*Primary Key*):** `production_order_id`
 - **Kunci Unik (*Unique Key*):** `po_number`
-- **Kunci Tamu (*Foreign Key*):** `created_by` (Relasi ke `users.id`)
+- **Kunci Tamu (*Foreign Key*):** `created_by` (Relasi ke `users.user_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.11
 
 *Tabel 3.11: Spesifikasi File Tabel `production_orders`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
-| 1 | ID Pesanan | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | Nomor PO / Barcode | `po_number` | VARCHAR | 255 | Unique, Not Null (Simbologi Code 128) |
-| 3 | Nomor OBC | `no_obc` | VARCHAR | 255 | Index, Nullable |
+| 1 | ID Pesanan | `production_order_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | Nomor PO / Barcode | `po_number` | VARCHAR | 50 | Unique, Not Null (Simbologi Code 128) |
+| 3 | Nomor OBC | `no_obc` | VARCHAR | 50 | Index, Nullable |
 | 4 | Tipe Perso | `perso_type` | VARCHAR | 50 | Nullable (Perso / Non Perso) |
 | 5 | Kode Seri | `seri` | VARCHAR | 50 | Nullable |
-| 6 | Kode Produk | `product_code` | VARCHAR | 255 | Index, Nullable |
+| 6 | Kode Produk | `product_code` | VARCHAR | 50 | Index, Nullable |
 | 7 | Nama Produk | `product_name` | VARCHAR | 255 | Index, Not Null |
 | 8 | Nama Instansi Pemesan | `customer_name` | VARCHAR | 255 | Index, Nullable |
 | 9 | Spesifikasi Teknis | `specification` | TEXT | - | Nullable (Bahan Kertas, Pengaman) |
 | 10 | Jenis Kertas | `paper_type` | VARCHAR | 255 | Nullable |
-| 11 | Nomor Mesin Asal | `machine_number` | VARCHAR | 255 | Index, Nullable (Identitas Mesin Cetak) |
+| 11 | Nomor Mesin Asal | `machine_number` | VARCHAR | 50 | Index, Nullable (Identitas Mesin Cetak) |
 | 12 | Tanggal Pesanan | `order_date` | DATE | - | Not Null (TGL OBC) |
 | 13 | Tanggal Jatuh Tempo | `delivery_deadline` | DATE | - | Nullable (TGL JTempo) |
 | 14 | Tanggal Pakai Bahan Baku | `tgl_pakai_bb` | DATE | - | Nullable |
@@ -1502,7 +1502,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 | 29 | Kuantitas Kirim | `kirim_quantity` | INT UNSIGNED | 10 | Default: 0 |
 | 30 | Satuan Hitung | `unit` | VARCHAR | 30 | Default: 'lembar' |
 | 31 | Status Pengerjaan | `status` | VARCHAR | 30 | Default: 'ready', Nilai: 'ready', 'in_progress', 'completed', 'cancelled' |
-| 32 | ID Pembuat / Pengimpor | `created_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 32 | ID Pembuat / Pengimpor | `created_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable |
 | 33 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
 | 34 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*
@@ -1513,21 +1513,21 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Fungsi File:** Menyimpan data header laporan hasil pengemasan produksi harian
 - **Tipe File:** File Transaksi
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
-- **Kunci Utama (*Primary Key*):** `id`
+- **Kunci Utama (*Primary Key*):** `daily_report_id`
 - **Kunci Unik (*Unique Key*):** `report_code`, Komposit: (`product_series`, `report_date`, `shift`)
-- **Kunci Tamu (*Foreign Key*):** `user_id`, `supervisor_id` (Relasi ke `users.id`)
+- **Kunci Tamu (*Foreign Key*):** `user_id`, `supervisor_id` (Relasi ke `users.user_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.12
 
 *Tabel 3.12: Spesifikasi File Tabel `daily_reports`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
-| 1 | ID Laporan | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | Kode Laporan Sesi | `report_code` | VARCHAR | 30 | Unique, Not Null (Format: `{SERIES}-{YYYY-MM-DD}-S{N}`, contoh: `PCHT-2026-08-26-S1`) |
+| 1 | ID Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | Kode Laporan Sesi | `report_code` | VARCHAR | 50 | Unique, Not Null (Format: `{SERIES}-{YYYY-MM-DD}-S{N}`, contoh: `PCHT-2026-08-26-S1`) |
 | 3 | Seri Produk | `product_series` | VARCHAR | 30 | Index, Not Null (Nilai: 'pcht', 'mmea', 'hptl') |
 | 4 | Tanggal Pengemasan | `report_date` | DATE | - | Index, Not Null |
 | 5 | Giliran Kerja | `shift` | VARCHAR | 30 | Default: 'shift_1' (Nilai: 'shift_1', 'shift_2', 'shift_3') |
-| 6 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id` |
-| 7 | ID Supervisor Pemeriksa | `supervisor_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 6 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id` |
+| 7 | ID Supervisor Pemeriksa | `supervisor_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable |
 | 8 | Waktu Verifikasi | `verified_at` | TIMESTAMP | - | Nullable (Terisi saat status `verified`) |
 | 9 | Total Jenis Order | `total_items_count` | INT UNSIGNED | 5 | Default: 0 |
 | 10 | Total Hasil Kemas Baik | `total_good_quantity` | INT UNSIGNED | 10 | Default: 0 |
@@ -1544,25 +1544,25 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Fungsi File:** Menyimpan baris rincian item hasil kemas per pesanan produksi
 - **Tipe File:** File Transaksi (Detail)
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
-- **Kunci Utama (*Primary Key*):** `id`
-- **Kunci Tamu (*Foreign Key*):** `daily_report_id` (ke `daily_reports.id`), `production_order_id` (ke `production_orders.id`)
+- **Kunci Utama (*Primary Key*):** `daily_report_item_id`
+- **Kunci Tamu (*Foreign Key*):** `daily_report_id` (ke `daily_reports.daily_report_id`), `production_order_id` (ke `production_orders.production_order_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.13
 
 *Tabel 3.13: Spesifikasi File Tabel `daily_report_items`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
-| 1 | ID Rincian Item | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | ID Header Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `daily_reports.id` (Cascade) |
-| 3 | ID Pesanan SAP | `production_order_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `production_orders.id`, Nullable |
+| 1 | ID Rincian Item | `daily_report_item_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 2 | ID Header Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `daily_reports.daily_report_id` (Cascade) |
+| 3 | ID Pesanan SAP | `production_order_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `production_orders.production_order_id`, Nullable |
 | 4 | Nomor PO Snapshot | `po_number` | VARCHAR | 50 | Index, Not Null |
-| 5 | Nama Produk Snapshot | `product_name` | VARCHAR | 150 | Not Null |
+| 5 | Nama Produk Snapshot | `product_name` | VARCHAR | 255 | Not Null |
 | 6 | Spesifikasi Snapshot | `specification` | TEXT | - | Nullable |
 | 7 | Nomor Mesin Snapshot | `machine_number` | VARCHAR | 50 | Nullable |
 | 8 | Target Kuantitas SAP | `target_quantity` | INT UNSIGNED | 10 | Default: 0 |
 | 9 | Jumlah Kemas Baik | `good_quantity` | INT UNSIGNED | 10 | Default: 0 |
 | 10 | Jumlah Kemas Reject | `reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 11 | Satuan Hitung | `unit` | VARCHAR | 20 | Default: 'lembar' |
-| 12 | Catatan Khusus Item | `notes` | VARCHAR | 255 | Nullable |
+| 11 | Satuan Hitung | `unit` | VARCHAR | 30 | Default: 'lembar' |
+| 12 | Catatan Khusus Item | `notes` | TEXT | - | Nullable |
 | 13 | Waktu Pemindaian | `scanned_at` | DATETIME | - | Nullable |
 | 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
 | 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
@@ -1574,14 +1574,14 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Fungsi File:** Menyimpan catatan riwayat aktivitas pengunggahan berkas ekspor master SAP
 - **Tipe File:** File Log Riwayat
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
-- **Kunci Utama (*Primary Key*):** `id`
-- **Kunci Tamu (*Foreign Key*):** `user_id` (Relasi ke `users.id`)
+- **Kunci Utama (*Primary Key*):** `sap_import_log_id`
+- **Kunci Tamu (*Foreign Key*):** `user_id` (Relasi ke `users.user_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.14
 
 *Tabel 3.14: Spesifikasi File Tabel `sap_import_logs`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
-| 1 | ID Riwayat Impor | `id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
+| 1 | ID Riwayat Impor | `sap_import_log_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
 | 2 | Nama Berkas Unggahan | `file_name` | VARCHAR | 255 | Not Null |
 | 3 | Jalur Penyimpanan Berkas | `file_path` | VARCHAR | 255 | Nullable (Path di server setelah unggah) |
 | 4 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Default: 0 |
@@ -1590,7 +1590,7 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 | 7 | Jumlah Baris Gagal | `failed_count` | INT UNSIGNED | 8 | Default: 0 |
 | 8 | Status Impor | `status` | VARCHAR | 30 | Default: 'success', Nilai: 'success', 'partial', 'failed' |
 | 9 | Log Kesalahan Baris | `error_log` | JSON | - | Nullable (Catatan baris yang gagal diproses) |
-| 10 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.id`, Nullable |
+| 10 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable |
 | 11 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
 | 12 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
 *(Sumber: Hasil Penelitian, 2026)*

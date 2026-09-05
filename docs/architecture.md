@@ -98,7 +98,7 @@ erDiagram
     PRODUCTION_ORDERS ||--o{ DAILY_REPORT_ITEMS : "production_order_id (SET NULL)"
 
     USERS {
-        bigint id PK "Identity Column"
+        bigint user_id PK "Identity Column"
         string nip UK "Nomor Pegawai (VARCHAR 30)"
         string username UK "Identitas Login (VARCHAR 50)"
         string name "Nama Lengkap Pegawai"
@@ -109,7 +109,7 @@ erDiagram
     }
 
     PRODUCTION_ORDERS {
-        bigint id PK "Identity Column"
+        bigint production_order_id PK "Identity Column"
         string po_number UK "Nomor Pesanan SAP (Barcode Key, VARCHAR 50)"
         string no_obc "Nomor Order Buku Cetak (VARCHAR 50)"
         string perso_type "Tipe Personalisasi (VARCHAR 50)"
@@ -129,7 +129,7 @@ erDiagram
     }
 
     DAILY_REPORTS {
-        bigint id PK "Identity Column"
+        bigint daily_report_id PK "Identity Column"
         string report_code UK "Kode Dokumen (e.g. PCHT-2026-09-06-S1)"
         string product_series "Kategori Seri: PCHT | MMEA | HPTL"
         date report_date "Tanggal Operasional Kerja"
@@ -145,7 +145,7 @@ erDiagram
     }
 
     DAILY_REPORT_ITEMS {
-        bigint id PK "Identity Column"
+        bigint daily_report_item_id PK "Identity Column"
         bigint daily_report_id FK "Relasi ke Header Laporan"
         bigint production_order_id FK "Relasi Opsional ke Master Order SAP"
         string po_number "Snapshot No PO (VARCHAR 50)"
@@ -161,7 +161,7 @@ erDiagram
     }
 
     SAP_IMPORT_LOGS {
-        bigint id PK "Identity Column"
+        bigint sap_import_log_id PK "Identity Column"
         bigint user_id FK "Pengunggah Berkas SAP"
         string file_name "Nama Berkas Asli Spreadsheet"
         string file_path "Lokasi Berkas di Storage Disk"
@@ -183,7 +183,7 @@ Transformasi ERD konseptual ke dalam bentuk struktur rekaman logis relasional me
 ```mermaid
 classDiagram
     class USERS {
-        +BIGINT id [PK]
+        +BIGINT user_id [PK]
         VARCHAR(30) nip [UK]
         VARCHAR(50) username [UK]
         VARCHAR(100) name
@@ -197,7 +197,7 @@ classDiagram
     }
 
     class PRODUCTION_ORDERS {
-        +BIGINT id [PK]
+        +BIGINT production_order_id [PK]
         VARCHAR(50) po_number [UK]
         VARCHAR(50) no_obc
         VARCHAR(50) perso_type
@@ -234,7 +234,7 @@ classDiagram
     }
 
     class DAILY_REPORTS {
-        +BIGINT id [PK]
+        +BIGINT daily_report_id [PK]
         VARCHAR(50) report_code [UK]
         VARCHAR(30) product_series
         DATE report_date
@@ -252,7 +252,7 @@ classDiagram
     }
 
     class DAILY_REPORT_ITEMS {
-        +BIGINT id [PK]
+        +BIGINT daily_report_item_id [PK]
         #BIGINT daily_report_id [FK]
         #BIGINT production_order_id [FK]
         VARCHAR(50) po_number
@@ -270,7 +270,7 @@ classDiagram
     }
 
     class SAP_IMPORT_LOGS {
-        +BIGINT id [PK]
+        +BIGINT sap_import_log_id [PK]
         #BIGINT user_id [FK]
         VARCHAR(255) file_name
         VARCHAR(255) file_path
@@ -303,13 +303,11 @@ classDiagram
 - **Enterprise Framework Convention (Laravel Eloquent):** Secara default mengasumsikan nama Primary Key adalah `id`. Pengubahan nama kolom PK di fisik database memaksa penambahan deklarasi `protected $primaryKey = '...';` pada seluruh model, konfigurasi eksplisit nama kolom kunci tamu (`foreignKey`, `ownerKey`), serta penyesuaian dependensi internal framework (seperti Laravel Fortify dan session driver).
 
 #### Architectural Assessment & Strategy
-Sebagai Data Architect, kita menyelesaikan dilema ini dengan membedakan **Tingkat Representasi Logis (Naskah Skripsi)** dan **Tingkat Implementasi Fisik (Database Engine & Kode Aplikasi)**:
+Sebagai Data Architect, dilema penamaan Primary Key diselesaikan dengan **Pathway 2 — Full Physical Database Refactoring** (diaktifkan pada US-6.1):
 
-1. **Pathway 1 — Dual-Representation Strategy (Rekomendasi Utama):**
-   - **Pada Naskah Akademis (Bab III):** Dokumentasikan Primary Key secara eksplisit sebagai atribut identitas entitas: `user_id (PK)`, `production_order_id (PK)`, `daily_report_id (PK)`, dll. Dalam ERD Chen dan tabel LRS, representasikan kolom PK dengan nama tersebut agar 100% memenuhi kaidah akademis dosen pembimbing.
-   - **Pada Basis Data Fisik Laravel:** Kolom fisik tetap mempertahankan penamaan standar `id` (atau diselaraskan secara terkontrol). Keuntungannya adalah zero-risk regression: seluruh relasi bawaan framework (`$this->belongsTo(...)`, `$this->hasMany(...)`), session guard, dan route-model binding tetap berjalan 100% tanpa overhead maintenance.
-2. **Pathway 2 — Full Physical Database Refactoring:**
-   - Jika dosen penguji bersikukuh memeriksa skema database fisik secara langsung via phpMyAdmin/DBeaver saat demonstrasi sidang, migrasi fisik dapat dieksekusi dengan memperbarui seluruh file migrasi dan Model Eloquent (lihat rincian pada Sprint Planning Phase 06).
+1. **Basis Data Fisik & Model Eloquent:** Kolom Primary Key domain diganti menjadi `user_id`, `production_order_id`, `daily_report_id`, `daily_report_item_id`, dan `sap_import_log_id`. Setiap Model menetapkan `protected $primaryKey`, mendefinisikan relasi dengan `foreignKey`/`ownerKey` eksplisit, serta menyediakan accessor `$model->id` yang mengembalikan `getKey()` agar call site Livewire/Blade dan `Auth::id()` tetap kompatibel.
+2. **Naskah Akademis (Bab III):** ERD Chen, LRS, dan spesifikasi file mendokumentasikan PK fisik yang sama sehingga demonstrasi sidang (phpMyAdmin/DBeaver) selaras dengan diagram skripsi.
+3. **Pathway 1 (Dual-Representation / Academic Bridge):** Tetap tercatat sebagai alternatif historis berisiko lebih rendah (fisik `id`, dokumentasi akademis `tablename_id`), namun digantikan Pathway 2 agar tidak ada kesenjangan kognitif antara naskah dan skema live.
 
 ---
 
@@ -472,5 +470,6 @@ Gunakan operasi atomik `DailyReport::firstOrCreate()` atau tangani `QueryExcepti
 - [docs/dev-docs/decisions/003-production-order-indexing-and-schema-architecture.md](dev-docs/decisions/003-production-order-indexing-and-schema-architecture.md) — Keputusan indeks barcode master data
 - [docs/dev-docs/decisions/006-daily-production-report-schema-and-session-launcher.md](dev-docs/decisions/006-daily-production-report-schema-and-session-launcher.md) — Skema sesi laporan harian
 - [docs/dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md](dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md) — ADR penyelarasan penamaan Primary Key dan hardening transaksi
+- [docs/dev-docs/features/dual-path-primary-key-and-model-alignment.md](dev-docs/features/dual-path-primary-key-and-model-alignment.md) — Dokumentasi teknis Pathway 2 PK fisik `tablename_id`
 - [docs/scrum-planning/phase-06-database-architecture-refinement-and-academic-alignment.md](scrum-planning/phase-06-database-architecture-refinement-and-academic-alignment.md) — Rencana backlog sprint implementasi refactoring basis data
 - [docs/BAB_III_Draft.md](BAB_III_Draft.md) — Naskah Bab III Skripsi (ERD Chen, LRS, dan Spesifikasi File Basis Data)

@@ -11,7 +11,7 @@
 During the comprehensive database architecture review of the `scan-produksi` application and consultation with academic advisors (dosen pembimbing/penguji skripsi), three core architectural tensions and data integrity challenges were identified:
 
 1. **Academic Primary Key Naming Dilemma (`tablename_id` vs `id`):**  
-   Academic thesis standards (based on classical relational database design, Chen's ER notation, and ISO/IEC 11179) dictate that primary keys should be universally qualified by their entity name (e.g., `user_id`, `production_order_id`, `daily_report_id`, `daily_report_item_id`, `sap_import_log_id`) to ensure unambiguous natural joins and transparent relationship tracking in LRS diagrams. Conversely, modern web application frameworks such as Laravel adhere to the *Convention over Configuration* standard where the surrogate primary key is uniformly named `id`. Modifying the physical schema to `tablename_id` incurs significant framework friction, requiring manual configuration of `$primaryKey`, foreign key overrides, and third-party package adjustments (e.g., Fortify, session handlers).
+   Academic thesis standards (based on classical relational database design, Chen's ER notation, and ISO/IEC 11179) dictate that primary keys should be universally qualified by their entity name (e.g., `user_id`, `production_order_id`, `daily_report_id`, `daily_report_item_id`, `sap_import_log_id`) to ensure unambiguous natural joins and transparent relationship tracking in LRS diagrams. Conversely, modern web application frameworks such as Laravel adhere to the *Convention over Configuration* standard where the surrogate primary key is uniformly named `id`. Modifying the physical schema to `tablename_id` incurs framework friction, requiring manual configuration of `$primaryKey`, foreign key overrides, and careful validation/query updates.
 
 2. **Database Cleanliness and "ERP Dump" Sprawl:**  
    The `production_orders` table contains over 30 columns reflecting the flat structure of exported SAP spreadsheets, combining English attributes with legacy factory abbreviations (e.g., `tgl_pakai_bb`, `jml_bb`, `jml_cd`, `total_bb`, `hcts_baik`). Furthermore, `total_bb` represents a stored calculated value (`jml_bb + jml_cd`), violating Third Normal Form (3NF). Migration schemas also exhibited redundant indexes (e.g., `report_code` declared with both `->unique()` and `->index()`), unbounded `string()` definitions defaulting to `VARCHAR(255)`, and column type mismatches (`daily_reports.notes` as `TEXT` vs `daily_report_items.notes` as `VARCHAR(255)`).
@@ -25,9 +25,33 @@ During the comprehensive database architecture review of the `scan-produksi` app
 
 We have established the following architectural decisions to balance academic rigor with engineering pragmatism:
 
-### 1. Dual-Representation Strategy for Primary Key Conventions
-- **Academic Thesis Representation (Bab III):** In conceptual ERD diagrams (Chen notation), Logical Record Structure (LRS) diagrams, and File Specification data dictionaries, the primary keys are formally documented as `user_id (PK)`, `production_order_id (PK)`, `daily_report_id (PK)`, `daily_report_item_id (PK)`, and `sap_import_log_id (PK)`. This satisfies the academic requirements of examiners without inducing application instability.
-- **Physical Codebase & Eloquent Implementation:** The physical migrations and Eloquent models retain the standard `id` primary key convention to maintain compatibility with Laravel's built-in authentication, sessions, factory generators, and relationship conventions. A full physical refactoring pathway is documented in Phase 06 Scrum Planning should physical database inspection be mandated by examiners.
+### 1. Full Physical Primary Key Refactoring (Pathway 2 — Activated for US-6.1)
+
+**Decision:** Execute Pathway 2. Physical migrations and Eloquent models now use qualified primary keys:
+
+| Table | Physical PK | Eloquent `$primaryKey` |
+|-------|-------------|------------------------|
+| `users` | `user_id` | `user_id` |
+| `production_orders` | `production_order_id` | `production_order_id` |
+| `daily_reports` | `daily_report_id` | `daily_report_id` |
+| `daily_report_items` | `daily_report_item_id` | `daily_report_item_id` |
+| `sap_import_logs` | `sap_import_log_id` | `sap_import_log_id` |
+
+Foreign keys reference parent qualified columns explicitly, for example:
+
+- `production_orders.created_by` → `users.user_id`
+- `daily_reports.user_id` / `supervisor_id` → `users.user_id`
+- `daily_report_items.daily_report_id` → `daily_reports.daily_report_id`
+- `daily_report_items.production_order_id` → `production_orders.production_order_id`
+- `sap_import_logs.user_id` → `users.user_id`
+
+**Compatibility bridge:** each domain model exposes `getIdAttribute()` returning `$this->getKey()` so Blade/Livewire call sites and `Auth::id()` continue to work without a full UI rewrite.
+
+**Academic thesis representation (Bab III):** ERD Chen, LRS, and File Specification tables document the same physical names (`user_id (PK)`, etc.), eliminating the cognitive mapping gap that Pathway 1 would have left between docs and phpMyAdmin.
+
+**Implementation Status (US-6.1):** Completed — see `tests/Feature/MasterData/PrimaryKeyArchitectureTest.php` and `docs/dev-docs/features/dual-path-primary-key-and-model-alignment.md`.
+
+Pathway 1 (keep physical `id`, document academic names only) remains documented historically as the lower-risk alternative that was superseded for sidang demonstrability.
 
 ### 2. Physical Schema Cleanup & Portability Hardening
 - **Index Deduplication:** Remove the redundant `->index()` call on `daily_reports.report_code`, retaining only `$table->string('report_code', 50)->unique();`.
@@ -49,15 +73,18 @@ We have established the following architectural decisions to balance academic ri
 ## Consequences
 
 ### Positive
-- **Academic Approval:** Seamlessly fulfills the thesis advisor's explicit requirement for qualified primary key notation in documentation and defense presentations.
-- **Zero Framework Friction:** Avoids introducing boilerplate `$primaryKey` configurations or breaking built-in Laravel relationship resolution.
+- **Academic Approval:** Physical schema and thesis documentation both present qualified primary keys for sidang inspection.
+- **Demonstrable Consistency:** phpMyAdmin/DBeaver, ERD, and LRS show the same PK names.
 - **Data Integrity & Consistency:** Guarantees zero denormalization drift between report item lines and header aggregates via ACID transactional boundaries.
 - **Production Portability:** Prepares the database schema for migration from local SQLite to MySQL 8.0+ / PostgreSQL 16+ without index size errors or truncation faults.
 - **Memory & Storage Optimization:** Eliminates redundant B-Tree indexes and over-allocated VARCHAR storage pages.
+- **UI Compatibility:** `$model->id` accessor limits blast radius of the PK rename across Blade and Livewire.
 
 ### Negative
-- **Cognitive Mapping:** Developers reading the academic documentation alongside the raw database schema must recognize that documentation `tablename_id` corresponds to physical surrogate `id`.
+- **Framework Friction:** Every relationship, `unique` ignore column, and raw `join`/`orderBy` on PK columns must name the qualified key explicitly.
 - **Transaction Overhead:** Wrapping each barcode scan persistence in `DB::transaction()` incurs minor database lock overhead, though well within the capacity of the packaging station's throughput (~300 scans per shift).
+- **Fresh Migrate Required:** Existing local databases must run `migrate:fresh` (or equivalent) after pulling US-6.1.
 
 ### Neutral
 - **ERP Dump Retention:** Retaining flat SAP fields in `production_orders` maintains rapid spreadsheet import performance while requiring field categorization in developer documentation.
+- **Laravel System Tables:** `jobs`, `failed_jobs`, `sessions`, and `cache` retain framework-default `id` columns; they are outside the academic domain model.
