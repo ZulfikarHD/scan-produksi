@@ -68,6 +68,12 @@ Pathway 1 (keep physical `id`, document academic names only) remains documented 
 - **Preconditioned Verification:** `ReportDetail::verifyReport()` performs `UPDATE ... WHERE status = submitted` so draft/already-verified reports cannot be sealed incorrectly.
 - **Implementation Status (US-6.3):** Completed — see `tests/Feature/Reports/ReportConcurrencyAndTransactionTest.php` and `docs/dev-docs/features/transactional-hardening-and-concurrency-protection.md`.
 
+### 4. Academic Thesis Synchronization (US-6.5)
+- **Bab III Documentation Synchronization:** Synchronize `docs/BAB_III_Draft.md` to reflect the refined database architecture across the Chen ERD (Gambar 3.20), LRS diagram (Gambar 3.21), and File Specification tables (Tabel 3.10 s.d. Tabel 3.14).
+- **Physical-to-Academic Alignment:** Ensure that every field name, data type, bounded VARCHAR length, foreign key constraint, and index in Bab III matches the physical database schema and migrations.
+- **Academic Writing Rigor:** Enforce industrial-paper-writing standards throughout the Bab III database documentation (flowing narrative paragraphs, grounded shop-floor terminology, no AI clichés or fluff).
+- **Implementation Status (US-6.5):** Completed — see `tests/Feature/MasterData/AcademicThesisSynchronizationTest.php`, `docs/BAB_III_Draft.md`, and `docs/dev-docs/features/academic-thesis-database-synchronization.md`.
+
 ---
 
 ## Consequences

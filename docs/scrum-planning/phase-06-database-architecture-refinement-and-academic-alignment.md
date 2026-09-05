@@ -201,20 +201,20 @@ DB::transaction(function () use ($qty) {
 **So that** the thesis report accurately depicts the system design, satisfies all academic standards, and matches the live demonstration during the thesis examination  
 
 **Acceptance Criteria:**
-- [ ] Update Chen Entity Relationship Diagram (ERD) in [docs/BAB_III_Draft.md](../BAB_III_Draft.md) to clearly highlight Primary Keys as `user_id (PK)`, `production_order_id (PK)`, `daily_report_id (PK)`, `daily_report_item_id (PK)`, and `sap_import_log_id (PK)`.
-- [ ] Update Logical Record Structure (LRS) class diagram to reflect precise bounded VARCHAR data types and eliminated redundant indexes.
-- [ ] Update File Specifications (Tabel 3.10 s.d. Tabel 3.14):
+- [x] Update Chen Entity Relationship Diagram (ERD) in [docs/BAB_III_Draft.md](../BAB_III_Draft.md) to clearly highlight Primary Keys as `user_id (PK)`, `production_order_id (PK)`, `daily_report_id (PK)`, `daily_report_item_id (PK)`, and `sap_import_log_id (PK)`.
+- [x] Update Logical Record Structure (LRS) class diagram to reflect precise bounded VARCHAR data types and eliminated redundant indexes.
+- [x] Update File Specifications (Tabel 3.10 s.d. Tabel 3.14):
   - Tabel 3.10: `users`
   - Tabel 3.11: `production_orders`
   - Tabel 3.12: `daily_reports`
   - Tabel 3.13: `daily_report_items`
   - Tabel 3.14: `sap_import_logs`
-- [ ] Ensure that academic writing tone adheres strictly to `industrial-paper-writing` standards (flowing narrative paragraphs, no AI clichés, grounded operational terminology).
+- [x] Ensure that academic writing tone adheres strictly to `industrial-paper-writing` standards (flowing narrative paragraphs, no AI clichés, grounded operational terminology).
 
 **Tasks:**
-1. Review [docs/BAB_III_Draft.md](../BAB_III_Draft.md) around line 1160–1600 (ERD, LRS, File Specifications).
-2. Align diagram attributes and tables with the refined architecture.
-3. Validate that academic descriptions maintain professional and rigorous Indonesian technical phrasing.
+1. [x] Review [docs/BAB_III_Draft.md](../BAB_III_Draft.md) around line 1160–1600 (ERD, LRS, File Specifications).
+2. [x] Align diagram attributes and tables with the refined architecture.
+3. [x] Validate that academic descriptions maintain professional and rigorous Indonesian technical phrasing.
 
 ---
 

@@ -22,6 +22,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [Transactional Hardening & Concurrency Protection](dev-docs/features/transactional-hardening-and-concurrency-protection.md)
   - [Schema Decluttering, String Bounds & Data Dictionary](dev-docs/features/schema-decluttering-and-data-dictionary.md)
   - [Dual-Path Primary Key & Model Architecture Alignment](dev-docs/features/dual-path-primary-key-and-model-alignment.md)
+  - [Academic Thesis Database Synchronization](dev-docs/features/academic-thesis-database-synchronization.md)
   - [Daily Production Report Management, Verification & Export](dev-docs/features/report-management-verification-and-export.md)
   - [Dashboard Analytics & 14-Day Production Visualization](dev-docs/features/dashboard-analytics-and-14-day-chart.md)
 - **Architecture Decision Records (ADRs)**:
@@ -49,6 +50,7 @@ Step-by-step guides for unit supervisors and packaging operators.
   - [Panduan Pemindaian Barcode & Input Hasil Produksi](user-docs/guides/panduan-pemindaian-barcode-dan-input-produksi.md)
   - [Panduan Arsip Laporan, Koreksi, Verifikasi, dan Cetak Fisik](user-docs/guides/panduan-arsip-laporan-verifikasi-dan-cetak.md)
   - [Panduan Beranda & Analitik Produksi (Dashboard)](user-docs/guides/panduan-beranda-dan-analitik-dashboard.md)
+  - [Panduan Verifikasi Struktur Data & Dokumen Laporan Produksi](user-docs/guides/panduan-verifikasi-skema-dan-spesifikasi-basis-data.md)
 
 ### 3. Scrum Planning & Specifications
 - [Phase 01: Foundation, Auth & User Management](scrum-planning/phase-01-foundation-auth-user-management.md)

@@ -1159,7 +1159,9 @@ flowchart TD
 ---
 
 #### 3. Entity Relationship Diagram (ERD)
-Entity Relationship Diagram (ERD) memodelkan keterhubungan konseptual antar-entitas data dalam sistem dokumentasi hasil produksi harian. Pemodelan ERD dirancang menggunakan **Notasi Chen** yang merepresentasikan entitas dalam bentuk persegi panjang (*rectangles*), relasi antar-entitas dalam bentuk belah ketupat (*diamonds*), serta atribut data dalam bentuk elips (*ovals*) dengan garis bawah penanda kunci utama (*Primary Key*).
+Entity Relationship Diagram (ERD) memodelkan keterhubungan konseptual antar-entitas data dalam sistem dokumentasi hasil produksi harian. Pemodelan ERD dirancang menggunakan **Notasi Chen** yang merepresentasikan entitas dalam bentuk persegi panjang (*rectangles*), relasi keterhubungan antar-entitas dalam bentuk belah ketupat (*diamonds*), serta atribut data dalam bentuk elips (*ovals*) dengan garis bawah penanda kunci utama (*Primary Key*).
+
+Sesuai kaidah pemodelan relasional klasik Peter Chen dan standar penamaan ISO/IEC 11179 yang diwajibkan dalam evaluasi sidang skripsi, seluruh kunci utama entitas tidak menggunakan penamaan *generic* `id`, melainkan dinyatakan secara eksplisit dengan format `tablename_id` (`user_id`, `production_order_id`, `daily_report_id`, `daily_report_item_id`, dan `sap_import_log_id`). Standardisasi ini mencegah terjadinya ambiguitas identitas entitas ketika diagram dikonversikan ke dalam relasi fisik basis data maupun saat dilakukan operasi penggabungan (*join*) multi-tabel.
 
 Diagram ERD notasi Chen disajikan pada Gambar 3.20:
 
@@ -1191,6 +1193,9 @@ flowchart TD
         E_PO["Production_Order"]
         A_P1(["<u>production_order_id (PK)</u>"])
         A_P2(["po_number (UK)"])
+        A_P2b(["no_obc"])
+        A_P2c(["perso_type"])
+        A_P2d(["seri"])
         A_P3(["product_code"])
         A_P4(["product_name"])
         A_P5(["customer_name"])
@@ -1203,6 +1208,9 @@ flowchart TD
         A_P12(["status"])
         E_PO --- A_P1
         E_PO --- A_P2
+        E_PO --- A_P2b
+        E_PO --- A_P2c
+        E_PO --- A_P2d
         E_PO --- A_P3
         E_PO --- A_P4
         E_PO --- A_P5
@@ -1271,12 +1279,20 @@ flowchart TD
         E_LOG["SAP_Import_Log"]
         A_L1(["<u>sap_import_log_id (PK)</u>"])
         A_L2(["file_name"])
+        A_L2b(["file_path"])
         A_L3(["total_rows"])
         A_L4(["imported_count"])
+        A_L5(["updated_count"])
+        A_L6(["failed_count"])
+        A_L7(["status"])
         E_LOG --- A_L1
         E_LOG --- A_L2
+        E_LOG --- A_L2b
         E_LOG --- A_L3
         E_LOG --- A_L4
+        E_LOG --- A_L5
+        E_LOG --- A_L6
+        E_LOG --- A_L7
     end
 
     R_IMP{"mengimpor"}
@@ -1297,21 +1313,51 @@ flowchart TD
 *Gambar 3.20: Entity Relationship Diagram (ERD) Notasi Chen Sistem Dokumentasi Produksi Harian*
 
 Kardinalitas dan hubungan relasional dalam ERD dijelaskan sebagai berikut:
-1. **Relasi `User` ke `Production_Order` (mengimpor):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat mengimpor banyak berkas rekaman pesanan produksi SAP.
-2. **Relasi `User` ke `Daily_Report` (mencatat):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Petugas dapat mencatat banyak laporan hasil kemas harian.
-3. **Relasi `User` ke `Daily_Report` (memverifikasi):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat memverifikasi banyak dokumen laporan harian.
-4. **Relasi `User` ke `SAP_Import_Log` (merekam log):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu pengguna Supervisor dapat memiliki banyak catatan log riwayat unggahan berkas SAP.
-5. **Relasi `Daily_Report` ke `Daily_Report_Item` (memuat):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu dokumen laporan harian memuat satu atau banyak rincian item hasil kemas.
-6. **Relasi `Production_Order` ke `Daily_Report_Item` (menjadi acuan):** Memiliki kardinalitas *One-to-Many* (1:M), di mana satu rekaman pesanan produksi SAP menjadi acuan data bagi satu atau banyak rincian item laporan harian.
+1. **Relasi `User` ke `Production_Order` (*Mengimpor*)**
+   <br>
+   Hubungan ini memiliki kardinalitas *One-to-Many* (1:M). Satu orang Kepala Unit / Supervisor berhak mengimpor banyak berkas pesanan produksi hasil ekspor SAP. Kunci utama `user_id` pada entitas `User` direlasikan sebagai kunci tamu `created_by` pada entitas `Production_Order` untuk menjamin jejak audit (*audit trail*) pembuat atau pengunggah master data ke dalam sistem.
+
+2. **Relasi `User` ke `Daily_Report` (*Mencatat*)**
+   <br>
+   Hubungan ini memiliki kardinalitas *One-to-Many* (1:M). Satu orang Petugas (Operator Kemas) dapat membuat dan mencatat banyak dokumen laporan hasil produksi harian sesuai jadwal giliran kerja shift yang dijalankan. Atribut `user_id` pada entitas `User` ditempatkan sebagai kunci tamu `user_id` pada entitas `Daily_Report`.
+
+3. **Relasi `User` ke `Daily_Report` (*Memverifikasi*)**
+   <br>
+   Hubungan ini memiliki kardinalitas *One-to-Many* (1:M). Satu orang Kepala Unit / Supervisor memiliki wewenang untuk memeriksa, memvalidasi rekapitulasi lembar baik dan rusak, serta mengesahkan banyak laporan produksi harian yang telah diselesaikan oleh operator. Atribut `user_id` pada entitas `User` direlasikan sebagai kunci tamu `supervisor_id` pada entitas `Daily_Report` dan dicatat bersamaan dengan stempel waktu pengesahan `verified_at`.
+
+4. **Relasi `User` ke `SAP_Import_Log` (*Merekam Log*)**
+   <br>
+   Hubungan ini memiliki kardinalitas *One-to-Many* (1:M). Satu orang Supervisor dapat memiliki banyak catatan riwayat aktivitas pengunggahan berkas SAP. Kunci utama `user_id` pada entitas `User` dicatat sebagai kunci tamu `user_id` pada entitas `SAP_Import_Log` guna mendokumentasikan volume baris yang diproses serta rincian log anomali impor.
+
+5. **Relasi `Daily_Report` ke `Daily_Report_Item` (*Memuat*)**
+   <br>
+   Hubungan ini memiliki kardinalitas *One-to-Many* (1:M). Satu dokumen header laporan harian memuat satu atau banyak baris rincian item hasil pemindaian barcode. Kunci utama `daily_report_id` pada entitas `Daily_Report` didistribusikan sebagai kunci tamu `daily_report_id` pada entitas `Daily_Report_Item` dengan mekanisme integritas referensial penghapusan berjenjang (*cascade on delete*).
+
+6. **Relasi `Production_Order` ke `Daily_Report_Item` (*Menjadi Acuan*)**
+   <br>
+   Hubungan ini memiliki kardinalitas *One-to-Many* (1:M). Satu rekaman master pesanan produksi SAP dapat menjadi acuan bagi satu atau beberapa baris item pemindaian pada laporan harian, terutama ketika kuantitas lembar satu pesanan diselesaikan dalam beberapa kali pemindaian atau diselesaikan secara bertahap antar-shift. Kunci utama `production_order_id` pada entitas `Production_Order` direlasikan sebagai kunci tamu `production_order_id` pada entitas `Daily_Report_Item`.
 
 ---
 
 #### 4. Logical Record Structure (LRS)
-Logical Record Structure (LRS) dibentuk dari hasil transformasi diagram relasi entitas (ERD) ke dalam bentuk struktur rekaman tabel relasional yang telah melalui proses penentuan kunci utama (*Primary Key*) dan penempatan kunci tamu (*Foreign Key*).
+Logical Record Structure (LRS) dibentuk dari hasil transformasi diagram relasi entitas (ERD) ke dalam bentuk struktur rekaman tabel relasional yang telah melalui proses penentuan kunci utama (*Primary Key*) dan penempatan kunci tamu (*Foreign Key*). Transformasi ini memetakan relasi konseptual tingkat tinggi ke dalam skema fisik basis data relasional yang siap diimplementasikan pada database engine MySQL.
 
 Aturan transformasi ERD ke LRS yang diterapkan meliputi:
-1. Hubungan kardinalitas *One-to-Many* (1:M) ditransformasikan dengan menempatkan atribut *Primary Key* dari entitas di sisi "1" (One) menjadi atribut *Foreign Key* pada entitas di sisi "M" (Many).
-2. Seluruh atribut dari entitas diubah menjadi elemen data (*fields*) yang memiliki tipe data dan panjang presisi pada tingkat basis data fisik.
+1. **Distribusi Kunci Tamu pada Hubungan *One-to-Many* (1:M)**
+   <br>
+   Hubungan kardinalitas *One-to-Many* (1:M) ditransformasikan dengan mendistribusikan atribut *Primary Key* dari entitas pada sisi "1" (*One*) menjadi atribut *Foreign Key* pada entitas di sisi "M" (*Many*). Kunci utama `user_id` pada tabel `USERS` bermigrasi menjadi kunci tamu `created_by` pada `PRODUCTION_ORDERS`, `user_id` dan `supervisor_id` pada `DAILY_REPORTS`, serta `user_id` pada `SAP_IMPORT_LOGS`. Kunci utama `daily_report_id` dan `production_order_id` bermigrasi menjadi kunci tamu pada tabel transaksi detail `DAILY_REPORT_ITEMS`.
+
+2. **Standarisasi Penamaan Kunci Utama Akademis (`tablename_id`)**
+   <br>
+   Seluruh tabel domain menerapkan konvensi penamaan kunci utama eksplisit berbasis nama tabel (`user_id`, `production_order_id`, `daily_report_id`, `daily_report_item_id`, `sap_import_log_id`). Konvensi ini menghilangkan kerancuan identitas kolom saat dilakukan operasi penggabungan (*join*) antar-tabel serta selaras dengan kaidah teoritis relasional Chen dan standar ISO/IEC 11179.
+
+3. **Penetapan Batasan Panjang (*Bounded Lengths*) dan Efisiensi Indeks B-Tree**
+   <br>
+   Seluruh atribut teks terstruktur didefinisikan dengan batasan panjang karakter presisi guna membatasi konsumsi memori buffer halaman indeks pohon B-Tree pada basis data MySQL dengan *character set* `utf8mb4`. Kolom pencarian cepat seperti `po_number`, `no_obc`, `product_code`, dan `machine_number` dibatasi pada `VARCHAR(50)`, sedangkan kolom status, seri produk, dan giliran kerja dibatasi pada `VARCHAR(30)`.
+
+4. **Penyelarasan Tipe Data Catatan Operasional dan Eliminasi Indeks Redundan**
+   <br>
+   Atribut catatan kendala kemas pada `daily_report_items.notes` diselaraskan menjadi tipe `TEXT` setara dengan tabel induk `daily_reports.notes` untuk mengeliminasi risiko pemotongan string (*string truncation*) saat operator mencatat deskripsi anomali cetak atau kertas. Indeks sekunder redundan pada `report_code` dihapus sehingga hanya mengandalkan indeks pohon B-Tree tunggal bawaan deklarasi `UNIQUE`.
 
 Struktur LRS Sistem Dokumentasi Hasil Produksi Harian disajikan pada Gambar 3.21:
 
@@ -1321,10 +1367,12 @@ classDiagram
         *user_id (PK) : BIGINT
         nip : VARCHAR(30) [UK]
         username : VARCHAR(50) [UK]
-        name : VARCHAR(100)
-        email : VARCHAR(100) [UK]
+        name : VARCHAR(255)
+        email : VARCHAR(255) [UK]
+        email_verified_at : TIMESTAMP
         password : VARCHAR(255)
-        role : ENUM('supervisor', 'petugas')
+        remember_token : VARCHAR(100)
+        role : VARCHAR(20)
         is_active : BOOLEAN
         last_login_at : TIMESTAMP
         created_at : TIMESTAMP
@@ -1362,7 +1410,7 @@ classDiagram
         kemas_quantity : INT
         kirim_quantity : INT
         unit : VARCHAR(30)
-        status : ENUM('ready', 'in_progress', 'completed', 'cancelled')
+        status : VARCHAR(30)
         #created_by (FK) : BIGINT
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
@@ -1373,7 +1421,7 @@ classDiagram
         report_code : VARCHAR(50) [UK]
         product_series : VARCHAR(30)
         report_date : DATE
-        shift : ENUM('shift_1', 'shift_2', 'shift_3')
+        shift : VARCHAR(30)
         #user_id (FK) : BIGINT
         #supervisor_id (FK) : BIGINT
         verified_at : TIMESTAMP
@@ -1381,7 +1429,7 @@ classDiagram
         total_good_quantity : INT
         total_reject_quantity : INT
         notes : TEXT
-        status : ENUM('draft', 'submitted', 'verified')
+        status : VARCHAR(30)
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
     }
@@ -1407,11 +1455,13 @@ classDiagram
     class SAP_IMPORT_LOGS {
         *sap_import_log_id (PK) : BIGINT
         file_name : VARCHAR(255)
+        file_path : VARCHAR(255)
         total_rows : INT
         imported_count : INT
         updated_count : INT
         failed_count : INT
         status : VARCHAR(30)
+        error_log : JSON
         #user_id (FK) : BIGINT
         created_at : TIMESTAMP
         updated_at : TIMESTAMP
@@ -1426,41 +1476,54 @@ classDiagram
 *(Sumber: Hasil Penelitian, 2026)*  
 *Gambar 3.21: Logical Record Structure (LRS) Sistem Dokumentasi Produksi Harian*
 
+Berdasarkan struktur rekaman logis pada Gambar 3.21, keterkaitan fungsional antar-tabel dianalisis sebagai berikut:
+1. **Entitas Induk `USERS`:** Menjadi pusat otentikasi dan otorisasi yang menaungi dua peran operasional di Unit Pengemasan. Relasi ke `PRODUCTION_ORDERS` dan `SAP_Import_Logs` merekam identitas supervisor yang memasukkan data pasif (*dormant data*) ke sistem, sementara relasi ke `DAILY_REPORTS` mencatat operator pelaksana pemindaian (`user_id`) dan supervisor yang berwenang mengesahkan dokumen (`supervisor_id`).
+2. **Entitas Master `PRODUCTION_ORDERS`:** Menyimpan data pesanan produksi hasil konversi berkas ekspor SAP. Tabel ini menampung atribut operasional kemas yang diakses secara intensif oleh barcode scanner Code 128 serta metadata SAP pasif yang berfungsi sebagai acuan audit kuantitas lembar kerja, toleransi inschiet, dan rencana cetak.
+3. **Entitas Transaksi Header `DAILY_REPORTS`:** Mengelola siklus hidup sesi laporan harian per kombinasi unik seri produk, tanggal, dan shift. Kolom rekapitulasi produksi (`total_items_count`, `total_good_quantity`, dan `total_reject_quantity`) dihitung secara otomatis dan sinkron menggunakan transaksi database atomik (*ACID*) pada saat operator memindai barcode.
+4. **Entitas Transaksi Detail `DAILY_REPORT_ITEMS`:** Menyimpan snapshot data pemindaian fisik setiap pesanan di meja pengemasan. Penyimpanan salinan `po_number`, `product_name`, `specification`, dan `machine_number` pada tingkat baris item menjamin integritas laporan historis tetap terjaga meskipun data master pesanan mengalami pembaruan di kemudian hari.
+5. **Entitas Audit `SAP_IMPORT_LOGS`:** Menyediakan transparansi administratif atas setiap berkas Excel atau CSV yang diunggah supervisor, lengkap dengan jumlah baris yang berhasil diolah, diperbarui, atau gagal beserta rincian objek JSON log galat untuk kebutuhan pelacakan anomali.
+
 ---
 
 #### 5. Spesifikasi File
-Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang digunakan dalam sistem, mencakup nama field, tipe data, panjang ukuran data, dan keterangan batasannya:
+Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data fisik yang dibangun dalam sistem dokumentasi hasil produksi harian. Basis data diimplementasikan pada database engine MySQL Server dengan *storage engine* InnoDB dan *character set* `utf8mb4_unicode_ci` yang menjamin integritas referensial (*foreign keys*), kepatuhan transaksi atomik ACID (*Atomicity, Consistency, Isolation, Durability*), serta optimasi pemanfaatan halaman memori indeks pohon B-Tree.
+
+Rincian spesifikasi mencakup nama file/tabel, akronim, fungsi, tipe file, media penyimpanan, penetapan kunci utama (*Primary Key*), kunci unik (*Unique Key*), kunci tamu (*Foreign Key*), serta struktur detail elemen data sebagai berikut:
 
 ##### a. Spesifikasi File `users`
 - **Nama File / Tabel:** `users`
 - **Akronim File:** USR
-- **Fungsi File:** Menyimpan data akun pengguna, peran hak akses, dan kredensial login
+- **Fungsi File:** Menyimpan data identitas akun pengguna, hak akses peran otorisasi, dan kredensial autentikasi sistem
 - **Tipe File:** File Master
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `user_id`
 - **Kunci Unik (*Unique Key*):** `nip`, `username`, `email`
 - **Struktur Tabel:** Disajikan pada Tabel 3.10
 
+Tabel `users` berfungsi sebagai berkas master otentikasi dan otorisasi yang mencatat seluruh personil pengguna sistem di Unit Pengemasan. Pengguna dibedakan menjadi dua peran utama, yaitu Petugas (Operator Kemas) yang bertugas membuka sesi laporan dan memindai barcode hasil pengemasan pada setiap giliran kerja shift, serta Kepala Unit / Supervisor yang bertugas mengimpor master data pesanan produksi dari berkas SAP, memantau pergerakan rekapitulasi produksi harian, dan melakukan verifikasi pengesahan laporan. Sistem mendukung multi-kredensial login di mana pengguna dapat masuk menggunakan Nomor Pegawai (NP), nama pengguna (*username*), maupun alamat email yang terdaftar unik.
+
 *Tabel 3.10: Spesifikasi File Tabel `users`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
 | 1 | ID Pengguna | `user_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | Nama Lengkap | `name` | VARCHAR | 100 | Not Null |
-| 3 | Nomor Pegawai | `nip` | VARCHAR | 30 | Unique, Nullable (Kredensial Login) |
-| 4 | Username | `username` | VARCHAR | 50 | Unique, Nullable (Kredensial Login) |
-| 5 | Alamat Email | `email` | VARCHAR | 100 | Unique, Not Null |
-| 6 | Kata Sandi | `password` | VARCHAR | 255 | Not Null (Terenkripsi Bcrypt) |
-| 7 | Peran Akun | `role` | ENUM | - | Value: 'supervisor', 'petugas' |
-| 8 | Status Keaktifan | `is_active` | BOOLEAN | 1 | Default: true (1) |
-| 9 | Login Terakhir | `last_login_at` | TIMESTAMP | - | Nullable |
-| 10 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 11 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 2 | Nama Lengkap | `name` | VARCHAR | 255 | Not Null (Nama Lengkap Pegawai) |
+| 3 | Nomor Pegawai | `nip` | VARCHAR | 30 | Unique, Nullable (Nomor Pegawai / Kredensial Login Utama) |
+| 4 | Username | `username` | VARCHAR | 50 | Unique, Nullable (Nama Pengguna / Kredensial Login Alternatif) |
+| 5 | Alamat Email | `email` | VARCHAR | 255 | Unique, Not Null (Alamat Surel Pengguna) |
+| 6 | Waktu Verifikasi Email | `email_verified_at` | TIMESTAMP | - | Nullable (Stempel Waktu Verifikasi Email) |
+| 7 | Kata Sandi | `password` | VARCHAR | 255 | Not Null (Hash Sandi Terenkripsi Bcrypt / Argon2id) |
+| 8 | Token Ingat Sesi | `remember_token` | VARCHAR | 100 | Nullable (Token Sesi Otentikasi Berkelanjutan) |
+| 9 | Peran Akun | `role` | VARCHAR | 20 | Not Null, Default: 'petugas' (Nilai: 'supervisor', 'petugas' via PHP Backed Enum) |
+| 10 | Status Keaktifan | `is_active` | BOOLEAN | 1 | Default: true (1) (Status Keaktifan Akun) |
+| 11 | Login Terakhir | `last_login_at` | TIMESTAMP | - | Nullable (Stempel Waktu Sesi Login Terakhir) |
+| 12 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable (Waktu Perekaman Data Pengguna) |
+| 13 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable (Waktu Pembaruan Terakhir Data Pengguna) |
 *(Sumber: Hasil Penelitian, 2026)*
 
 ##### b. Spesifikasi File `production_orders`
 - **Nama File / Tabel:** `production_orders`
 - **Akronim File:** PO
-- **Fungsi File:** Menyimpan data master pesanan produksi hasil ekspor dari sistem SAP
+- **Fungsi File:** Menyimpan master data pesanan produksi hasil konversi berkas ekspor sistem ERP SAP
 - **Tipe File:** File Master
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `production_order_id`
@@ -1468,49 +1531,58 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Kunci Tamu (*Foreign Key*):** `created_by` (Relasi ke `users.user_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.11
 
+Struktur data tabel `production_orders` dikategorikan menjadi dua kelompok besar dalam kamus data (*data dictionary*):
+1. **Atribut Operasional Kemas (*Operational Packaging Attributes*):** Mencakup kolom identitas order seperti `po_number`, `no_obc`, `perso_type`, `seri`, `product_code`, `product_name`, `customer_name`, `specification`, `paper_type`, `machine_number`, `target_quantity`, `unit`, `status`, dan `created_by`. Kolom-kolom ini diakses secara intensif oleh barcode scanner genggam Code 128 dan antarmuka pencatatan hasil kemas. Seluruh kolom pencarian teks dibatasi panjangnya secara presisi (`VARCHAR(50)` dan `VARCHAR(30)`) guna meminimalkan konsumsi ruang memori pada indeks B-Tree MySQL.
+2. **Metadata Pasif SAP (*Passthrough SAP Metadata*):** Mencakup kolom-kolom timeline produksi (`order_date`, `delivery_deadline`, `tgl_pakai_bb`, `tgl_cetak`, `tgl_verifikasi`, `packaging_date`) serta metrik kuantitas lembar kerja pabrik (`rencet_quantity`, `jml_bb`, `jml_cd`, `total_bb`, `jml_cetak`, `baik_verifikasi`, `rusak_verifikasi`, `hcts_baik`, `total_hcts`, `kemas_quantity`, `kirim_quantity`). Kolom-kolom ini merupakan data pasif (*dormant data*) yang disimpan secara utuh untuk menjamin fidelitas audit administratif dan ketertelusuran riwayat tanpa mengalami perubahan nilai di meja kerja pengemasan.
+
 *Tabel 3.11: Spesifikasi File Tabel `production_orders`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
 | 1 | ID Pesanan | `production_order_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | Nomor PO / Barcode | `po_number` | VARCHAR | 50 | Unique, Not Null (Simbologi Code 128) |
-| 3 | Nomor OBC | `no_obc` | VARCHAR | 50 | Index, Nullable |
-| 4 | Tipe Perso | `perso_type` | VARCHAR | 50 | Nullable (Perso / Non Perso) |
-| 5 | Kode Seri | `seri` | VARCHAR | 50 | Nullable |
-| 6 | Kode Produk | `product_code` | VARCHAR | 50 | Index, Nullable |
-| 7 | Nama Produk | `product_name` | VARCHAR | 255 | Index, Not Null |
-| 8 | Nama Instansi Pemesan | `customer_name` | VARCHAR | 255 | Index, Nullable |
-| 9 | Spesifikasi Teknis | `specification` | TEXT | - | Nullable (Bahan Kertas, Pengaman) |
-| 10 | Jenis Kertas | `paper_type` | VARCHAR | 255 | Nullable |
-| 11 | Nomor Mesin Asal | `machine_number` | VARCHAR | 50 | Index, Nullable (Identitas Mesin Cetak) |
-| 12 | Tanggal Pesanan | `order_date` | DATE | - | Not Null (TGL OBC) |
-| 13 | Tanggal Jatuh Tempo | `delivery_deadline` | DATE | - | Nullable (TGL JTempo) |
-| 14 | Tanggal Pakai Bahan Baku | `tgl_pakai_bb` | DATE | - | Nullable |
-| 15 | Tanggal Cetak | `tgl_cetak` | DATE | - | Nullable |
-| 16 | Tanggal Verifikasi | `tgl_verifikasi` | DATE | - | Nullable |
-| 17 | Tanggal Pengemasan | `packaging_date` | DATE | - | Nullable |
-| 18 | Target Kuantitas Pesanan | `target_quantity` | INT UNSIGNED | 10 | Default: 0 (QTY Pesan SAP) |
-| 19 | Kuantitas Rencana Cetak | `rencet_quantity` | INT UNSIGNED | 10 | Default: 0 (RENCET) |
-| 20 | Jumlah Lembar Kerja Bahan Baku | `jml_bb` | INT UNSIGNED | 10 | Default: 0 |
-| 21 | Jumlah Cetakan Dasar | `jml_cd` | INT UNSIGNED | 10 | Default: 0 |
-| 22 | Total Bahan Baku | `total_bb` | INT UNSIGNED | 10 | Default: 0 (JML\_BB + JML\_CD) |
-| 23 | Jumlah Cetak | `jml_cetak` | INT UNSIGNED | 10 | Default: 0 |
-| 24 | Baik Verifikasi | `baik_verifikasi` | INT UNSIGNED | 10 | Default: 0 |
-| 25 | Rusak / Afval Verifikasi | `rusak_verifikasi` | INT UNSIGNED | 10 | Default: 0 |
-| 26 | Hasil HCTS Baik | `hcts_baik` | INT UNSIGNED | 10 | Default: 0 |
-| 27 | Total HCTS | `total_hcts` | INT UNSIGNED | 10 | Default: 0 |
-| 28 | Kuantitas Kemas | `kemas_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 29 | Kuantitas Kirim | `kirim_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 30 | Satuan Hitung | `unit` | VARCHAR | 30 | Default: 'lembar' |
-| 31 | Status Pengerjaan | `status` | VARCHAR | 30 | Default: 'ready', Nilai: 'ready', 'in_progress', 'completed', 'cancelled' |
+| 2 | Nomor PO / Barcode | `po_number` | VARCHAR | 50 | Unique, Not Null (Nomor PO SAP / Simbologi Barcode Code 128) |
+| 3 | Nomor OBC | `no_obc` | VARCHAR | 50 | Index, Nullable (Nomor Order Bukti Cetak) |
+| 4 | Tipe Personalasi | `perso_type` | VARCHAR | 50 | Nullable (Kategori: Perso / Non Perso) |
+| 5 | Kode Seri | `seri` | VARCHAR | 50 | Nullable (Kode Seri Pita Cukai) |
+| 6 | Kode Produk | `product_code` | VARCHAR | 50 | Index, Nullable (Kode Material Produk SAP) |
+| 7 | Nama Produk | `product_name` | VARCHAR | 255 | Index, Not Null (Deskripsi / Nama Produk Pita Cukai) |
+| 8 | Nama Instansi Pemesan | `customer_name` | VARCHAR | 255 | Index, Nullable (Instansi Pemesan / DJBC) |
+| 9 | Spesifikasi Teknis | `specification` | TEXT | - | Nullable (Spesifikasi Teknis Kertas & Pengaman) |
+| 10 | Jenis Kertas | `paper_type` | VARCHAR | 255 | Nullable (Jenis Bahan Baku Kertas Sekuriti) |
+| 11 | Nomor Mesin Asal | `machine_number` | VARCHAR | 50 | Index, Nullable (Nomor Work Center / Identitas Mesin Cetak Asal) |
+| 12 | Tanggal Pesanan | `order_date` | DATE | - | Not Null (Tanggal OBC / Terbit Pesanan) |
+| 13 | Tanggal Jatuh Tempo | `delivery_deadline` | DATE | - | Nullable (Tanggal Jatuh Tempo Penyerahan) |
+| 14 | Tanggal Pakai Bahan Baku | `tgl_pakai_bb` | DATE | - | Nullable (Tanggal Pengambilan Bahan Baku Kertas) |
+| 15 | Tanggal Realisasi Cetak | `tgl_cetak` | DATE | - | Nullable (Tanggal Pelaksanaan Cetak di Mesin) |
+| 16 | Tanggal Verifikasi Lembar | `tgl_verifikasi` | DATE | - | Nullable (Tanggal Pemeriksaan Fisik Lembar) |
+| 17 | Tanggal Pengemasan | `packaging_date` | DATE | - | Nullable (Tanggal Pelaksanaan Proses Kemas) |
+| 18 | Target Kuantitas Pesanan | `target_quantity` | INT UNSIGNED | 10 | Default: 0 (Target Lembar SAP Pesanan — Atribut Operasional Kemas) |
+| 19 | Kuantitas Rencana Cetak | `rencet_quantity` | INT UNSIGNED | 10 | Default: 0 (Rencana Cetak SAP) |
+| 20 | Lembar Kerja Bahan Baku | `jml_bb` | INT UNSIGNED | 10 | Default: 0 (Jumlah Lembar Kerja Bahan Baku Pokok) |
+| 21 | Cadangan / Inschiet Cetak | `jml_cd` | INT UNSIGNED | 10 | Default: 0 (Jumlah Lembar Cadangan Inschiet) |
+| 22 | Total Bahan Baku | `total_bb` | INT UNSIGNED | 10 | Default: 0 (Total Bahan Baku = JML_BB + JML_CD) |
+| 23 | Jumlah Realisasi Cetak | `jml_cetak` | INT UNSIGNED | 10 | Default: 0 (Jumlah Lembar Realisasi Cetak) |
+| 24 | Baik Meja Verifikasi | `baik_verifikasi` | INT UNSIGNED | 10 | Default: 0 (Jumlah Lembar Baik Hasil Verifikasi) |
+| 25 | Rusak / Afval Verifikasi | `rusak_verifikasi` | INT UNSIGNED | 10 | Default: 0 (Jumlah Lembar Afval Rusak Hasil Verifikasi) |
+| 26 | Hasil HCTS Baik | `hcts_baik` | INT UNSIGNED | 10 | Default: 0 (Hasil Baik yang Dijadikan HCTS) |
+| 27 | Total HCTS | `total_hcts` | INT UNSIGNED | 10 | Default: 0 (Total HCTS) |
+| 28 | Kuantitas Kemas SAP | `kemas_quantity` | INT UNSIGNED | 10 | Default: 0 (Realisasi Kuantitas Kemas Menurut SAP) |
+| 29 | Kuantitas Pengiriman | `kirim_quantity` | INT UNSIGNED | 10 | Default: 0 (Kuantitas Pengiriman Lembar Akhir) |
+| 30 | Satuan Hitung | `unit` | VARCHAR | 30 | Default: 'lembar' (Satuan Hitung Produk) |
+| 31 | Status Pengerjaan | `status` | VARCHAR | 30 | Index, Default: 'ready' (Nilai: 'ready', 'in_progress', 'completed', 'cancelled') |
 | 32 | ID Pembuat / Pengimpor | `created_by` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable |
-| 33 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 34 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 33 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable (Waktu Perekaman Data Order) |
+| 34 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable (Waktu Pembaruan Terakhir Data Order) |
 *(Sumber: Hasil Penelitian, 2026)*
+
+Indeks gabungan (*composite indexes*) yang didefinisikan pada tabel `production_orders` meliputi:
+- `INDEX (status, order_date)`: Mempercepat penyaringan antrean pesanan aktif berdasarkan tanggal terbit pesanan.
+- `INDEX (machine_number, status)`: Mengoptimalkan pemilahan order per nomor mesin cetak pada panel pemantauan supervisor.
+- `INDEX (no_obc, status)`: Mempercepat pelacakan status pesanan berdasarkan nomor order bukti cetak.
 
 ##### c. Spesifikasi File `daily_reports`
 - **Nama File / Tabel:** `daily_reports`
 - **Akronim File:** DREP
-- **Fungsi File:** Menyimpan data header laporan hasil pengemasan produksi harian
+- **Fungsi File:** Menyimpan data header dokumen laporan hasil pengemasan produksi harian per sesi seri produk dan giliran kerja
 - **Tipe File:** File Transaksi
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `daily_report_id`
@@ -1518,82 +1590,98 @@ Spesifikasi file menjelaskan rincian teknis dari setiap tabel basis data yang di
 - **Kunci Tamu (*Foreign Key*):** `user_id`, `supervisor_id` (Relasi ke `users.user_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.12
 
+Tabel `daily_reports` berfungsi sebagai header transaksi pelaporan produksi per sesi kerja. Setiap sesi diidentifikasi melalui kode laporan terstandarisasi (`report_code`) dengan format `{SERIES}-{YYYY-MM-DD}-S{N}` (contoh: `PCHT-2026-08-26-S1`). Untuk mencegah redundansi indeks pada MySQL, kolom `report_code` hanya menggunakan satu indeks B-Tree unik (`UNIQUE`) tanpa deklarasi indeks sekunder duplikat. Selain itu, batasan unik komposit tiga kolom `(product_series, report_date, shift)` menjamin secara fisik bahwa tidak akan pernah ada dua sesi laporan ganda yang dibuat pada tanggal, giliran kerja shift, dan seri produk yang sama. Kolom agregat produksi (`total_items_count`, `total_good_quantity`, dan `total_reject_quantity`) diperbarui secara otomatis dan atomik dalam blok transaksi database saat operator memindai barcode.
+
 *Tabel 3.12: Spesifikasi File Tabel `daily_reports`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
 | 1 | ID Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | Kode Laporan Sesi | `report_code` | VARCHAR | 50 | Unique, Not Null (Format: `{SERIES}-{YYYY-MM-DD}-S{N}`, contoh: `PCHT-2026-08-26-S1`) |
+| 2 | Kode Laporan Sesi | `report_code` | VARCHAR | 50 | Unique, Not Null (Indeks Tunggal B-Tree Hasil Deduplikasi) |
 | 3 | Seri Produk | `product_series` | VARCHAR | 30 | Index, Not Null (Nilai: 'pcht', 'mmea', 'hptl') |
-| 4 | Tanggal Pengemasan | `report_date` | DATE | - | Index, Not Null |
-| 5 | Giliran Kerja | `shift` | VARCHAR | 30 | Default: 'shift_1' (Nilai: 'shift_1', 'shift_2', 'shift_3') |
-| 6 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id` |
-| 7 | ID Supervisor Pemeriksa | `supervisor_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable |
-| 8 | Waktu Verifikasi | `verified_at` | TIMESTAMP | - | Nullable (Terisi saat status `verified`) |
-| 9 | Total Jenis Order | `total_items_count` | INT UNSIGNED | 5 | Default: 0 |
-| 10 | Total Hasil Kemas Baik | `total_good_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 11 | Total Kuantitas Reject | `total_reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 12 | Catatan Operasional | `notes` | TEXT | - | Nullable |
-| 13 | Status Verifikasi | `status` | VARCHAR | 30 | Default: 'draft' (Nilai: 'draft', 'submitted', 'verified') |
-| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 4 | Tanggal Pengemasan | `report_date` | DATE | - | Index, Not Null (Tanggal Pelaksanaan Shift Pengemasan) |
+| 5 | Giliran Kerja | `shift` | VARCHAR | 30 | Index, Default: 'shift_1' (Nilai: 'shift_1', 'shift_2', 'shift_3') |
+| 6 | ID Petugas Pelaksana | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id` (Pembuat Laporan, Cascade on Delete) |
+| 7 | ID Supervisor Pemeriksa | `supervisor_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable (Supervisor yang Memeriksa Laporan) |
+| 8 | Waktu Verifikasi | `verified_at` | TIMESTAMP | - | Nullable (Stempel Waktu Pengesahan Verifikasi Laporan) |
+| 9 | Total Jenis Order | `total_items_count` | INT UNSIGNED | 10 | Default: 0 (Akumulasi Jumlah Baris PO yang Dipindai) |
+| 10 | Total Hasil Kemas Baik | `total_good_quantity` | INT UNSIGNED | 10 | Default: 0 (Akumulasi Lembar Hasil Kemas Baik) |
+| 11 | Total Kuantitas Reject | `total_reject_quantity` | INT UNSIGNED | 10 | Default: 0 (Akumulasi Lembar Afval / Rusak Kemas) |
+| 12 | Catatan Operasional | `notes` | TEXT | - | Nullable (Catatan Operasional Rekapitulasi Shift) |
+| 13 | Status Verifikasi | `status` | VARCHAR | 30 | Index, Default: 'draft' (Nilai: 'draft', 'submitted', 'verified') |
+| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable (Waktu Pembukaan Sesi Laporan) |
+| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable (Waktu Pembaruan Rekapitulasi Laporan) |
 *(Sumber: Hasil Penelitian, 2026)*
+
+Indeks gabungan (*composite indexes*) yang didefinisikan pada tabel `daily_reports` meliputi:
+- `UNIQUE (product_series, report_date, shift)`: Menjamin keunikan sesi pelaporan harian per kombinasi seri produk, tanggal, dan shift kerja.
+- `INDEX (status, report_date)`: Mempercepat penyaringan status dokumen laporan pada tabel rekapitulasi utama supervisor.
 
 ##### d. Spesifikasi File `daily_report_items`
 - **Nama File / Tabel:** `daily_report_items`
 - **Akronim File:** DRIT
-- **Fungsi File:** Menyimpan baris rincian item hasil kemas per pesanan produksi
+- **Fungsi File:** Menyimpan baris rincian item hasil pemindaian barcode fisik per pesanan produksi di meja pengemasan
 - **Tipe File:** File Transaksi (Detail)
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `daily_report_item_id`
 - **Kunci Tamu (*Foreign Key*):** `daily_report_id` (ke `daily_reports.daily_report_id`), `production_order_id` (ke `production_orders.production_order_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.13
 
+Tabel `daily_report_items` menyimpan rekaman setiap pesanan produksi yang diselesaikan di meja pengemasan melalui pemindaian barcode Code 128 pada Kartu Mesin Produksi. Untuk melindungi keabsahan laporan historis dari perubahan data master di kemudian hari, tabel ini menyimpan *snapshot* data pesanan pada saat pemindaian (`po_number`, `product_name`, `specification`, `machine_number`). Atribut catatan khusus item (`notes`) diselaraskan menggunakan tipe `TEXT` (sebelumnya bertipe `VARCHAR(255)`) agar seragam dengan kolom catatan pada tabel induk `daily_reports` dan mencegah kesalahan pemotongan teks (*string truncation*) saat operator mencatat deskripsi insidental mengenai kondisi lembar kertas atau mesin.
+
 *Tabel 3.13: Spesifikasi File Tabel `daily_report_items`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
 | 1 | ID Rincian Item | `daily_report_item_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | ID Header Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `daily_reports.daily_report_id` (Cascade) |
-| 3 | ID Pesanan SAP | `production_order_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `production_orders.production_order_id`, Nullable |
-| 4 | Nomor PO Snapshot | `po_number` | VARCHAR | 50 | Index, Not Null |
-| 5 | Nama Produk Snapshot | `product_name` | VARCHAR | 255 | Not Null |
-| 6 | Spesifikasi Snapshot | `specification` | TEXT | - | Nullable |
-| 7 | Nomor Mesin Snapshot | `machine_number` | VARCHAR | 50 | Nullable |
-| 8 | Target Kuantitas SAP | `target_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 9 | Jumlah Kemas Baik | `good_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 10 | Jumlah Kemas Reject | `reject_quantity` | INT UNSIGNED | 10 | Default: 0 |
-| 11 | Satuan Hitung | `unit` | VARCHAR | 30 | Default: 'lembar' |
-| 12 | Catatan Khusus Item | `notes` | TEXT | - | Nullable |
-| 13 | Waktu Pemindaian | `scanned_at` | DATETIME | - | Nullable |
-| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 2 | ID Header Laporan | `daily_report_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `daily_reports.daily_report_id` (Cascade on Delete) |
+| 3 | ID Pesanan SAP | `production_order_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `production_orders.production_order_id`, Nullable (Null on Delete) |
+| 4 | Nomor PO Snapshot | `po_number` | VARCHAR | 50 | Index, Not Null (Snapshot Nomor PO / Barcode Code 128) |
+| 5 | Nama Produk Snapshot | `product_name` | VARCHAR | 255 | Not Null (Snapshot Deskripsi Produk saat Pemindaian) |
+| 6 | Spesifikasi Snapshot | `specification` | TEXT | - | Nullable (Snapshot Spesifikasi Teknis Kertas & Pengaman) |
+| 7 | Nomor Mesin Snapshot | `machine_number` | VARCHAR | 50 | Index, Nullable (Snapshot Nomor Mesin Cetak Asal) |
+| 8 | Target Kuantitas SAP | `target_quantity` | INT UNSIGNED | 10 | Default: 0 (Target Lembar SAP Pesanan) |
+| 9 | Jumlah Kemas Baik | `good_quantity` | INT UNSIGNED | 10 | Default: 0 (Jumlah Lembar Hasil Kemas Baik) |
+| 10 | Jumlah Kemas Reject | `reject_quantity` | INT UNSIGNED | 10 | Default: 0 (Jumlah Lembar Afval / Rusak Kemas) |
+| 11 | Satuan Hitung | `unit` | VARCHAR | 30 | Default: 'lembar' (Satuan Hitung Lembar Kemas) |
+| 12 | Catatan Khusus Item | `notes` | TEXT | - | Nullable (Catatan Khusus Insidental Lembar — Tipe TEXT) |
+| 13 | Waktu Pemindaian | `scanned_at` | DATETIME | - | Nullable (Waktu Presisi Pemindaian Barcode) |
+| 14 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable (Stempel Waktu Penyimpanan Item ke Basis Data) |
+| 15 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable (Stempel Waktu Pembaruan Terakhir Item) |
 *(Sumber: Hasil Penelitian, 2026)*
+
+Indeks gabungan (*composite indexes*) yang didefinisikan pada tabel `daily_report_items` meliputi:
+- `INDEX (daily_report_id, po_number)`: Mengakselerasi pengecekan duplikasi item dan agregasi kuantitas hasil kemas per nomor PO dalam satu sesi laporan.
 
 ##### e. Spesifikasi File `sap_import_logs`
 - **Nama File / Tabel:** `sap_import_logs`
 - **Akronim File:** IMPL
-- **Fungsi File:** Menyimpan catatan riwayat aktivitas pengunggahan berkas ekspor master SAP
+- **Fungsi File:** Menyimpan catatan riwayat dan jejak audit aktivitas pengunggahan berkas ekspor master data pesanan produksi SAP
 - **Tipe File:** File Log Riwayat
 - **Media Penyimpanan:** Harddisk / SSD (MySQL Server)
 - **Kunci Utama (*Primary Key*):** `sap_import_log_id`
 - **Kunci Tamu (*Foreign Key*):** `user_id` (Relasi ke `users.user_id`)
 - **Struktur Tabel:** Disajikan pada Tabel 3.14
 
+Tabel `sap_import_logs` berfungsi sebagai instrumen audit kepatuhan atas seluruh berkas data pasif (*dormant data*) yang diunggah oleh Kepala Unit / Supervisor ke dalam sistem. Tabel ini merekam nama berkas asli, jalur penyimpanan fisik berkas di server (`file_path`), metrik volume pemrosesan (total baris, jumlah baris baru diimpor, baris diperbarui, dan baris gagal), serta status akhir pemrosesan (`success`, `partial`, atau `failed`). Apabila ditemukan baris yang tidak valid atau memiliki format kolom yang cacat, sistem mencatat detail nomor baris dan deskripsi kegagalannya ke dalam kolom `error_log` berformat JSON terstruktur sehingga memudahkan penelusuran masalah tanpa mengganggu proses importasi baris-baris lainnya.
+
 *Tabel 3.14: Spesifikasi File Tabel `sap_import_logs`*
 | No | Elemen Data | Nama Field | Tipe Data | Panjang / Ukuran | Keterangan / Constraint |
 |---|---|---|---|---|---|
 | 1 | ID Riwayat Impor | `sap_import_log_id` | BIGINT UNSIGNED | 20 | Primary Key, Auto Increment |
-| 2 | Nama Berkas Unggahan | `file_name` | VARCHAR | 255 | Not Null |
-| 3 | Jalur Penyimpanan Berkas | `file_path` | VARCHAR | 255 | Nullable (Path di server setelah unggah) |
-| 4 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Default: 0 |
-| 5 | Jumlah Baris Diimpor | `imported_count` | INT UNSIGNED | 8 | Default: 0 |
-| 6 | Jumlah Baris Diperbarui | `updated_count` | INT UNSIGNED | 8 | Default: 0 |
-| 7 | Jumlah Baris Gagal | `failed_count` | INT UNSIGNED | 8 | Default: 0 |
-| 8 | Status Impor | `status` | VARCHAR | 30 | Default: 'success', Nilai: 'success', 'partial', 'failed' |
-| 9 | Log Kesalahan Baris | `error_log` | JSON | - | Nullable (Catatan baris yang gagal diproses) |
-| 10 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable |
-| 11 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable |
-| 12 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable |
+| 2 | ID Pengunggah | `user_id` | BIGINT UNSIGNED | 20 | Foreign Key ke `users.user_id`, Nullable (Null on Delete) |
+| 3 | Nama Berkas Unggahan | `file_name` | VARCHAR | 255 | Not Null (Nama Asli Berkas Excel / CSV SAP) |
+| 4 | Jalur Penyimpanan Berkas | `file_path` | VARCHAR | 255 | Nullable (Jalur Relatif Berkas Pasif yang Disimpan di Server) |
+| 5 | Total Baris Berkas | `total_rows` | INT UNSIGNED | 8 | Default: 0 (Jumlah Seluruh Baris Data dalam Berkas Mentah) |
+| 6 | Jumlah Baris Diimpor | `imported_count` | INT UNSIGNED | 8 | Default: 0 (Jumlah Baris Berhasil Disimpan sebagai PO Baru) |
+| 7 | Jumlah Baris Diperbarui | `updated_count` | INT UNSIGNED | 8 | Default: 0 (Jumlah Baris yang Memperbarui PO yang Telah Ada) |
+| 8 | Jumlah Baris Gagal | `failed_count` | INT UNSIGNED | 8 | Default: 0 (Jumlah Baris yang Mengalami Kegagalan Validasi) |
+| 9 | Status Impor | `status` | VARCHAR | 30 | Index, Default: 'success' (Nilai: 'success', 'partial', 'failed') |
+| 10 | Log Kesalahan Baris | `error_log` | JSON | - | Nullable (Struktur Array JSON Berisi Rincian Baris Gagal dan Penyebabnya) |
+| 11 | Waktu Dibuat | `created_at` | TIMESTAMP | - | Nullable (Waktu Unggah Berkas Dieksekusi) |
+| 12 | Waktu Diperbarui | `updated_at` | TIMESTAMP | - | Nullable (Waktu Pembaruan Terakhir Riwayat Impor) |
 *(Sumber: Hasil Penelitian, 2026)*
+
+Indeks gabungan (*composite indexes*) yang didefinisikan pada tabel `sap_import_logs` meliputi:
+- `INDEX (created_at, status)`: Mempercepat penyaringan dan pengurutan kronologis log impor berdasarkan stempel waktu dan status keberhasilan.
 
 ---
 

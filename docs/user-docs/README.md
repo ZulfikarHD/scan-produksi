@@ -57,3 +57,8 @@ Selamat datang di pusat dokumentasi dan panduan operasional **Sistem Monitoring 
    - Memeriksa proporsi kontribusi antar shift kerja dan peringkat 5 mesin cetak terproduktif.
    - Memanfaatkan pintasan aksi cepat ke seluruh modul operasional sistem.
    - Memeriksa riwayat 5 berkas laporan produksi terbaru dan menyegarkan data seketika.
+
+9. **[Panduan Verifikasi Struktur Data & Dokumen Laporan Produksi](guides/panduan-verifikasi-skema-dan-spesifikasi-basis-data.md)**
+   - Memahami struktur master data pesanan produksi SAP dan atribut operasional kemas.
+   - Memeriksa kode laporan, nomor PO barcode, dan akumulasi hasil kemas baik serta afval reject.
+   - Meninjau riwayat impor berkas SAP dan penanganan kesalahan baris.
