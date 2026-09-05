@@ -345,27 +345,23 @@ Di industri percetakan dokumen sekuriti berpresisi tinggi:
 
 ### 4.4 Resolving Redundant Indexes & Data Type Mismatches
 
-Pemeriksaan baris kode migrasi menemukan inefisiensi yang harus dirapikan:
+Pemeriksaan baris kode migrasi menemukan inefisiensi yang **telah dirapikan pada US-6.2**:
 
-1. **Redundant Index pada `daily_reports.report_code`:**
+1. **Redundant Index pada `daily_reports.report_code` (selesai):**
    ```php
-   // ❌ Ditemukan pada database/migrations/2026_08_26_000004_create_daily_reports_and_items_tables.php:16
-   $table->string('report_code')->unique()->index();
+   // ✅ database/migrations/2026_08_26_000004_create_daily_reports_and_items_tables.php
+   $table->string('report_code', 50)->unique();
    ```
-   Deklarasi `->unique()` pada MySQL, PostgreSQL, maupun SQLite secara otomatis membuat indeks pohon B-Tree unik. Penambahan `->index()` setelahnya menciptakan indeks kedua yang identik, memperlambat operasi *write* dan memboroskan kapasitas memori *index buffer cache*.
-   - **Solusi:** Hapus `->index()` dan pertahankan `$table->string('report_code', 50)->unique();`.
+   Deklarasi `->unique()` secara otomatis membuat indeks pohon B-Tree unik. Rantai `->index()` tambahan dihapus agar tidak menciptakan indeks kedua yang memperlambat *write* dan memboroskan *index buffer cache*.
 
-2. **Ketidaksesuaian Tipe Kolom Catatan (`notes`):**
-   - `daily_reports.notes` bertipe `text` (kapasitas 64 KB pada MySQL).
-   - `daily_report_items.notes` bertipe `string` (kapasitas default 255 karakter).
-   Jika operator kemas mencatat rincian teknis afval kertas atau kendala pisau potong yang panjang, penyimpanan akan terpotong (*truncate*) atau melempar fatal error pada MySQL mode strict.
-   - **Solusi:** Samakan tipe data `daily_report_items.notes` menjadi `text()->nullable()`.
+2. **Ketidaksesuaian Tipe Kolom Catatan (`notes`) (selesai):**
+   - `daily_reports.notes` dan `daily_report_items.notes` sama-sama bertipe `text()->nullable()`.
+   - Catatan operator yang panjang tidak lagi terpotong pada batas 255 karakter.
 
-3. **Restriksi Ukuran Kolom String:**
-   Pada MySQL dengan set karakter `utf8mb4`, setiap karakter memakan memori hingga 4 byte. Menggunakan `VARCHAR(255)` untuk seluruh kolom kode identitas membebani *composite index page*.
-   - **Solusi:** Berikan panjang terukur: `po_number` (50), `no_obc` (50), `machine_number` (50), `unit` (30).
+3. **Restriksi Ukuran Kolom String (selesai):**
+   Pada MySQL dengan set karakter `utf8mb4`, panjang terukur diterapkan antara lain: `po_number` (50), `no_obc` (50), `machine_number` (50), `product_code` (50), `unit` (30), serta kolom status/shift/seri terkait. `SapImportService::boundString()` memotong sel impor yang melebihi batas sebelum upsert.
 
----
+Dokumentasi fitur: [Schema Decluttering & Data Dictionary](dev-docs/features/schema-decluttering-and-data-dictionary.md).
 
 ## 5. Concurrency Control & Transaction Boundaries
 

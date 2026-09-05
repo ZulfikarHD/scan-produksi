@@ -10,6 +10,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * Master data Production Order hasil impor SAP (flat ERP dump + atribut operasional kemas).
+ *
+ * Data dictionary (US-6.2):
+ * - Operational Packaging Attributes: po_number, no_obc, perso_type, seri, product_code,
+ *   product_name, customer_name, specification, paper_type, machine_number, target_quantity,
+ *   unit, status, created_by — dipakai barcode scan, report entry, dan workflow kemas.
+ * - Passthrough SAP Metadata: order_date, delivery_deadline, tgl_pakai_bb, tgl_cetak,
+ *   tgl_verifikasi, packaging_date, rencet_quantity, jml_bb, jml_cd, total_bb, jml_cetak,
+ *   baik_verifikasi, rusak_verifikasi, hcts_baik, total_hcts, kemas_quantity, kirim_quantity —
+ *   disimpan apa adanya untuk fidelitas impor/audit tanpa mutasi di area kerja.
+ *
  * @property int $id
  * @property string $po_number
  * @property string|null $no_obc

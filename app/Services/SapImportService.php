@@ -377,8 +377,8 @@ class SapImportService
             $data = $this->mapPositionalFallback($cells);
         }
 
-        // 1. Sanitize PO Number
-        $poNumber = trim((string) ($data['po_number'] ?? ''));
+        // 1. Sanitize PO Number (VARCHAR 50 bound — US-6.2)
+        $poNumber = $this->boundString(trim((string) ($data['po_number'] ?? '')), 50);
         if ($poNumber === '') {
             $errors[] = "Baris {$rowIndex}: Nomor PO tidak boleh kosong.";
         }
@@ -386,12 +386,12 @@ class SapImportService
 
         // 2. Sanitize Product Name & Product Code
         $productName = trim((string) ($data['product_name'] ?? ''));
-        $productCode = trim((string) ($data['product_code'] ?? ''));
+        $productCode = $this->boundString(trim((string) ($data['product_code'] ?? '')), 50);
 
         if ($productName === '' && $productCode !== '') {
             $productName = $productCode;
         } elseif ($productCode === '' && $productName !== '') {
-            $productCode = $productName;
+            $productCode = $this->boundString($productName, 50);
         }
 
         if ($productName === '') {
@@ -429,21 +429,43 @@ class SapImportService
         $data['tgl_verifikasi'] = $this->normalizeDate($data['tgl_verifikasi'] ?? null);
         $data['packaging_date'] = $this->normalizeDate($data['packaging_date'] ?? null);
 
-        // 5. Sanitize Text Attributes
-        $data['no_obc'] = filled($data['no_obc'] ?? null) ? trim((string) $data['no_obc']) : null;
-        $data['perso_type'] = filled($data['perso_type'] ?? null) ? trim((string) $data['perso_type']) : null;
-        $data['seri'] = filled($data['seri'] ?? null) ? trim((string) $data['seri']) : null;
+        // 5. Sanitize Text Attributes (bounded VARCHAR lengths — US-6.2)
+        $data['no_obc'] = filled($data['no_obc'] ?? null)
+            ? $this->boundString(trim((string) $data['no_obc']), 50)
+            : null;
+        $data['perso_type'] = filled($data['perso_type'] ?? null)
+            ? $this->boundString(trim((string) $data['perso_type']), 50)
+            : null;
+        $data['seri'] = filled($data['seri'] ?? null)
+            ? $this->boundString(trim((string) $data['seri']), 50)
+            : null;
         $data['customer_name'] = filled($data['customer_name'] ?? null) ? trim((string) $data['customer_name']) : null;
         $data['specification'] = filled($data['specification'] ?? null) ? trim((string) $data['specification']) : null;
         $data['paper_type'] = filled($data['paper_type'] ?? null) ? trim((string) $data['paper_type']) : null;
-        $data['machine_number'] = filled($data['machine_number'] ?? null) ? trim((string) $data['machine_number']) : null;
-        $data['unit'] = filled($data['unit'] ?? null) ? trim((string) $data['unit']) : 'lembar';
+        $data['machine_number'] = filled($data['machine_number'] ?? null)
+            ? $this->boundString(trim((string) $data['machine_number']), 50)
+            : null;
+        $data['unit'] = filled($data['unit'] ?? null)
+            ? $this->boundString(trim((string) $data['unit']), 30)
+            : 'lembar';
 
         return [
             'is_valid' => empty($errors),
             'errors' => $errors,
             'data' => $data,
         ];
+    }
+
+    /**
+     * Potong string agar tidak melebihi batas VARCHAR kolom (cegah MySQL error 1406).
+     */
+    protected function boundString(string $value, int $maxLength): string
+    {
+        if ($value === '' || mb_strlen($value) <= $maxLength) {
+            return $value;
+        }
+
+        return mb_substr($value, 0, $maxLength);
     }
 
     /**

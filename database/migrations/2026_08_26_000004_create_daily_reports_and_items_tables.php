@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('daily_reports', function (Blueprint $table) {
             $table->id();
-            $table->string('report_code')->unique()->index();
+            // unique() already creates a B-Tree index; do not chain ->index() (US-6.2)
+            $table->string('report_code', 50)->unique();
             $table->string('product_series', 30)->index();
             $table->date('report_date')->index();
             $table->string('shift', 30)->default('shift_1')->index();
@@ -34,14 +35,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('daily_report_id')->constrained('daily_reports')->cascadeOnDelete();
             $table->foreignId('production_order_id')->nullable()->constrained('production_orders')->nullOnDelete();
-            $table->string('po_number')->index();
+            $table->string('po_number', 50)->index();
             $table->string('product_name');
             $table->text('specification')->nullable();
-            $table->string('machine_number')->nullable()->index();
+            $table->string('machine_number', 50)->nullable()->index();
             $table->unsignedInteger('target_quantity')->default(0);
             $table->unsignedInteger('good_quantity')->default(0);
             $table->string('unit', 30)->default('lembar');
-            $table->string('notes')->nullable();
+            // Match parent daily_reports.notes (TEXT) to avoid VARCHAR(255) truncation (US-6.2)
+            $table->text('notes')->nullable();
             $table->dateTime('scanned_at')->nullable();
             $table->timestamps();
 

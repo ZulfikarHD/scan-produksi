@@ -32,8 +32,10 @@ We have established the following architectural decisions to balance academic ri
 ### 2. Physical Schema Cleanup & Portability Hardening
 - **Index Deduplication:** Remove the redundant `->index()` call on `daily_reports.report_code`, retaining only `$table->string('report_code', 50)->unique();`.
 - **Data Type Synchronization:** Convert `daily_report_items.notes` from `string()` (VARCHAR 255) to `text()->nullable()` to match the parent `daily_reports.notes` column, preventing string truncation on detailed operator notes.
-- **Bounded VARCHAR Allocations:** Apply explicit length constraints to key lookup columns (`po_number: 50`, `no_obc: 50`, `machine_number: 50`, `product_code: 50`, `unit: 30`) to optimize B-Tree index memory efficiency under MySQL `utf8mb4`.
+- **Bounded VARCHAR Allocations:** Apply explicit length constraints to key lookup columns (`po_number: 50`, `no_obc: 50`, `machine_number: 50`, `product_code: 50`, `unit: 30`, plus `perso_type`, `seri`, `status`, and matching `daily_reports` / `daily_report_items` bounds) to optimize B-Tree index memory efficiency under MySQL `utf8mb4`.
 - **Validation of the Snapshot Pattern:** Reaffirm the intentional denormalization of product specifications in `daily_report_items` alongside a nullable `production_order_id` with `nullOnDelete()`, guaranteeing immutable audit archives for security printing compliance.
+- **Implementation Status (US-6.2):** Completed — see `tests/Feature/MasterData/SchemaDeclutteringAndBoundsTest.php`, `docs/dev-docs/features/schema-decluttering-and-data-dictionary.md`, and `SapImportService::boundString()`.
+- **Data Dictionary Categorization:** `production_orders` columns are documented (migration header + `ProductionOrder` PHPDoc) as Operational Packaging Attributes vs Passthrough SAP Metadata without a physical table split.
 
 ### 3. Transactional Hardening & Concurrency Protection
 - **Atomic Barcode Scanning:** Wrap the item snapshot creation and totals recalculation inside `DB::transaction()` within `ProductionEntry::saveEntry()` (also applied to inline update/delete).

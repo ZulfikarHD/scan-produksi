@@ -8,25 +8,34 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * Data dictionary categorization (US-6.2):
+     * - Operational Packaging Attributes: po_number, no_obc, perso_type, seri, product_code,
+     *   product_name, customer_name, specification, paper_type, machine_number, target_quantity,
+     *   unit, status, created_by — used by barcode scan, report entry, and kemas workflows.
+     * - Passthrough SAP Metadata: order_date, delivery_deadline, tgl_pakai_bb, tgl_cetak,
+     *   tgl_verifikasi, packaging_date, rencet_quantity, jml_bb, jml_cd, total_bb, jml_cetak,
+     *   baik_verifikasi, rusak_verifikasi, hcts_baik, total_hcts, kemas_quantity, kirim_quantity —
+     *   flat ERP dump retained for import/audit fidelity without shop-floor mutation.
      */
     public function up(): void
     {
         Schema::create('production_orders', function (Blueprint $table) {
             $table->id();
 
-            // Identitas Pokok Order & Barcode SAP (Code 128)
-            $table->string('po_number')->unique(); // NO PO (Primary Barcode Lookup)
-            $table->string('no_obc')->nullable()->index(); // No OBC
+            // Operational Packaging Attributes — identitas order & barcode SAP (Code 128)
+            $table->string('po_number', 50)->unique(); // NO PO (Primary Barcode Lookup)
+            $table->string('no_obc', 50)->nullable()->index(); // No OBC
             $table->string('perso_type', 50)->nullable(); // Perso / non Perso
             $table->string('seri', 50)->nullable(); // SERI
-            $table->string('product_code')->nullable()->index(); // Bagian dari Material SAP
+            $table->string('product_code', 50)->nullable()->index(); // Bagian dari Material SAP
             $table->string('product_name')->index(); // Material / Nama Produk
             $table->string('customer_name')->nullable()->index(); // Pelanggan / Institusi
             $table->text('specification')->nullable(); // Spesifikasi teknis kertas & sekuriti
             $table->string('paper_type')->nullable(); // Jenis bahan baku kertas
-            $table->string('machine_number')->nullable()->index(); // WORK CENTER / Mesin
+            $table->string('machine_number', 50)->nullable()->index(); // WORK CENTER / Mesin
 
-            // Timeline & Tanggal Siklus Produksi SAP
+            // Passthrough SAP Metadata — timeline & tanggal siklus produksi
             $table->date('order_date'); // TGL OBC
             $table->date('delivery_deadline')->nullable(); // TGL JTempo
             $table->date('tgl_pakai_bb')->nullable(); // TGL_PAKAI_BB
@@ -34,8 +43,8 @@ return new class extends Migration
             $table->date('tgl_verifikasi')->nullable(); // TGL_VERIFIKASI
             $table->date('packaging_date')->nullable(); // Tanggal Kemas
 
-            // Kuantitas & Akumulasi Lembar Kerja SAP
-            $table->unsignedInteger('target_quantity')->default(0); // QTY PESAN (Target Order)
+            // Operational: target_quantity | Passthrough: metrik kuantitas SAP lainnya
+            $table->unsignedInteger('target_quantity')->default(0); // QTY PESAN (Target Order) — Operational
             $table->unsignedInteger('rencet_quantity')->default(0); // RENCET (Rencana Cetak)
             $table->unsignedInteger('jml_bb')->default(0); // JML_BB (LK) - Lembar Kerja Bahan Baku
             $table->unsignedInteger('jml_cd')->default(0); // JLM_CD (LK) - Cadangan / Inschiet
@@ -48,7 +57,7 @@ return new class extends Migration
             $table->unsignedInteger('kemas_quantity')->default(0); // KEMAS
             $table->unsignedInteger('kirim_quantity')->default(0); // KIRIM
 
-            // Status, Satuan & Audit Trail
+            // Operational Packaging Attributes — status, satuan & audit trail
             $table->string('unit', 30)->default('lembar'); // Satuan kemas (lembar/rim/buku)
             $table->string('status', 30)->default('ready')->index();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

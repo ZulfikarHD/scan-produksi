@@ -91,9 +91,9 @@ class DailyReport extends Model
 **So that** the database minimizes memory consumption, prevents index bloat, avoids note truncation errors, and remains performant at scale  
 
 **Acceptance Criteria:**
-- [ ] Remove duplicate B-Tree index on `daily_reports.report_code` by dropping the redundant `->index()` statement, preserving only `$table->string('report_code', 50)->unique();`.
-- [ ] Convert `daily_report_items.notes` from `string()` (VARCHAR 255) to `text()->nullable()` to match the parent `daily_reports.notes` column.
-- [ ] Apply explicit, bounded VARCHAR lengths to prevent over-allocation on MySQL `utf8mb4`:
+- [x] Remove duplicate B-Tree index on `daily_reports.report_code` by dropping the redundant `->index()` statement, preserving only `$table->string('report_code', 50)->unique();`.
+- [x] Convert `daily_report_items.notes` from `string()` (VARCHAR 255) to `text()->nullable()` to match the parent `daily_reports.notes` column.
+- [x] Apply explicit, bounded VARCHAR lengths to prevent over-allocation on MySQL `utf8mb4`:
   - `production_orders.po_number`: `VARCHAR(50)`
   - `production_orders.no_obc`: `VARCHAR(50)`
   - `production_orders.perso_type`: `VARCHAR(50)`
@@ -108,14 +108,14 @@ class DailyReport extends Model
   - `daily_report_items.po_number`: `VARCHAR(50)`
   - `daily_report_items.machine_number`: `VARCHAR(50)`
   - `daily_report_items.unit`: `VARCHAR(30)`
-- [ ] Document data dictionary categorization in `production_orders` separating Operational Packaging Attributes from Passthrough SAP Metadata.
-- [ ] Validate that existing SAP import files parse and upsert cleanly into bounded columns without truncation errors.
+- [x] Document data dictionary categorization in `production_orders` separating Operational Packaging Attributes from Passthrough SAP Metadata.
+- [x] Validate that existing SAP import files parse and upsert cleanly into bounded columns without truncation errors.
 
 **Tasks:**
-1. Create or adjust migration `database/migrations/2026_08_26_000004_create_daily_reports_and_items_tables.php` to remove redundant index and widen notes to `text`.
-2. Apply explicit lengths on VARCHAR definitions across `production_orders` and `daily_report_items`.
-3. Verify that `SapImportService` handles bounded strings properly.
-4. Run `php artisan test --compact --filter=ProductionOrderTest` and `php artisan test --compact --filter=ReportSessionTest`.
+1. [x] Create or adjust migration `database/migrations/2026_08_26_000004_create_daily_reports_and_items_tables.php` to remove redundant index and widen notes to `text`.
+2. [x] Apply explicit lengths on VARCHAR definitions across `production_orders` and `daily_report_items`.
+3. [x] Verify that `SapImportService` handles bounded strings properly.
+4. [x] Run `php artisan test --compact --filter=ProductionOrderTest` and `php artisan test --compact --filter=ReportSessionTest`.
 
 ---
 
