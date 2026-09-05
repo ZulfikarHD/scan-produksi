@@ -182,15 +182,15 @@ DB::transaction(function () use ($qty) {
 **So that** transitioning the application from local Laragon/SQLite to the enterprise production server occurs with zero downtime or syntax incompatibilities  
 
 **Acceptance Criteria:**
-- [ ] Confirm no MySQL-only syntax (such as relying on physical column positioning from `->after()`) causes functional breakage when ignored by PostgreSQL or SQLite.
-- [ ] Ensure all composite index key lengths comply with MySQL `utf8mb4` 3072-byte prefix limits.
-- [ ] Verify JSON column storage and casting for `sap_import_logs.error_log` across all database drivers.
-- [ ] Document database connection configuration guidelines and environment variables in [docs/architecture.md](../architecture.md).
+- [x] Confirm no MySQL-only syntax (such as relying on physical column positioning from `->after()`) causes functional breakage when ignored by PostgreSQL or SQLite.
+- [x] Ensure all composite index key lengths comply with MySQL `utf8mb4` 3072-byte prefix limits.
+- [x] Verify JSON column storage and casting for `sap_import_logs.error_log` across all database drivers.
+- [x] Document database connection configuration guidelines and environment variables in [docs/architecture.md](../architecture.md).
 
 **Tasks:**
-1. Audit all migration files for cross-database compatibility.
-2. Validate foreign key constraint behaviors (`cascadeOnDelete`, `nullOnDelete`).
-3. Document production database configuration recommendations in architecture docs.
+1. [x] Audit all migration files for cross-database compatibility.
+2. [x] Validate foreign key constraint behaviors (`cascadeOnDelete`, `nullOnDelete`).
+3. [x] Document production database configuration recommendations in architecture docs.
 
 ---
 

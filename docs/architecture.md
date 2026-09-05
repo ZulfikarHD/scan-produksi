@@ -453,14 +453,190 @@ Gunakan operasi atomik `DailyReport::firstOrCreate()` atau tangani `QueryExcepti
 
 ## 6. Database Engine Portability (SQLite → MySQL / PostgreSQL)
 
-| Aspek / Fitur | SQLite (Pengembangan Lokal) | MySQL 8.0+ (Target Produksi) | PostgreSQL 16+ (Alternatif Enterprise) | Rekomendasi Portabilitas |
+Sistem **scan-produksi** dirancang untuk beroperasi secara portabel melintasi tiga mesin basis data relasional utama: **SQLite 3** untuk pengembangan lokal dan pengujian otomatis cepat (*in-memory*), **MySQL 8.0+** sebagai basis data target implementasi *on-premise* di lingkungan operasional pabrik, serta **PostgreSQL 16+** sebagai opsi infrastruktur korporat masa depan berdaya tahan tinggi.
+
+### 6.1 Matriks Kompatibilitas Lintas Driver Basis Data
+
+| Aspek / Fitur Relasional | SQLite 3 (Pengembangan Lokal / Test) | MySQL 8.0+ (Target Produksi Pabrik) | PostgreSQL 16+ (Alternatif Enterprise) | Ketetapan Arsitektur & Portabilitas |
 |---|---|---|---|---|
-| **Foreign Key Enforcement** | Dinonaktifkan default (aktif via pragma) | Selalu aktif (InnoDB) | Selalu aktif | Pastikan seeder & test menghormati integritas FK |
-| **Klausa `->after()`** | Diabaikan (*silent ignore*) | Didukung penuh | Diabaikan | Jangan bergantung pada urutan fisik kolom di query |
-| **Kolom JSON (`error_log`)** | Disimpan sebagai `TEXT` | Native `JSON` (dengan validasi sintaks) | Disimpan sebagai `JSON` / `JSONB` | Gunakan casting array pada model Eloquent |
-| **Tipe Data Waktu** | Disimpan sebagai string ISO 8601 | `DATETIME` / `TIMESTAMP` | `TIMESTAMP WITHOUT TIME ZONE` | Selalu gunakan accessor/mutator Carbon Laravel |
-| **Panjang Indeks String** | Tidak dibatasi | Dibatasi hingga 3072 byte (utf8mb4) | Tidak dibatasi (hingga batas tuple) | Batasi panjang `VARCHAR` pada kolom berindeks |
-| **Tipe Data Kuantitas** | Integer dinamis | `INT UNSIGNED` | `INTEGER` (signed) | Pertahankan `unsignedInteger` di migrasi Laravel |
+| **Foreign Key Constraints** | Diaktifkan via konfigurasi `'foreign_key_constraints' => true` (`PRAGMA foreign_keys = ON`) | Selalu aktif pada engine default InnoDB | Selalu aktif secara natif | Diuji otomatis pada `DatabasePortabilityTest` untuk menjamin integritas referensial. |
+| **Klausa Posisi `->after()`** | Diabaikan secara anggun (*silent ignore*) oleh SQLite SchemaGrammar | Didukung penuh untuk memposisikan kolom fisik tabel | Diabaikan secara anggun (*silent ignore*) oleh PostgresGrammar | Dilarang keras menulis kueri atau pemetaan numerik berbasis urutan posisi kolom fisik (`SELECT *` offset). Seluruh model Eloquent dan query builder wajib menyebutkan nama kolom secara eksplisit. |
+| **Penyimpanan Kolom JSON** | Disimpan secara fisik sebagai `TEXT` | Disimpan sebagai tipe biner `JSON` natif dengan validasi sintaks otomatis | Disimpan sebagai `JSON` / `JSONB` natif | Model Eloquent (`SapImportLog`) menggunakan casting `'error_log' => 'array'` sehingga serialisasi dan deserialisasi bekerja transparan dan identik di ketiga mesin. |
+| **Batas Panjang Kunci Indeks** | Tidak dibatasi secara praktis | Dibatasi hingga 3.072 byte pada format `DYNAMIC` / `utf8mb4` | Dibatasi hingga 1/3 ukuran halaman memori (± 2.700 byte untuk tuple B-Tree) | Seluruh kolom string pembentuk indeks majemuk dibatasi dengan panjang terukur (`VARCHAR(30)` hingga `VARCHAR(50)`), menjaga konsumsi memori indeks di bawah 500 byte. |
+| **Fungsi Agregasi Waktu Nyata** | `COUNT(*)`, `SUM()`, `COALESCE()` standar ANSI | `COUNT(*)`, `SUM()`, `COALESCE()` standar ANSI | `COUNT(*)`, `SUM()`, `COALESCE()` standar ANSI | Tidak menggunakan fungsi spesifik vendor (seperti `IFNULL` MySQL atau ekstensi non-ANSI). Kueri `selectRaw` pada modul pemindaian dan penyuntingan bersifat portabel murni. |
+| **Tipe Data Kuantitas & Flag** | Integer dinamis, integer 0/1 untuk boolean | `INT UNSIGNED`, `TINYINT(1)` untuk boolean | `INTEGER` (signed), `BOOLEAN` natif | Definisi migrasi Laravel menggunakan `$table->unsignedInteger(...)` dan `$table->boolean(...)` yang ditransformasikan secara akurat oleh masing-masing grammar driver. |
+
+---
+
+### 6.2 Independensi Urutan Kolom Fisik (`->after()`)
+
+Pada migrasi penambahan kolom:
+1. `2026_08_26_000001_add_role_nip_username_status_to_users_table.php`:
+   ```php
+   $table->string('nip', 30)->nullable()->unique()->after('name');
+   $table->string('username', 50)->nullable()->unique()->after('nip');
+   $table->string('role', 20)->default('petugas')->after('password');
+   $table->boolean('is_active')->default(true)->after('role');
+   $table->timestamp('last_login_at')->nullable()->after('is_active');
+   ```
+2. `2026_08_26_000005_add_verified_at_and_reject_to_daily_reports_tables.php`:
+   ```php
+   $table->unsignedInteger('total_reject_quantity')->default(0)->after('total_good_quantity');
+   $table->timestamp('verified_at')->nullable()->after('supervisor_id');
+   $table->unsignedInteger('reject_quantity')->default(0)->after('good_quantity');
+   ```
+
+**Aturan Penjaminan Portabilitas:**
+- Mesin MySQL menempatkan kolom baru tepat di sebelah kolom acuan `->after()`, menjaga kerapian susunan kolom ketika diinspeksi melalui perkakas basis data administratif (*phpMyAdmin* atau *MySQL Workbench*).
+- Mesin PostgreSQL dan SQLite tidak mendukung klausa posisi `AFTER` pada operasi `ALTER TABLE ADD COLUMN`. Laravel SchemaGrammar untuk SQLite dan PostgreSQL mengabaikan pemanggilan `->after()` tanpa memicu galat sintaksis (*graceful fallback*), menambahkan kolom tersebut di posisi akhir tabel.
+- Kode aplikasi dalam repositori ini sepenuhnya terisolasi dari perbedaan urutan fisik tersebut karena interaksi basis data dieksekusi melalui Eloquent Model dan pemanggilan kolom berbasis nama (*named projection*), bukan indeks numerik array (*positional fetch*).
+
+---
+
+### 6.3 Audit Anggaran Ukuran Indeks Majemuk MySQL utf8mb4 (3.072 Byte)
+
+Pada MySQL 8.0+ dengan set karakter bawaan `utf8mb4` (yang mengalokasikan hingga 4 byte per karakter untuk mendukung set karakter multibyte dan simbol sekuriti), panjang gabungan seluruh kolom dalam satu indeks pohon B-Tree dibatasi maksimal **3.072 byte**. Apabila tabel memiliki indeks komposit pada beberapa kolom `VARCHAR(255)` tanpa pembatasan panjang, migrasi akan gagal dengan pengecualian fatal:
+`SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 3072 bytes`.
+
+Arsitektur skema `scan-produksi` mengaudit seluruh indeks komposit pada domain tabel dengan alokasi ketat:
+
+| Tabel Basis Data | Nama / Kolom Indeks Majemuk | Komposisi Tipe Data & Ukuran Byte (utf8mb4) | Total Ukuran Byte | Status Portabilitas |
+|---|---|---|---|---|
+| `production_orders` | `['status', 'order_date']` | `VARCHAR(30)` (120 B) + `DATE` (3 B) | **123 Byte** | Aman (< 3.072 B) |
+| `production_orders` | `['machine_number', 'status']` | `VARCHAR(50)` (200 B) + `VARCHAR(30)` (120 B) | **320 Byte** | Aman (< 3.072 B) |
+| `production_orders` | `['no_obc', 'status']` | `VARCHAR(50)` (200 B) + `VARCHAR(30)` (120 B) | **320 Byte** | Aman (< 3.072 B) |
+| `sap_import_logs` | `['created_at', 'status']` | `TIMESTAMP` (4 B) + `VARCHAR(30)` (120 B) | **124 Byte** | Aman (< 3.072 B) |
+| `daily_reports` | `['product_series', 'report_date', 'shift']` (UK) | `VARCHAR(30)` (120 B) + `DATE` (3 B) + `VARCHAR(30)` (120 B) | **243 Byte** | Aman (< 3.072 B) |
+| `daily_reports` | `['status', 'report_date']` | `VARCHAR(30)` (120 B) + `DATE` (3 B) | **123 Byte** | Aman (< 3.072 B) |
+| `daily_report_items` | `['daily_report_id', 'po_number']` | `BIGINT` (8 B) + `VARCHAR(50)` (200 B) | **208 Byte** | Aman (< 3.072 B) |
+
+Setiap indeks komposit dalam aplikasi mengonsumsi **kurang dari 350 byte**, hanya menghabiskan ±11% dari batas aman MySQL, sehingga mencegah risiko pemborosan memori *buffer pool* dan menjamin kompatibilitas penuh.
+
+---
+
+### 6.4 Struktur Kolom JSON & Model Casting (`sap_import_logs.error_log`)
+
+Tabel `sap_import_logs` mencatat riwayat pemrosesan impor master order SAP termasuk rincian baris yang gagal divalidasi pada kolom `error_log`:
+- **Definisi Migrasi:** `$table->json('error_log')->nullable();`
+- **Tingkat Fisik MySQL 8.0+:** Disimpan dalam format biner teroptimasi `JSON` natif dengan verifikasi sintaks otomatis saat *write*.
+- **Tingkat Fisik PostgreSQL 16+:** Diterjemahkan sebagai tipe `JSON` standar.
+- **Tingkat Fisik SQLite 3:** Diterjemahkan sebagai kolom teks `TEXT`.
+- **Penanganan Aplikasi Eloquent:**
+  Model `SapImportLog` menetapkan deklarasi casting eksplisit:
+  ```php
+  protected function casts(): array
+  {
+      return [
+          'total_rows' => 'integer',
+          'imported_count' => 'integer',
+          'updated_count' => 'integer',
+          'failed_count' => 'integer',
+          'error_log' => 'array',
+      ];
+  }
+  ```
+  Dengan konfigurasi ini, Eloquent secara otomatis melakukan `json_encode()` saat menyimpan array error dan `json_decode(..., true)` saat membaca rekaman dari basis data. Fungsionalitas aplikasi tidak bergantung pada fitur mesin spesifik, dan data log audit tetap utuh saat basis data dimigrasikan antar-platform.
+
+---
+
+### 6.5 Integritas Referensial Kunci Tamu (*Foreign Key Lifecycle*)
+
+Integritas relasional antar-tabel dijaga secara konsisten melalui dua aksi penghapusan kunci tamu:
+
+1. **`cascadeOnDelete()` — Penghapusan Berjenjang Dependen Induk:**
+   - Menghapus akun Petugas (`users.user_id`) akan menghapus seluruh rekaman header sesi laporan (`daily_reports`) yang dibuat oleh petugas tersebut.
+   - Menghapus dokumen laporan harian (`daily_reports.daily_report_id`) secara otomatis menghapus seluruh baris rincian item (`daily_report_items`) di bawahnya, mencegah keberadaan data yatim (*orphaned records*).
+2. **`nullOnDelete()` — Perlindungan Arsip & Nilai Snapshot:**
+   - Menghapus data master pesanan SAP (`production_orders.production_order_id`) **tidak menghapus** baris rincian pada `daily_report_items`. Foreign key disetel ke `NULL`, sementara seluruh data snapshot operasional (`po_number`, `product_name`, `specification`, `machine_number`, `target_quantity`, `good_quantity`, `reject_quantity`, `unit`, `notes`, `scanned_at`) tetap utuh untuk kebutuhan pembuktian audit hukum.
+   - Menghapus akun supervisor pengesah (`daily_reports.supervisor_id`) atau pengunggah berkas SAP (`sap_import_logs.user_id`) menyetel kolom kunci tamu menjadi `NULL` tanpa membatalkan keabsahan rekaman laporan atau berkas log.
+
+---
+
+### 6.6 Kepatuhan Sintaks ANSI SQL pada Kueri Agregasi
+
+Seluruh kalkulasi akumulasi data (seperti pada `ProductionEntry::saveEntry()` dan `EditReport::refreshTotals()`) menggunakan ekspresi SQL murni yang mematuhi standar ANSI:
+```php
+$totals = DailyReportItem::where('daily_report_id', $this->report->id)
+    ->selectRaw('COUNT(*) as total_items, COALESCE(SUM(good_quantity), 0) as total_good, COALESCE(SUM(reject_quantity), 0) as total_reject')
+    ->first();
+```
+- Fungsi `COUNT(*)` dan `SUM(...)` didukung universal oleh SQLite, MySQL, dan PostgreSQL.
+- Fungsi pembungkus nilai kosong `COALESCE(..., 0)` memastikan kalkulasi menghasilkan nilai integer 0 saat tabel masih kosong (menghindari galat nilai `NULL` pada PostgreSQL atau MySQL *strict mode*).
+- Layanan analitik `DashboardAnalyticsService` mengelompokkan data deret waktu menggunakan koleksi PHP (`Collection::groupBy()`) berbasis tanggal terurai, menghindari ketergantungan pada fungsi pemformatan tanggal spesifik vendor seperti `DATE_FORMAT()` (MySQL), `strftime()` (SQLite), atau `TO_CHAR()` (PostgreSQL).
+
+---
+
+### 6.7 Panduan Konfigurasi Basis Data Produksi & Variabel Lingkungan (`.env`)
+
+#### Lingkungan 1: Pengembangan Lokal & Pengujian Cepat (SQLite)
+Cocok untuk lingkungan kerja lokal pengembang, CI/CD pipeline, dan eksekusi pengujian Pest:
+```ini
+DB_CONNECTION=sqlite
+DB_DATABASE=/absolute/path/to/database/database.sqlite
+DB_FOREIGN_KEYS=true
+```
+
+#### Lingkungan 2: Target Produksi Pabrik (MySQL 8.0+)
+Konfigurasi standar untuk server operasional *on-premise* unit pengemasan:
+```ini
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=scan_produksi_prod
+DB_USERNAME=pds_app_user
+DB_PASSWORD=SecureProductionPasswordGenerated2026!
+DB_CHARSET=utf8mb4
+DB_COLLATION=utf8mb4_unicode_ci
+MYSQL_ATTR_SSL_CA=
+```
+
+**Rekomendasi Parameter `my.cnf` Mesin MySQL Produksi:**
+- `default_storage_engine = InnoDB`
+- `innodb_file_per_table = 1`
+- `innodb_buffer_pool_size = 2G` (sesuaikan dengan 60-70% RAM server)
+- `innodb_flush_log_at_trx_commit = 1` (menjamin durabilitas penuh ACID)
+- `character-set-server = utf8mb4`
+- `collation-server = utf8mb4_unicode_ci`
+- `sql_mode = "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"`
+
+#### Lingkungan 3: Alternatif Enterprise (PostgreSQL 16+)
+Konfigurasi untuk infrastruktur korporat dengan replikasi tingkat lanjut:
+```ini
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=scan_produksi_enterprise
+DB_USERNAME=pds_app_user
+DB_PASSWORD=SecureProductionPasswordGenerated2026!
+DB_CHARSET=utf8
+DB_SSLMODE=prefer
+```
+
+---
+
+### 6.8 Prosedur Verifikasi Migrasi & *Cutover* Produksi
+
+Sebelum melakukan *cutover* produksi ke basis data MySQL/PostgreSQL, administrator wajib menjalankan serangkaian perintah verifikasi:
+
+1. **Pengujian Status Migrasi Bersih:**
+   ```bash
+   php artisan migrate:status
+   ```
+2. **Uji Coba Migrasi Penuh (*Dry-Run / Migration Cycle*):**
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+3. **Eksekusi Pengujian Otomatis Integritas Relasional:**
+   ```bash
+   php artisan test --compact --filter=DatabasePortabilityTest
+   php artisan test --compact --filter=PrimaryKeyArchitectureTest
+   ```
+4. **Verifikasi Encoding Tabel & Buffer Indeks (MySQL Shell):**
+   ```sql
+   SELECT table_name, table_collation, data_length, index_length 
+   FROM information_schema.tables 
+   WHERE table_schema = 'scan_produksi_prod';
+   ```
 
 ---
 
@@ -470,6 +646,10 @@ Gunakan operasi atomik `DailyReport::firstOrCreate()` atau tangani `QueryExcepti
 - [docs/dev-docs/decisions/003-production-order-indexing-and-schema-architecture.md](dev-docs/decisions/003-production-order-indexing-and-schema-architecture.md) — Keputusan indeks barcode master data
 - [docs/dev-docs/decisions/006-daily-production-report-schema-and-session-launcher.md](dev-docs/decisions/006-daily-production-report-schema-and-session-launcher.md) — Skema sesi laporan harian
 - [docs/dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md](dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md) — ADR penyelarasan penamaan Primary Key dan hardening transaksi
+- [docs/dev-docs/decisions/011-cross-database-portability-and-migration-standards.md](dev-docs/decisions/011-cross-database-portability-and-migration-standards.md) — ADR standarisasi portabilitas basis data lintas engine
 - [docs/dev-docs/features/dual-path-primary-key-and-model-alignment.md](dev-docs/features/dual-path-primary-key-and-model-alignment.md) — Dokumentasi teknis Pathway 2 PK fisik `tablename_id`
+- [docs/dev-docs/features/schema-decluttering-and-data-dictionary.md](dev-docs/features/schema-decluttering-and-data-dictionary.md) — Dokumentasi perapian skema dan restriksi panjang VARCHAR
+- [docs/dev-docs/features/transactional-hardening-and-concurrency-protection.md](dev-docs/features/transactional-hardening-and-concurrency-protection.md) — Dokumentasi batas transaksi atomik pemindaian barcode
+- [docs/dev-docs/features/production-portability-and-multi-database-verification.md](dev-docs/features/production-portability-and-multi-database-verification.md) — Dokumentasi verifikasi portabilitas SQLite ke MySQL dan PostgreSQL
 - [docs/scrum-planning/phase-06-database-architecture-refinement-and-academic-alignment.md](scrum-planning/phase-06-database-architecture-refinement-and-academic-alignment.md) — Rencana backlog sprint implementasi refactoring basis data
 - [docs/BAB_III_Draft.md](BAB_III_Draft.md) — Naskah Bab III Skripsi (ERD Chen, LRS, dan Spesifikasi File Basis Data)

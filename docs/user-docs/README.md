@@ -62,3 +62,8 @@ Selamat datang di pusat dokumentasi dan panduan operasional **Sistem Monitoring 
    - Memahami struktur master data pesanan produksi SAP dan atribut operasional kemas.
    - Memeriksa kode laporan, nomor PO barcode, dan akumulasi hasil kemas baik serta afval reject.
    - Meninjau riwayat impor berkas SAP dan penanganan kesalahan baris.
+
+10. **[Panduan Konfigurasi & Portabilitas Basis Data](guides/panduan-konfigurasi-dan-portabilitas-basis-data.md)**
+   - Menyiapkan koneksi SQLite untuk pengujian cepat dan demonstrasi sidang.
+   - Mengonfigurasi server basis data produksi MySQL 8.0+ dan setelan parameter InnoDB.
+   - Menjalankan uji otomatis integritas relasional dan pemeriksaan status migrasi.
