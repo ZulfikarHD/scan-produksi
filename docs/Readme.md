@@ -9,6 +9,7 @@ PT Percetakan Dokumen Sekuriti (Unit Pengemasan)
 ### 1. Developer Documentation (`docs/dev-docs/`)
 Technical references, architectural diagrams, data models, and decisions for software engineers.
 
+- [System & Database Architecture Document](architecture.md)
 - [Dev Docs Overview](dev-docs/README.md)
 - **Features**:
   - [Authentication & Layout Shell](dev-docs/features/authentication-and-layout-shell.md)
@@ -18,6 +19,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [Master Data Explorer & Manual Order Management](dev-docs/features/master-data-explorer-and-manual-order.md)
   - [Daily Production Report Session & Code Generator](dev-docs/features/daily-production-report-session.md)
   - [High-Speed Continuous Barcode Scanning & Inline Production Entry](dev-docs/features/continuous-barcode-scan-and-inline-production-entry.md)
+  - [Transactional Hardening & Concurrency Protection](dev-docs/features/transactional-hardening-and-concurrency-protection.md)
   - [Daily Production Report Management, Verification & Export](dev-docs/features/report-management-verification-and-export.md)
   - [Dashboard Analytics & 14-Day Production Visualization](dev-docs/features/dashboard-analytics-and-14-day-chart.md)
 - **Architecture Decision Records (ADRs)**:
@@ -30,6 +32,7 @@ Technical references, architectural diagrams, data models, and decisions for sof
   - [ADR-007: High-Speed Continuous Barcode Scanning, Focus Management, and Inline Table Editing Architecture](dev-docs/decisions/007-high-speed-continuous-barcode-scanning-and-inline-table-editing.md)
   - [ADR-008: Daily Report Verification, Correction Window, and Streaming Export Architecture](dev-docs/decisions/008-daily-report-verification-and-streaming-export-architecture.md)
   - [ADR-009: Dashboard Analytics Aggregation, Zero-Fill Timeseries, and Chart.js Integration](dev-docs/decisions/009-dashboard-analytics-aggregation-and-chartjs-visualization.md)
+  - [ADR-010: Database Schema Refinement, Academic Primary Key Conventions, and Transactional Hardening](dev-docs/decisions/010-database-schema-refinement-and-academic-pk-conventions.md)
 
 ### 2. User Guides (`docs/user-docs/`)
 Step-by-step guides for unit supervisors and packaging operators.
@@ -54,3 +57,4 @@ Step-by-step guides for unit supervisors and packaging operators.
 - [Phase 03: UX Plan](scrum-planning/phase-03-ux-plan.md)
 - [Phase 04: Report Management & Print](scrum-planning/phase-04-report-management-and-print.md)
 - [Phase 05: Dashboard Analytics & 14-Day Chart](scrum-planning/phase-05-dashboard-analytics-14-day-chart.md)
+- [Phase 06: Database Architecture Refinement & Academic Alignment](scrum-planning/phase-06-database-architecture-refinement-and-academic-alignment.md)

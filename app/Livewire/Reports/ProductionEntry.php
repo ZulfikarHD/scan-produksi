@@ -10,6 +10,7 @@ use App\Models\User;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -127,23 +128,28 @@ class ProductionEntry extends Component
             return;
         }
 
-        DailyReportItem::create([
-            'daily_report_id' => $this->report->id,
-            'production_order_id' => $this->scannedOrder->id,
-            'po_number' => $this->scannedOrder->po_number,
-            'product_name' => $this->scannedOrder->product_name,
-            'specification' => $this->scannedOrder->specification,
-            'machine_number' => $this->scannedOrder->machine_number,
-            'target_quantity' => $this->scannedOrder->target_quantity,
-            'good_quantity' => $qty,
-            'unit' => $this->scannedOrder->unit ?? 'lembar',
-            'notes' => $this->itemNotes ?: null,
-            'scanned_at' => now(),
-        ]);
+        // Simpan item dan sinkronisasi agregat header dalam satu transaksi atomik (ACID)
+        DB::transaction(function () use ($qty) {
+            DailyReportItem::create([
+                'daily_report_id' => $this->report->id,
+                'production_order_id' => $this->scannedOrder->id,
+                'po_number' => $this->scannedOrder->po_number,
+                'product_name' => $this->scannedOrder->product_name,
+                'specification' => $this->scannedOrder->specification,
+                'machine_number' => $this->scannedOrder->machine_number,
+                'target_quantity' => $this->scannedOrder->target_quantity,
+                'good_quantity' => $qty,
+                'reject_quantity' => 0,
+                'unit' => $this->scannedOrder->unit ?? 'lembar',
+                'notes' => $this->itemNotes ?: null,
+                'scanned_at' => now(),
+            ]);
+
+            $this->refreshTotals();
+        });
 
         $poNumber = $this->scannedOrder->po_number;
 
-        $this->refreshTotals();
         $this->reset(['scanPo', 'scannedOrder', 'productionQty', 'itemNotes']);
 
         $this->dispatch('play-sound', ['type' => 'success']);
@@ -173,10 +179,14 @@ class ProductionEntry extends Component
             return;
         }
 
-        $item = DailyReportItem::where('daily_report_id', $this->report->id)->findOrFail($itemId);
-        $item->update(['good_quantity' => $qty]);
+        $item = null;
 
-        $this->refreshTotals();
+        DB::transaction(function () use ($itemId, $qty, &$item) {
+            $item = DailyReportItem::where('daily_report_id', $this->report->id)->findOrFail($itemId);
+            $item->update(['good_quantity' => $qty]);
+            $this->refreshTotals();
+        });
+
         Flux::toast("Jumlah PO {$item->po_number} diperbarui menjadi {$qty} lembar.", variant: 'success');
     }
 
@@ -192,8 +202,11 @@ class ProductionEntry extends Component
             return;
         }
 
-        DailyReportItem::where('daily_report_id', $this->report->id)->where('id', $itemId)->delete();
-        $this->refreshTotals();
+        DB::transaction(function () use ($itemId) {
+            DailyReportItem::where('daily_report_id', $this->report->id)->where('id', $itemId)->delete();
+            $this->refreshTotals();
+        });
+
         Flux::toast('Baris item PO berhasil dihapus dari laporan.', variant: 'info');
     }
 
@@ -239,16 +252,18 @@ class ProductionEntry extends Component
     }
 
     /**
-     * Hitung ulang akumulasi total item PO dan kuantitas hasil kemas.
+     * Hitung ulang akumulasi total item, kuantitas baik, dan reject dalam satu query atomik.
      */
     protected function refreshTotals(): void
     {
-        $totalItems = DailyReportItem::where('daily_report_id', $this->report->id)->count();
-        $totalGood = (int) DailyReportItem::where('daily_report_id', $this->report->id)->sum('good_quantity');
+        $totals = DailyReportItem::where('daily_report_id', $this->report->id)
+            ->selectRaw('COUNT(*) as total_items, COALESCE(SUM(good_quantity), 0) as total_good, COALESCE(SUM(reject_quantity), 0) as total_reject')
+            ->first();
 
         $this->report->update([
-            'total_items_count' => $totalItems,
-            'total_good_quantity' => $totalGood,
+            'total_items_count' => (int) ($totals->total_items ?? 0),
+            'total_good_quantity' => (int) ($totals->total_good ?? 0),
+            'total_reject_quantity' => (int) ($totals->total_reject ?? 0),
         ]);
         $this->report->refresh();
     }

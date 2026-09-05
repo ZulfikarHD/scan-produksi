@@ -14,13 +14,14 @@ flowchart TD
     D -->|Order Not Found| F[Error Toast & Buzzer Sound]
     E -->|Dispatch focus-qty-input| G[Jumlah Kemas Input #production-qty-input]
     G -->|Type Qty + Press Enter| H[ProductionEntry::saveEntry]
-    H -->|Insert Record| I[(daily_report_items Table)]
-    H -->|Recalculate Totals| J[(daily_reports Table)]
+    H -->|DB::transaction| H2[Insert item + refreshTotals 3 aggregates]
+    H2 -->|Commit| I[(daily_report_items Table)]
+    H2 -->|Commit| J[(daily_reports Table)]
     H -->|Dispatch focus-scan-input| B
     
     K[Inline Table Row] -->|Edit Cell Value + Enter/Blur| L[ProductionEntry::updateItemQuantity]
-    L -->|Update Record & Recount| I
-    L -->|Recount Totals| J
+    L -->|DB::transaction Update + Recount| I
+    L -->|Recount totals incl reject| J
     
     M[Header Finalize Button] -->|wire:click=finalizeReport| N[Update status to SUBMITTED]
     N -->|Lock Editing & Show Print CTA| O[Physical Print View /reports/{code}/print]
@@ -45,6 +46,7 @@ erDiagram
         bigint supervisor_id FK
         int total_items_count
         int total_good_quantity
+        int total_reject_quantity
         text notes
         string status
         timestamp created_at
@@ -61,6 +63,7 @@ erDiagram
         string machine_number
         int target_quantity
         int good_quantity
+        int reject_quantity
         string unit
         string notes
         datetime scanned_at
@@ -73,11 +76,11 @@ erDiagram
 
 | Layer | File | Purpose |
 |---|---|---|
-| Livewire Component | `app/Livewire/Reports/ProductionEntry.php` | Handles continuous scan lookup, focus event dispatches, singular item persistence, inline quantity updates, deletion, finalization, and supervisor reopening |
+| Livewire Component | `app/Livewire/Reports/ProductionEntry.php` | Handles continuous scan lookup, focus event dispatches, transactional item persistence, atomic three-aggregate refresh, inline quantity updates, deletion, finalization, and supervisor reopening |
 | Blade Template | `resources/views/livewire/reports/production-entry.blade.php` | Single-surface scan console, Web Audio API sound synthesis, matched SAP spec pill, and 9-column inline editable table |
 | Printable Template | `resources/views/reports/print.blade.php` | Standardized A4 portrait layout with company header, metadata table, items breakdown, and signature block for handover |
 | Routing | `routes/web.php` | Named routes for `reports.entry` (`/reports/{report:report_code}/entry`) and `reports.print` (`/reports/{report:report_code}/print`) |
-| Feature Tests | `tests/Feature/Reports/ProductionEntryTest.php`<br>`tests/Feature/Reports/InlineRowEditTest.php`<br>`tests/Feature/Reports/FinalizeReportTest.php`<br>`tests/Feature/Reports/ReportPrintTest.php` | Full Pest feature test suite verifying scanning loop, inline edits, total calculations, lock permissions, and print rendering |
+| Feature Tests | `tests/Feature/Reports/ProductionEntryTest.php`<br>`tests/Feature/Reports/InlineRowEditTest.php`<br>`tests/Feature/Reports/FinalizeReportTest.php`<br>`tests/Feature/Reports/ReportPrintTest.php`<br>`tests/Feature/Reports/ReportConcurrencyAndTransactionTest.php` | Full Pest feature test suite verifying scanning loop, inline edits, transactional totals (including reject), lock permissions, and print rendering |
 
 ## Flow Explanation
 
@@ -88,7 +91,7 @@ erDiagram
    - If not found, an error toast is displayed, buzzer audio is emitted, the input is cleared, and focus remains on `#scan-po-input`.
    - If found, product specifications are displayed in the matched pill, a pleasant chime plays, and `@focus-qty-input` transfers focus to `#production-qty-input` (auto-selecting the default target quantity).
    - The operator types the actual packed amount and presses `Enter`.
-   - `saveEntry()` creates a snapshot row in `daily_report_items`, increments report aggregates, resets the form, dispatches `@focus-scan-input`, and prepares the console for the next card immediately.
+   - `saveEntry()` wraps snapshot insert and `refreshTotals()` inside `DB::transaction()`, recalculating `total_items_count`, `total_good_quantity`, and `total_reject_quantity` in one `selectRaw`, then resets the form and dispatches `@focus-scan-input`.
 2. **Real-Time Inline Table Editing (No Modals)**:
    - All scanned rows are listed in reverse chronological order in the table below the console.
    - To correct a typo, the operator clicks or tabs directly to the number input in the "Jumlah Kemas" column.
@@ -114,9 +117,12 @@ erDiagram
 - **Single-Surface Zero-Modal Architecture**: Modals interrupt high-speed operator scanning rhythm. Integrating the scanner input, spec pill, and inline table into one reactive Livewire surface allows seamless processing of hundreds of cards per hour.
 - **Web Audio API Synthesis**: Rather than relying on external MP3 audio asset files that may fail to buffer or trigger cross-origin blocking, audio chimes are synthesized directly in the browser using the Web Audio API oscillator.
 - **Snapshot Immutability**: All item attributes (name, specification, machine number, target quantity) are snapshotted in `daily_report_items` upon save, ensuring historical report integrity regardless of future SAP master data imports.
+- **Transactional Aggregate Sync**: Item writes and header totals share one ACID transaction so a mid-write failure cannot leave orphan items or drifted `total_*` columns (see ADR-010 / Phase 06 US-6.3).
 
 ## Related
 
 - [ADR-007: High-Speed Continuous Barcode Scanning and Inline Table Editing](../decisions/007-high-speed-continuous-barcode-scanning-and-inline-table-editing.md)
+- [ADR-010: Database Schema Refinement and Transactional Hardening](../decisions/010-database-schema-refinement-and-academic-pk-conventions.md)
+- [Transactional Hardening & Concurrency Protection](./transactional-hardening-and-concurrency-protection.md)
 - [Daily Production Report Session & Code Generator](./daily-production-report-session.md)
 - [Panduan Pemindaian Barcode & Input Produksi](../../user-docs/guides/panduan-pemindaian-barcode-dan-input-produksi.md)

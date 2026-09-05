@@ -41,9 +41,10 @@ Sistem baru ini memanfaatkan **Barcode Scanner (Code 128)** yang membaca Nomor O
 | **Phase 03** | [Barcode Scan & Daily Production Entry](phase-03-barcode-scan-daily-production.md) | Code 128 Scanner Event Listener, Real-time Spec Lookup, Reactive Staging Table, Multi-Item Draft | 5-6 days | 34 pts |
 | **Phase 04** | [Report Management, Verification & Print](phase-04-report-management-and-print.md) | Report Index & Flux Table, Unique Report ID Generator, Edit/Audit Trail, Print Template & Export | 4-5 days | 28 pts |
 | **Phase 05** | [Dashboard Analytics & 14-Day Production Graph](phase-05-dashboard-analytics-14-day-chart.md) | 14-Day Trend Chart (Chart.js / Alpine), KPI Metric Cards, Shift Breakdown, Quick Action Hub | 3-4 days | 24 pts |
+| **Phase 06** | [Database Architecture Refinement & Academic Alignment](phase-06-database-architecture-refinement-and-academic-alignment.md) | Schema Decluttering, Index Deduplication, Transactional Barcode Scanning, and Academic Primary Key Alignment (`tablename_id`) | 4-5 days | 32 pts |
 
-**Total Estimated Sprint Duration**: 19 - 24 Days  
-**Total Story Points**: 141 Story Points
+**Total Estimated Sprint Duration**: 23 - 29 Days  
+**Total Story Points**: 173 Story Points
 
 ---
 
@@ -54,3 +55,4 @@ Sistem baru ini memanfaatkan **Barcode Scanner (Code 128)** yang membaca Nomor O
 - [Phase 03: Barcode Scan & Daily Production Entry](phase-03-barcode-scan-daily-production.md)
 - [Phase 04: Report Management, Verification & Print](phase-04-report-management-and-print.md)
 - [Phase 05: Dashboard Analytics & 14-Day Production Graph](phase-05-dashboard-analytics-14-day-chart.md)
+- [Phase 06: Database Architecture Refinement & Academic Alignment](phase-06-database-architecture-refinement-and-academic-alignment.md)

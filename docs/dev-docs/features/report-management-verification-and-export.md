@@ -12,13 +12,14 @@ flowchart TD
     
     B -->|Click Row Detail| D[ReportDetail Component /reports/{code}]
     D -->|Supervisor Action: Verify| E[DailyReportPolicy::verify]
-    E -->|Approved| F[Mark status=VERIFIED, record supervisor_id & verified_at]
+    E -->|Approved| F["Atomic UPDATE where status=SUBMITTED → VERIFIED"]
+    F -->|0 rows affected| F2[Warning toast no change]
     
     D -->|Supervisor Action: Delete| G[DailyReportPolicy::delete]
-    G -->|Approved| H[Cascade Delete Items & Restore Production Orders]
+    G -->|Approved| H[DB::transaction Cascade Delete Items & Restore Orders]
     
     B -->|Click Edit Button| I[EditReport Component /reports/{code}/edit]
-    I -->|Policy Check: <24h & Own Report or Supervisor| J[Recalculate Good & Reject Totals]
+    I -->|Policy Check: <24h & Own Report or Supervisor| J[DB::transaction Recalculate 3 Aggregates]
     J -->|Save Changes| K[Update daily_reports & daily_report_items]
     
     B -->|Trigger Export Modal / Export Route| L[ReportExportController::export]
@@ -91,8 +92,8 @@ erDiagram
 ## Flow Explanation
 
 1. **Archive Exploration & Filtering**: Users access `/reports` and filter archives by product series, shift, report status, or quick date presets (`Hari Ini`, `Kemarin`, `7 Hari Terakhir`, `Bulan Ini`). Live search queries match both `report_code` and associated `po_number` via subqueries.
-2. **Audit & Verification**: When viewing `/reports/{report_code}`, supervisors evaluate production output figures against target specs. Clicking "Verifikasi Laporan" prompts an official confirmation modal, setting status to `VERIFIED`, recording `supervisor_id` and timestamp `verified_at`. Once verified, editing is strictly locked.
-3. **Report Correction (24-Hour Window)**: Petugas can edit submitted reports they authored within 24 hours of creation; supervisors can edit any unverified report at any time. The edit form dynamically updates good and reject quantities, appends supplemental POs, removes mistaken entries, and recomputes summary aggregates on save.
+2. **Audit & Verification**: When viewing `/reports/{report_code}`, supervisors evaluate production output figures against target specs. Clicking "Verifikasi Laporan" prompts an official confirmation modal. Persistence uses an atomic `UPDATE ... WHERE status = submitted` so only submitted reports become `VERIFIED` (draft or already-verified rows yield a warning toast and no state change). Once verified, editing is strictly locked.
+3. **Report Correction (24-Hour Window)**: Petugas can edit submitted reports they authored within 24 hours of creation; supervisors can edit any unverified report at any time. The edit form dynamically updates good and reject quantities, appends supplemental POs, removes mistaken entries, and recomputes all three summary aggregates inside `DB::transaction` on save.
 4. **Memory-Efficient XLSX Streaming**: The export controller leverages `OpenSpout` to stream rows directly to client downloads without buffering thousands of records into server memory.
 
 ## Decisions & Trade-offs
@@ -103,4 +104,6 @@ erDiagram
 
 ## Related
 - [ADR-008: Daily Report Verification and Streaming Export Architecture](../decisions/008-daily-report-verification-and-streaming-export-architecture.md)
+- [ADR-010: Database Schema Refinement and Transactional Hardening](../decisions/010-database-schema-refinement-and-academic-pk-conventions.md)
+- [Transactional Hardening & Concurrency Protection](./transactional-hardening-and-concurrency-protection.md)
 - [User Guide: Panduan Arsip Laporan, Verifikasi & Cetak](../../user-docs/guides/panduan-arsip-laporan-verifikasi-dan-cetak.md)

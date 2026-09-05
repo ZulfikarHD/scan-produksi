@@ -10,6 +10,7 @@ use App\Models\User;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -74,22 +75,31 @@ class ReportDetail extends Component
     }
 
     /**
-     * Eksekusi verifikasi laporan: ubah status ke Terverifikasi, catat supervisor_id dan verified_at.
+     * Eksekusi verifikasi laporan: ubah status ke Terverifikasi hanya jika status masih Terkirim.
      */
     public function verifyReport(): void
     {
         $this->authorize('verify', $this->report);
 
-        $this->report->update([
-            'status' => ReportStatus::VERIFIED,
-            'supervisor_id' => Auth::id(),
-            'verified_at' => now(),
-        ]);
+        // Update atomik dengan precondition status SUBMITTED (mencegah race / double-verify)
+        $updated = DailyReport::where('id', $this->report->id)
+            ->where('status', ReportStatus::SUBMITTED)
+            ->update([
+                'status' => ReportStatus::VERIFIED,
+                'supervisor_id' => Auth::id(),
+                'verified_at' => now(),
+            ]);
 
         $this->report->refresh();
         $this->report->load(['user', 'supervisor']);
-
         $this->dispatch('close-modal', 'verify-report-confirm');
+
+        if (! $updated) {
+            Flux::toast("Gagal memverifikasi: Laporan {$this->report->report_code} belum diselesaikan atau sudah diverifikasi sebelumnya.", variant: 'warning');
+
+            return;
+        }
+
         Flux::toast("Laporan {$this->report->report_code} berhasil diverifikasi dan dikunci secara resmi.", variant: 'success');
     }
 
@@ -112,19 +122,21 @@ class ReportDetail extends Component
 
         $reportCode = $this->report->report_code;
 
-        // Kembalikan status akumulasi order terkait jika ada
-        foreach ($this->report->items as $item) {
-            if ($item->production_order_id) {
-                $order = ProductionOrder::find($item->production_order_id);
-                if ($order) {
-                    $order->update([
-                        'kemas_quantity' => max(0, $order->kemas_quantity - $item->good_quantity),
-                    ]);
+        DB::transaction(function () {
+            // Kembalikan status akumulasi order terkait jika ada
+            foreach ($this->report->items as $item) {
+                if ($item->production_order_id) {
+                    $order = ProductionOrder::find($item->production_order_id);
+                    if ($order) {
+                        $order->update([
+                            'kemas_quantity' => max(0, $order->kemas_quantity - $item->good_quantity),
+                        ]);
+                    }
                 }
             }
-        }
 
-        $this->report->delete();
+            $this->report->delete();
+        });
 
         Flux::toast("Laporan {$reportCode} berhasil dihapus.", variant: 'success');
         $this->redirect(route('reports.index'));

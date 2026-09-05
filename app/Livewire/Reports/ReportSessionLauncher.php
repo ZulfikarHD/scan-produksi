@@ -11,6 +11,7 @@ use App\Services\ReportCodeGenerator;
 use Carbon\Carbon;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -108,15 +109,31 @@ class ReportSessionLauncher extends Component
             $code = $code.'-'.strtoupper(substr(uniqid(), -4));
         }
 
-        $report = DailyReport::create([
-            'report_code' => $code,
-            'product_series' => $validated['product_series'],
-            'report_date' => $validated['report_date'],
-            'shift' => $validated['shift'],
-            'user_id' => Auth::id() ?? 1,
-            'status' => ReportStatus::DRAFT,
-            'notes' => $validated['notes'] ?: null,
-        ]);
+        // Lindungi dari race condition TOCTOU saat dua operator membuka sesi yang sama secara bersamaan
+        try {
+            $report = DailyReport::create([
+                'report_code' => $code,
+                'product_series' => $validated['product_series'],
+                'report_date' => $validated['report_date'],
+                'shift' => $validated['shift'],
+                'user_id' => Auth::id() ?? 1,
+                'status' => ReportStatus::DRAFT,
+                'notes' => $validated['notes'] ?: null,
+            ]);
+        } catch (QueryException $e) {
+            $existingReport = DailyReport::where('product_series', $validated['product_series'])
+                ->whereDate('report_date', $validated['report_date'])
+                ->where('shift', $validated['shift'])
+                ->first();
+
+            if ($existingReport) {
+                Flux::toast("Sesi laporan {$existingReport->report_code} sudah dibuka oleh operator lain. Mengarahkan ke sesi aktif...", variant: 'info');
+
+                return redirect()->route('reports.entry', ['report' => $existingReport->report_code]);
+            }
+
+            throw $e;
+        }
 
         Flux::toast("Sesi laporan baru {$report->report_code} berhasil dibuat.", variant: 'success');
 

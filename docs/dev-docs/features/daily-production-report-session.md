@@ -14,6 +14,7 @@ flowchart TD
     A -->|Submit Form / Enter| F{Report Exists?}
     F -->|Yes| G[Resume Existing Session]
     F -->|No| H[Create Draft DailyReport Record]
+    H -->|QueryException unique race| G
     G --> I[Redirect to /reports/{report_code}/entry]
     H --> I
     I --> J[ProductionEntry Livewire Component]
@@ -91,6 +92,7 @@ erDiagram
    - Validates input parameters (`report_date`, `product_series`, `shift`).
    - If existing: flashes toast notification and redirects directly to `route('reports.entry', ['report' => $existingReport->report_code])`.
    - If new: generates code via `ReportCodeGenerator`, creates a new `DailyReport` record with status `draft`, and redirects to `reports.entry`.
+   - If two operators race the create path, a `QueryException` on the composite unique key is caught; the second operator is redirected to the winning session with an info toast (no unhandled SQL error).
 
 ## Routing & URL Structure
 
@@ -104,11 +106,14 @@ erDiagram
 ## Decisions & Trade-offs
 
 - **Smart Session Resuming vs Re-creating**: Operators frequently reopen draft reports after breaks or shift handovers. Instead of throwing database duplicate key exceptions, the system transparently opens the active session.
+- **TOCTOU Race Protection**: Beyond the optimistic existence check, `launchSession()` catches unique-constraint `QueryException` so concurrent workstation starts on the same `(product_series, report_date, shift)` never crash the UI.
 - **Lean Models & Direct Livewire Eloquent Queries**: In accordance with project development guidelines, business logic and database queries are placed directly in the Livewire component without unnecessary service/repository abstractions.
 - **Composite Unique Key**: Enforces database integrity ensuring that only one report exists per `(product_series, report_date, shift)` combination.
 
 ## Related
 
 - [ADR-006: Daily Production Report Schema and Session Launcher](../decisions/006-daily-production-report-schema-and-session-launcher.md)
+- [ADR-010: Database Schema Refinement and Transactional Hardening](../decisions/010-database-schema-refinement-and-academic-pk-conventions.md)
+- [Transactional Hardening & Concurrency Protection](./transactional-hardening-and-concurrency-protection.md)
 - [Master Data SAP Feature Documentation](./production-order-master-data.md)
 - [Panduan Inisiasi Sesi Laporan Produksi](../../user-docs/guides/panduan-inisiasi-sesi-laporan-produksi.md)

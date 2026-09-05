@@ -6,6 +6,7 @@ Welcome to the technical developer documentation for the **Sistem Monitoring & P
 
 ## Architecture & Standards
 
+- **Core Architecture Document**: [System & Database Architecture Document](../architecture.md)
 - **Backend Framework**: Laravel 13 (PHP 8.5)
 - **Frontend / Reactivity**: Livewire 4 + Flux UI + Livewire Blaze
 - **CSS / Styling**: Tailwind CSS v4
@@ -25,6 +26,7 @@ Welcome to the technical developer documentation for the **Sistem Monitoring & P
 | [Master Data Explorer & Manual Order Management](features/master-data-explorer-and-manual-order.md) | Tabbed Master Data Explorer on `/update-database`, multi-attribute filtering, debounced search, manual emergency order creation/edit modals, technical specification detail drawer, order deletion guardrails, source file download, and Excel (.xlsx) export. | Implemented (Phase 02 / US-2.4 & US-2.5) |
 | [Daily Production Report Session & Code Generator](features/daily-production-report-session.md) | Standardized report schemas (`daily_reports`, `daily_report_items`), series grouping (`PCHT`, `MMEA`, `HPTL`), auto shift detection, collision-free code generator, smart session launcher (`/reports/session`), and high-speed entry route. | Implemented (Phase 03 / US-3.1 & US-3.2) |
 | [High-Speed Continuous Barcode Scanning & Inline Production Entry](features/continuous-barcode-scan-and-inline-production-entry.md) | Continuous 100% keyboard scanning loop, instant SAP order lookup, Alpine.js cursor autofocus transfer, Web Audio API sound synthesis, 9-column inline editable table, shift finalization lock, and standard A4 physical print layout. | Implemented (Phase 03 / US-3.3, US-3.4, US-3.5) |
+| [Transactional Hardening & Concurrency Protection](features/transactional-hardening-and-concurrency-protection.md) | ACID wrappers for scan/edit writes, atomic three-aggregate `refreshTotals()`, TOCTOU-safe session launcher, and preconditioned supervisor verification. | Implemented (Phase 06 / US-6.3) |
 | [Daily Production Report Management, Verification & Export](features/report-management-verification-and-export.md) | Multi-criteria report archive explorer, quick date presets, detailed order audit trail with supervisor verification locking, 24-hour correction window, supervisor deletion guardrails, OpenSpout XLSX streaming, and print-ready PDF views. | Implemented (Phase 04 / US-4.1 - US-4.5) |
 | [Dashboard Analytics & 14-Day Production Visualization](features/dashboard-analytics-and-14-day-chart.md) | Unified Operational Command Center (`/dashboard`), daily production KPIs, interactive 14-day zero-filled Chart.js volume/defect trend, shift & machine distribution widgets, role-based quick action hub, and live recent report feed. | Implemented (Phase 05 / US-5.1 - US-5.4) |
 
@@ -43,3 +45,4 @@ Welcome to the technical developer documentation for the **Sistem Monitoring & P
 | [ADR-007](decisions/007-high-speed-continuous-barcode-scanning-and-inline-table-editing.md) | High-Speed Continuous Barcode Scanning, Focus Management, and Inline Table Editing Architecture | 2026-08-26 | Accepted |
 | [ADR-008](decisions/008-daily-report-verification-and-streaming-export-architecture.md) | Daily Report Verification, Correction Window, and Streaming Export Architecture | 2026-08-26 | Accepted |
 | [ADR-009](decisions/009-dashboard-analytics-aggregation-and-chartjs-visualization.md) | Dashboard Analytics Aggregation, Zero-Fill Timeseries, and Chart.js Integration | 2026-08-26 | Accepted |
+| [ADR-010](decisions/010-database-schema-refinement-and-academic-pk-conventions.md) | Database Schema Refinement, Academic Primary Key Conventions, and Transactional Hardening | 2026-09-06 | Accepted |

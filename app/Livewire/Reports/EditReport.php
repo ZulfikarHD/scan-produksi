@@ -8,6 +8,7 @@ use App\Models\ProductionOrder;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -204,56 +205,68 @@ class EditReport extends Component
             }
         }
 
-        // Simpan pembaruan pada item-item
-        foreach ($this->items as $itemData) {
-            if (! empty($itemData['id'])) {
-                $dbItem = DailyReportItem::where('daily_report_id', $this->report->id)->find($itemData['id']);
+        // Simpan seluruh koreksi item dan sinkronisasi agregat dalam satu transaksi atomik
+        DB::transaction(function () {
+            foreach ($this->items as $itemData) {
+                if (! empty($itemData['id'])) {
+                    $dbItem = DailyReportItem::where('daily_report_id', $this->report->id)->find($itemData['id']);
 
-                if ($dbItem) {
-                    if ($itemData['is_deleted']) {
-                        $dbItem->delete();
-                    } else {
-                        $dbItem->update([
-                            'good_quantity' => (int) $itemData['good_quantity'],
-                            'reject_quantity' => max(0, (int) $itemData['reject_quantity']),
-                            'notes' => $itemData['notes'] ?: null,
-                        ]);
+                    if ($dbItem) {
+                        if ($itemData['is_deleted']) {
+                            $dbItem->delete();
+                        } else {
+                            $dbItem->update([
+                                'good_quantity' => (int) $itemData['good_quantity'],
+                                'reject_quantity' => max(0, (int) $itemData['reject_quantity']),
+                                'notes' => $itemData['notes'] ?: null,
+                            ]);
+                        }
                     }
+                } elseif (! $itemData['is_deleted']) {
+                    // Item baru susulan
+                    DailyReportItem::create([
+                        'daily_report_id' => $this->report->id,
+                        'production_order_id' => $itemData['production_order_id'],
+                        'po_number' => $itemData['po_number'],
+                        'product_name' => $itemData['product_name'],
+                        'specification' => $itemData['specification'],
+                        'machine_number' => $itemData['machine_number'],
+                        'target_quantity' => (int) $itemData['target_quantity'],
+                        'good_quantity' => (int) $itemData['good_quantity'],
+                        'reject_quantity' => max(0, (int) $itemData['reject_quantity']),
+                        'unit' => $itemData['unit'],
+                        'notes' => $itemData['notes'] ?: null,
+                        'scanned_at' => now(),
+                    ]);
                 }
-            } elseif (! $itemData['is_deleted']) {
-                // Item baru susulan
-                DailyReportItem::create([
-                    'daily_report_id' => $this->report->id,
-                    'production_order_id' => $itemData['production_order_id'],
-                    'po_number' => $itemData['po_number'],
-                    'product_name' => $itemData['product_name'],
-                    'specification' => $itemData['specification'],
-                    'machine_number' => $itemData['machine_number'],
-                    'target_quantity' => (int) $itemData['target_quantity'],
-                    'good_quantity' => (int) $itemData['good_quantity'],
-                    'reject_quantity' => max(0, (int) $itemData['reject_quantity']),
-                    'unit' => $itemData['unit'],
-                    'notes' => $itemData['notes'] ?: null,
-                    'scanned_at' => now(),
-                ]);
             }
-        }
 
-        // Hitung ulang total akumulasi laporan
-        $remainingItems = DailyReportItem::where('daily_report_id', $this->report->id)->get();
-        $totalItemsCount = $remainingItems->count();
-        $totalGoodQuantity = (int) $remainingItems->sum('good_quantity');
-        $totalRejectQuantity = (int) $remainingItems->sum('reject_quantity');
+            $this->report->update([
+                'notes' => $this->notes ?: null,
+            ]);
 
-        $this->report->update([
-            'notes' => $this->notes ?: null,
-            'total_items_count' => $totalItemsCount,
-            'total_good_quantity' => $totalGoodQuantity,
-            'total_reject_quantity' => $totalRejectQuantity,
-        ]);
+            $this->refreshTotals();
+        });
 
         Flux::toast("Perubahan Laporan {$this->report->report_code} berhasil disimpan.", variant: 'success');
 
         return redirect()->route('reports.show', ['report' => $this->report->report_code]);
+    }
+
+    /**
+     * Hitung ulang akumulasi total item, kuantitas baik, dan reject dalam satu query atomik.
+     */
+    protected function refreshTotals(): void
+    {
+        $totals = DailyReportItem::where('daily_report_id', $this->report->id)
+            ->selectRaw('COUNT(*) as total_items, COALESCE(SUM(good_quantity), 0) as total_good, COALESCE(SUM(reject_quantity), 0) as total_reject')
+            ->first();
+
+        $this->report->update([
+            'total_items_count' => (int) ($totals->total_items ?? 0),
+            'total_good_quantity' => (int) ($totals->total_good ?? 0),
+            'total_reject_quantity' => (int) ($totals->total_reject ?? 0),
+        ]);
+        $this->report->refresh();
     }
 }

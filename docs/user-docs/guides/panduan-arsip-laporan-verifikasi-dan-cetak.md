@@ -54,6 +54,8 @@ Supervisor bertindak sebagai pemeriksa akhir atas keabsahan data produksi sebelu
 4. Pada kotak dialog konfirmasi, klik **Ya, Verifikasi Laporan**.
 5. Status laporan akan berubah menjadi **Terverifikasi** dengan stempel tanda tangan digital Supervisor dan waktu verifikasi tercatat rapi.
 
+> 💡 **Catatan:** Verifikasi hanya berlaku untuk laporan berstatus **Terkirim**. Jika laporan masih Draft atau sudah Terverifikasi, sistem menampilkan peringatan dan status tidak diubah.
+
 ---
 
 ### 5. Cetak Dokumen Fisik A4 & Ekspor Excel

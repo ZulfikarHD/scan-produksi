@@ -49,7 +49,7 @@ Pada kartu formulir inisiasi:
 ## FAQ (Pertanyaan yang Sering Diajukan)
 
 **Q: Apa yang terjadi jika saya membuka kategori dan shift yang sama dengan rekan kerja saya?**  
-A: Sistem mendeteksi bahwa sesi laporan tersebut sudah aktif dan akan langsung membuka laporan yang sama. Data yang sudah dipindai oleh rekan Anda akan tetap tersimpan aman di tabel rekapitulasi.
+A: Sistem mendeteksi bahwa sesi laporan tersebut sudah aktif dan akan langsung membuka laporan yang sama. Data yang sudah dipindai oleh rekan Anda akan tetap tersimpan aman di tabel rekapitulasi. Jika dua petugas menekan tombol buka sesi hampir bersamaan, sistem tetap mengarahkan ke satu sesi aktif yang sama tanpa membuat laporan ganda atau menampilkan pesan error teknis.
 
 **Q: Apakah petugas lain bisa melihat laporan yang saya buat pada shift hari ini?**  
 A: Ya, pada panel sebelah kanan *"Sesi Hari Ini"*, seluruh sesi laporan yang terdaftar pada tanggal terpilih dapat dilihat dan dibuka langsung oleh sesama petugas atau supervisor.
